@@ -7,8 +7,12 @@ scenario, let three Claude-powered nation agents reason through it under quantum
 uncertainty, and watch the result get written — immutably, cycle by cycle — to a blockchain.
 Every finding is citable by block number.
 
-**[Read the full run above →](https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313)**
-(a real 2-cycle simulation: Iran exits a peace deal, verified on-chain)
+**[Try it live →](https://governance-playground.vercel.app)** — no install needed. Connect via
+MetaMask (works with Sepolia testnet — get free test ETH from a faucet, see Quickstart below) and
+run a real scenario yourself.
+
+**[Or read a real run first →](https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313)**
+(a 2-cycle simulation: Iran exits a peace deal, verified on-chain)
 
 ---
 
@@ -70,7 +74,8 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
 | More scenarios (Palestine, Taiwan Strait, Russia-Ukraine, …) | ⬜ Planned |
-| Hosted/always-on version | ⬜ Planned — currently local-only |
+| Sepolia testnet deployment | ✅ Live — [verified on Etherscan](https://sepolia.etherscan.io/address/0x16da77Aa3e63215F738baF61f280caeE8F211A75) |
+| Hosted/always-on version | ✅ Live at [governance-playground.vercel.app](https://governance-playground.vercel.app) |
 
 ## Running it locally
 
