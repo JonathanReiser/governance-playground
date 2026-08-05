@@ -1,4 +1,15 @@
 // Rules-based simulation engine — mirrors run-all-experiments.js
+//
+// applyExperiment() is data-driven: it reads `experiment.effects` from the
+// scenario config rather than branching on hardcoded experiment ids. This
+// is what lets a second, unrelated scenario (e.g. Taiwan Strait) run
+// through the exact same engine as the Middle East scenario it was
+// originally written for — see scenarios/*.config.cjs's `effects` field on
+// each experiment.
+//
+// tick()'s ongoing per-cycle logic was ALREADY fully generic (driven only
+// by internal state — dealActive / _hardliner — not by any scenario-
+// specific string), so it's unchanged.
 export class SimulationEngine {
   constructor(scenario) {
     const m = scenario.simulation.metrics;
@@ -14,30 +25,33 @@ export class SimulationEngine {
     this.history       = [];
   }
 
-  applyExperiment(id) {
+  // `experiment` is a full experiment object from the scenario config
+  // (not just its id) — needs the `.effects` field.
+  applyExperiment(experiment) {
     const s = this.state;
-    if (id === "exp_deal_collapse") {
-      this.dealActive    = false;
-      s.stability        = Math.max(0, s.stability - 18);
-      s.dealIntegrity    = 0;
-      s.conflicts       += 4;
-      s.proxy           += 20;
-    }
-    if (id === "exp_congress_blocks") {
-      s.dealIntegrity    = Math.max(0, s.dealIntegrity - 25);
-      s.proxy            = Math.min(100, s.proxy + 10);
-    }
-    if (id === "exp_saudi_normalizes") {
-      s.trade            = Math.min(500, s.trade + 200);
-      s.stability        = Math.min(100, s.stability + 12);
-      s.proxy            = Math.min(100, s.proxy + 8);
-    }
-    if (id === "exp_hardliners_win") {
-      s.dealIntegrity    = Math.max(0, s.dealIntegrity - 35);
-      s.proxy            = Math.min(100, s.proxy + 25);
-      s.stability        = Math.max(0, s.stability - 10);
-      this._hardliner    = true;
-    }
+    const e = experiment?.effects || {};
+
+    const applyField = (key, spec) => {
+      if (spec == null) return;
+      if ("set" in spec) s[key] = spec.set;
+      else if ("delta" in spec) s[key] = s[key] + spec.delta;
+    };
+
+    applyField("stability",     e.stability);
+    applyField("dealIntegrity", e.dealIntegrity);
+    applyField("conflicts",     e.conflicts);
+    applyField("proxy",         e.proxy);
+    applyField("trade",         e.trade);
+
+    if (e.dealActive === false)  this.dealActive = false;
+    if (e.isHardlinerEvent)      this._hardliner = true;
+
+    // Same clamp bounds applyExperiment always used, just applied generically now.
+    s.stability     = Math.min(100, Math.max(0, s.stability));
+    s.proxy         = Math.min(100, Math.max(0, s.proxy));
+    s.trade         = Math.min(500, Math.max(0, s.trade));
+    s.dealIntegrity = Math.min(100, Math.max(0, s.dealIntegrity));
+    s.conflicts     = Math.max(0, s.conflicts);
   }
 
   tick(cycleNum) {
@@ -104,4 +118,32 @@ export function stabilityColor(score) {
   if (score >= 50) return "#eab308";
   if (score >= 25) return "#f97316";
   return "#ef4444";
+}
+
+// ─────────────────────────────────────────────────────────────
+// Generic hypothesis-check evaluator — interprets the declarative
+// `experiment.hypothesisChecks` array from a scenario config against a
+// completed run, instead of ResultsStep.jsx branching on hardcoded
+// experiment ids. See scenarios/*.config.cjs for the check definitions.
+// ─────────────────────────────────────────────────────────────
+export function evaluateHypothesisChecks(checks, { baseline, expEnd, expHistory }) {
+  const results = [];
+  for (const check of checks || []) {
+    let passed;
+    const m = check.metric;
+    switch (check.op) {
+      case "below":                passed = expEnd[m] < check.value; break;
+      case "above":                passed = expEnd[m] > check.value; break;
+      case "equals":                passed = expEnd[m] === check.value; break;
+      case "belowBaselineMinus":    passed = expEnd[m] < baseline[m] - check.value; break;
+      case "aboveBaselinePlus":     passed = expEnd[m] > baseline[m] + check.value; break;
+      case "belowPctOfBaseline":    passed = expEnd[m] < baseline[m] * (check.value / 100); break;
+      case "cyclesBelow":           passed = expHistory.filter(h => h[m] < check.value).length > 0; break;
+      case "aboveWithinFirstNCycles": passed = expHistory.slice(0, check.n).some(h => h[m] > check.value); break;
+      case "and":                   passed = (check.refs || []).every(i => results[i]?.passed); break;
+      default:                      passed = false;
+    }
+    results.push({ label: check.label, passed });
+  }
+  return results;
 }

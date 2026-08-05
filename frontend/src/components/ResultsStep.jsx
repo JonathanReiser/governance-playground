@@ -1,67 +1,28 @@
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
-import { stabilityLabel, stabilityColor } from "../lib/simulation";
+import { stabilityLabel, stabilityColor, evaluateHypothesisChecks } from "../lib/simulation";
 
 function delta(after, before) {
   const d = after - before;
   return (d >= 0 ? "+" : "") + d;
 }
 
-function HypothesisCheck({ id, baseline, expEnd, expHistory }) {
-  const checks = [];
+// Reads experiment.hypothesisChecks — a declarative list of pass/fail
+// conditions defined in the scenario config — instead of branching on
+// hardcoded experiment ids. See scenarios/*.config.cjs and
+// lib/simulation.js's evaluateHypothesisChecks().
+function HypothesisCheck({ experiment, baseline, expEnd, expHistory }) {
+  const results = evaluateHypothesisChecks(experiment.hypothesisChecks, { baseline, expEnd, expHistory });
+  const passed = results.filter(r => r.passed).length;
 
-  if (id === "exp_deal_collapse") {
-    const tradeDrop  = expEnd.trade < baseline.trade * 0.6;
-    const critStab   = expEnd.stability < 20;
-    const proxySurge = expEnd.proxy > baseline.proxy + 15;
-    const hormuzCyc  = expHistory.filter(h => h.trade < 50).length;
-    checks.push([tradeDrop,       `Hormuz closure impact (trade dropped >40%): trade ended at ${expEnd.trade}`]);
-    checks.push([critStab,        `Stability dropped below 20: reached ${expEnd.stability}`]);
-    checks.push([proxySurge,      `Proxy activity surged >15 pts: delta ${expEnd.proxy - baseline.proxy}`]);
-    checks.push([hormuzCyc > 0,   `Hormuz closure cycles (trade <50): ${hormuzCyc} cycles`]);
-  }
-
-  if (id === "exp_congress_blocks") {
-    const dealWeak   = expEnd.dealIntegrity < baseline.dealIntegrity - 15;
-    const hardliner  = expEnd.proxy > baseline.proxy + 8;
-    const proxyEarly = expHistory.slice(0, 5).some(h => h.proxy > 50);
-    const collapsed  = expEnd.dealIntegrity === 0;
-    checks.push([dealWeak,        `Deal integrity deteriorated >15 pts: delta ${expEnd.dealIntegrity - baseline.dealIntegrity}`]);
-    checks.push([hardliner,       `Hardliner pressure rose (proxy >+8): delta ${expEnd.proxy - baseline.proxy}`]);
-    checks.push([proxyEarly,      `Proxy activity resumed within 5 cycles`]);
-    checks.push([collapsed,       `Deal fully collapsed: integrity at ${expEnd.dealIntegrity}`]);
-  }
-
-  if (id === "exp_saudi_normalizes") {
-    const tradeSurge  = expEnd.trade > baseline.trade + 150;
-    const encircled   = expEnd.proxy > baseline.proxy + 5;
-    const netStable   = expEnd.stability > baseline.stability;
-    checks.push([tradeSurge,      `Trade increased >150: delta ${expEnd.trade - baseline.trade}`]);
-    checks.push([encircled,       `Iran hardliner response (proxy rose): delta ${expEnd.proxy - baseline.proxy}`]);
-    checks.push([netStable,       `Net stability gain: ${delta(expEnd.stability, baseline.stability)} pts`]);
-    checks.push([tradeSurge && netStable, `Trade and stability both up (dual win)`]);
-  }
-
-  if (id === "exp_hardliners_win") {
-    const exited     = expEnd.dealIntegrity === 0;
-    const proxySurge = expEnd.proxy > 80;
-    const hormuzCyc  = expHistory.filter(h => h.trade < 50).length;
-    const stabDrop   = baseline.stability - expEnd.stability >= 15;
-    checks.push([exited,          `Iran exits nuclear deal (integrity → 0): at ${expEnd.dealIntegrity}`]);
-    checks.push([proxySurge,      `Proxy activity surged to max >80: reached ${expEnd.proxy}`]);
-    checks.push([hormuzCyc > 0,   `Hormuz threatened (${hormuzCyc} cycles below 50 trade)`]);
-    checks.push([stabDrop,        `Significant stability drop >15 pts: −${baseline.stability - expEnd.stability}`]);
-  }
-
-  const passed = checks.filter(c => c[0]).length;
   return (
     <div className="hypothesis-block">
-      <div className="hypothesis-score">{passed}/{checks.length} confirmed</div>
+      <div className="hypothesis-score">{passed}/{results.length} confirmed</div>
       <ul className="hypothesis-list">
-        {checks.map(([ok, label], i) => (
-          <li key={i} className={ok ? "check-pass" : "check-fail"}>
-            {ok ? "✓" : "✗"} {label}
+        {results.map((r, i) => (
+          <li key={i} className={r.passed ? "check-pass" : "check-fail"}>
+            {r.passed ? "✓" : "✗"} {r.label}
           </li>
         ))}
       </ul>
@@ -183,7 +144,7 @@ export function ResultsStep({ results, onReset }) {
         <h3>Hypothesis Evaluation</h3>
         <blockquote className="hypothesis-text">"{experiment.hypothesis}"</blockquote>
         <HypothesisCheck
-          id={experiment.id}
+          experiment={experiment}
           baseline={baseline}
           expEnd={expEnd}
           expHistory={expHistory}

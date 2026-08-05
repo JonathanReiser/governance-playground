@@ -1,26 +1,29 @@
 /**
  * GOVERNANCE PLAYGROUND — Deploy Script
  *
- * This script reads the Middle East 2026 scenario config and deploys
- * the full simulation to a local Hardhat network (or any EVM chain).
+ * Reads a scenario config and deploys the full simulation to a local
+ * Hardhat network (or any EVM chain). Scenario-agnostic — everything
+ * below is driven by the config's own data (nations, relationships,
+ * citizenDistribution, etc.), not hardcoded to any particular scenario.
  *
  * What it does, in order:
  *   1. Deploy WorldRegistry (the simulation controller)
  *   2. Deploy MetricsOracle (the measurement engine)
  *   3. Wire them together
  *   4. Initialize the scenario
- *   5. Deploy each nation (Israel, Iran, Saudi Arabia)
- *   6. Distribute citizen tokens
+ *   5. Deploy each nation in the scenario config
+ *   6. Distribute citizen tokens (per scenario.citizenDistribution)
  *   7. Set up relationships between nations
- *   8. Register active events (the peace deal)
+ *   8. Register active events
  *   9. Print a deployment summary
  *
  * Run with:
  *   npx hardhat run scripts/deploy.js --network hardhat
+ *   SCENARIO_PATH=../scenarios/taiwan-strait-2026.config.cjs npx hardhat run scripts/deploy.js --network hardhat
  */
 
 const { ethers } = require("hardhat");
-const SCENARIO   = require("../scenarios/middle-east-2026.config.cjs");
+const SCENARIO   = require(process.env.SCENARIO_PATH || "../scenarios/middle-east-2026.config.cjs");
 
 // ─────────────────────────────────────────────────────────────
 // GOVERNANCE TYPE MAPPING
@@ -220,36 +223,15 @@ async function main() {
 
   console.log("\nStep 6: Distributing citizenship tokens...");
 
-  // For the simulation, we distribute tokens across test accounts
-  // representing different population segments:
-  //   signers[0] = deployer / researcher
-  //   signers[3] = moderate citizens
-  //   signers[4] = hardliner faction
-  //   signers[5] = reformist faction
+  // Data-driven from SCENARIO.citizenDistribution — { nationId: [{slot,
+  // amount}, ...] } — instead of hardcoded nation-id branches. Slot indices
+  // reference signers[0..5]: 0 = deployer/researcher, 1 = guardian-council-
+  // style role, 2 = royal/override-style role, 3-5 = population segments.
+  // See the scenario config file for the actual per-nation breakdown.
 
-  const citizenDistribution = {
-    israel: [
-      { address: signers[0].address, amount: BigInt(200_000) * BigInt(10**18) },
-      { address: signers[3].address, amount: BigInt(500_000) * BigInt(10**18) },
-      { address: signers[4].address, amount: BigInt(200_000) * BigInt(10**18) },
-      { address: signers[5].address, amount: BigInt(100_000) * BigInt(10**18) },
-    ],
-    iran: [
-      { address: signers[0].address, amount: BigInt(100_000) * BigInt(10**18) },
-      { address: signers[3].address, amount: BigInt(300_000) * BigInt(10**18) },
-      { address: signers[4].address, amount: BigInt(500_000) * BigInt(10**18) }, // hardliners dominant
-      { address: signers[5].address, amount: BigInt(100_000) * BigInt(10**18) },
-    ],
-    saudi_arabia: [
-      { address: signers[2].address, amount: BigInt(800_000) * BigInt(10**18) }, // royal authority dominant
-      { address: signers[3].address, amount: BigInt(150_000) * BigInt(10**18) },
-      { address: signers[5].address, amount: BigInt(50_000)  * BigInt(10**18) },
-    ],
-  };
-
-  for (const [nationId, distribution] of Object.entries(citizenDistribution)) {
-    const addresses = distribution.map(d => d.address);
-    const amounts   = distribution.map(d => d.amount);
+  for (const [nationId, allocations] of Object.entries(SCENARIO.citizenDistribution || {})) {
+    const addresses = allocations.map(a => signers[a.slot].address);
+    const amounts   = allocations.map(a => BigInt(a.amount) * BigInt(10 ** 18));
 
     await (await registry.distributeCitizenship(nationId, addresses, amounts)).wait();
     console.log(`  Distributed tokens for ${deployedNations[nationId].name}`);

@@ -171,13 +171,13 @@ export async function deployScenario(signer, scenario, onStatus) {
   }
 
   onStatus("Distributing citizenship tokens…");
-  const dist = {
-    israel:       [[getAddr(0), getAddr(3), getAddr(4), getAddr(5)], [200_000n, 500_000n, 200_000n, 100_000n].map(n => n * BigInt(10**18))],
-    iran:         [[getAddr(0), getAddr(3), getAddr(4), getAddr(5)], [100_000n, 300_000n, 500_000n, 100_000n].map(n => n * BigInt(10**18))],
-    saudi_arabia: [[getAddr(2), getAddr(3), getAddr(5)],             [800_000n, 150_000n,  50_000n].map(n => n * BigInt(10**18))],
-  };
-  for (const [id, [addrs, amounts]] of Object.entries(dist)) {
-    await (await registry.distributeCitizenship(id, addrs, amounts)).wait();
+  // Data-driven from scenario.citizenDistribution — { nationId: [{slot, amount}, ...] }
+  // — instead of hardcoded nation-id branches, so any scenario's nations
+  // (not just israel/iran/saudi_arabia) get their tokens distributed.
+  for (const [nationId, allocations] of Object.entries(scenario.citizenDistribution || {})) {
+    const addrs   = allocations.map(a => getAddr(a.slot));
+    const amounts = allocations.map(a => BigInt(a.amount) * BigInt(10 ** 18));
+    await (await registry.distributeCitizenship(nationId, addrs, amounts)).wait();
   }
 
   onStatus("Setting relationships…");

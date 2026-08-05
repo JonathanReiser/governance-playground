@@ -56,14 +56,22 @@ export function ExperimentStep({ signer, scenario, deployment, onResults }) {
       const fresh = await deployScenario(signer, scenario, () => {});
 
       const expEngine = new SimulationEngine(scenario);
-      expEngine.applyExperiment(selected.id);
+      expEngine.applyExperiment(selected);
 
       await fresh.oracle.recordExperiment(
         selected.id, "global", selected.change.target, BigInt(0), BigInt(0)
       );
 
-      if (selected.id === "exp_deal_collapse") {
-        await fresh.registry.updateEventStatus("hormuz_nuclear_deal", EventStatus.COLLAPSED);
+      // Generic: any experiment whose change targets an active event's
+      // status (e.g. "activeEvents.hormuz_nuclear_deal.status", or Taiwan
+      // Strait's "activeEvents.cross_strait_status_quo.status") gets that
+      // status change written on-chain too — not just one hardcoded event.
+      const eventStatusMatch = selected.change.target.match(/^activeEvents\.([^.]+)\.status$/);
+      if (eventStatusMatch) {
+        const newStatus = EventStatus[selected.change.to];
+        if (newStatus !== undefined) {
+          await fresh.registry.updateEventStatus(eventStatusMatch[1], newStatus);
+        }
       }
 
       await fresh.oracle.updateMetrics(

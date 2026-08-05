@@ -1,143 +1,18 @@
 import { useState } from "react";
+import MIDDLE_EAST_2026 from "../scenarios/middle-east-2026.json";
+import TAIWAN_STRAIT_2026 from "../scenarios/taiwan-strait-2026.json";
 
-// Inline the scenario — in a real app this would be a dynamic import or fetch
-// We can't import a .cjs directly from Vite, so we embed the relevant data.
-// The full config lives in scenarios/middle-east-2026.config.cjs
-const MIDDLE_EAST_2026 = {
-  meta: {
-    name: "Middle East — May 2026",
-    version: "1.0.0",
-    description:
-      "Post-war scenario following the US/Israel-Iran peace deal. " +
-      "Iran has agreed to cap nuclear enrichment and reopen the Hormuz Strait. " +
-      "The US has lifted partial sanctions. Regional stability is fragile.",
-    tags: ["middle-east", "peace-deal", "nuclear", "hormuz", "2026"],
-  },
-  nations: [
-    {
-      id: "israel",
-      name: "Israel",
-      flag: "🇮🇱",
-      governance: {
-        type: "PARLIAMENTARY_DEMOCRACY",
-        votingMechanism: "ONE_TOKEN_ONE_VOTE",
-        proposalThreshold: 100,
-        quorum: 40,
-        guardianVeto: false,
-        royalVeto: false,
-        hardlinerPressure: 45,
-        reformPressure: 55,
-      },
-      economy: { gdp: 520, treasury: 8500, sanctioned: false, tradeOpenness: "HIGH" },
-      military: { power: 850, proxyForces: false, proxyCapacity: 0, nuclearCapacity: true },
-      population: { sentiment: 58 },
-    },
-    {
-      id: "iran",
-      name: "Iran",
-      flag: "🇮🇷",
-      governance: {
-        type: "THEOCRATIC_REPUBLIC",
-        votingMechanism: "DUAL_LAYER",
-        proposalThreshold: 500,
-        quorum: 60,
-        guardianVeto: true,
-        royalVeto: false,
-        hardlinerPressure: 72,
-        reformPressure: 28,
-      },
-      economy: { gdp: 231, treasury: 4200, sanctioned: true, sanctionsReliefPending: true, tradeOpenness: "LOW" },
-      military: { power: 620, proxyForces: true, proxyCapacity: 85, nuclearCapacity: false, nuclearDealActive: true },
-      resources: { oil: 80, hormuzControl: true, hormuzOpen: true },
-      population: { sentiment: 29 },
-    },
-    {
-      id: "saudi_arabia",
-      name: "Saudi Arabia",
-      flag: "🇸🇦",
-      governance: {
-        type: "ABSOLUTE_MONARCHY",
-        votingMechanism: "COUNCIL_WEIGHTED",
-        proposalThreshold: 1000,
-        quorum: 75,
-        guardianVeto: false,
-        royalVeto: true,
-        hardlinerPressure: 38,
-        reformPressure: 62,
-      },
-      economy: { gdp: 1100, treasury: 18000, sanctioned: false, tradeOpenness: "HIGH" },
-      military: { power: 720, proxyForces: false, proxyCapacity: 0, nuclearCapacity: false },
-      resources: { oil: 90 },
-      population: { sentiment: 62 },
-    },
-  ],
-  relationships: [
-    { from: "israel", to: "iran",         type: "FRAGILE_PEACE", stabilityScore: 28, treatyActive: true,  treatyName: "Hormuz Nuclear Agreement" },
-    { from: "israel", to: "saudi_arabia", type: "COLD",          stabilityScore: 42, treatyActive: false, treatyName: "" },
-    { from: "iran",   to: "saudi_arabia", type: "COLD",          stabilityScore: 35, treatyActive: false, treatyName: "" },
-  ],
-  activeEvents: [
-    {
-      id: "hormuz_nuclear_deal",
-      name: "Hormuz Nuclear Agreement",
-      type: "PEACE_DEAL",
-      parties: ["israel", "iran"],
-      description: "Framework agreement capping Iranian enrichment at 20% and reopening Hormuz to international shipping.",
-    },
-    {
-      id: "hormuz_strait_control",
-      name: "Hormuz Strait — Iranian Control",
-      type: "RESOURCE_EVENT",
-      parties: ["iran", "saudi_arabia"],
-      description: "Iran retains effective control over Hormuz Strait, representing 20% of global oil trade.",
-    },
-  ],
-  simulation: {
-    defaultCycles: 20,
-    metrics: [
-      { id: "stability_index",  label: "Stability Index",  startingValue: 48,  unit: "/100" },
-      { id: "conflict_events",  label: "Conflict Events",  startingValue: 0,   unit: "" },
-      { id: "trade_volume",     label: "Trade Volume",     startingValue: 200, unit: "" },
-      { id: "proxy_activity",   label: "Proxy Activity",   startingValue: 35,  unit: "/100" },
-      { id: "deal_integrity",   label: "Deal Integrity",   startingValue: 32,  unit: "/100" },
-    ],
-  },
-  experiments: [
-    {
-      id: "exp_deal_collapse",
-      name: "The Deal Collapses",
-      question: "What happens if the peace deal collapses in cycle 1?",
-      change: { target: "activeEvents.hormuz_nuclear_deal.status", from: "ACTIVE_FRAGILE", to: "COLLAPSED" },
-      hypothesis: "Iran closes Hormuz within 3 cycles. Oil prices spike. Stability index drops below 20.",
-    },
-    {
-      id: "exp_congress_blocks",
-      name: "US Congress Blocks Sanctions Relief",
-      question: "What if the US fails to deliver on its sanctions promise?",
-      change: { target: "nations.iran.economy.sanctionsReliefPending", from: true, to: false },
-      hypothesis: "Iran's hardliner pressure increases. Deal integrity drops. Proxy activity resumes within 5 cycles.",
-    },
-    {
-      id: "exp_saudi_normalizes",
-      name: "Saudi Arabia Normalizes with Israel",
-      question: "What if Saudi Arabia formally recognizes Israel?",
-      change: { target: "relationships.israel_saudi.type", from: "COLD", to: "PARTNER" },
-      hypothesis: "Regional trade increases significantly. Iran feels encircled — hardliner pressure rises.",
-    },
-    {
-      id: "exp_hardliners_win",
-      name: "Iranian Hardliners Gain Power",
-      question: "What if hardliners replace moderates in Iran's government?",
-      change: { target: "nations.iran.governance.hardlinerPressure", from: 72, to: 95 },
-      hypothesis: "Iran exits the nuclear deal. Hormuz threatened within 4 cycles. Proxy activity surges to maximum.",
-    },
-  ],
-};
+// Both scenarios are generated 1:1 from the canonical CLI source of truth
+// (scenarios/*.config.cjs → frontend/src/scenarios/*.json) — see
+// scripts in the repo root. No hand-duplicated data here anymore.
+const SCENARIOS = [MIDDLE_EAST_2026, TAIWAN_STRAIT_2026];
 
 const GOV_LABELS = {
   PARLIAMENTARY_DEMOCRACY: "Parliamentary Democracy",
   THEOCRATIC_REPUBLIC:     "Theocratic Republic",
   ABSOLUTE_MONARCHY:       "Absolute Monarchy",
+  FEDERAL_REPUBLIC:        "Federal Republic",
+  MILITARY_JUNTA:          "Military Junta",
 };
 
 const REL_LABELS = {
@@ -153,13 +28,21 @@ const REL_COLORS = {
 };
 
 function NationCard({ nation }) {
+  // Different nations lean on different pressure fields depending on their
+  // governance structure (hardlinerPressure for Iran/China-style systems,
+  // reformPressure for Saudi/Japan-style hedging ones) — show whichever
+  // the nation actually has instead of assuming one specific field exists.
+  const pressureLabel = nation.governance.hardlinerPressure != null ? "Hardliner"
+                       : nation.governance.reformPressure   != null ? "Reform" : null;
+  const pressureValue = nation.governance.hardlinerPressure ?? nation.governance.reformPressure;
+
   return (
     <div className="nation-card">
       <div className="nation-header">
         <span className="nation-flag">{nation.flag}</span>
         <div>
           <div className="nation-name">{nation.name}</div>
-          <div className="nation-gov">{GOV_LABELS[nation.governance.type]}</div>
+          <div className="nation-gov">{GOV_LABELS[nation.governance.type] || nation.governance.type}</div>
         </div>
       </div>
       <div className="nation-stats">
@@ -171,10 +54,12 @@ function NationCard({ nation }) {
           <span className="stat-label">Treasury</span>
           <span className="stat-value">{nation.economy.treasury}</span>
         </div>
-        <div className="stat">
-          <span className="stat-label">Hardliner</span>
-          <span className="stat-value">{nation.governance.hardlinerPressure}%</span>
-        </div>
+        {pressureLabel && (
+          <div className="stat">
+            <span className="stat-label">{pressureLabel}</span>
+            <span className="stat-value">{pressureValue}%</span>
+          </div>
+        )}
         <div className="stat">
           <span className="stat-label">Guardian Veto</span>
           <span className="stat-value">{nation.governance.guardianVeto ? "Yes" : "No"}</span>
@@ -193,8 +78,29 @@ function NationCard({ nation }) {
 }
 
 export function ScenarioStep({ onLoad }) {
-  const [loaded, setLoaded] = useState(false);
-  const scenario = MIDDLE_EAST_2026;
+  const [scenario, setScenario] = useState(null);
+
+  if (!scenario) {
+    return (
+      <div className="step-panel">
+        <div className="panel-header">
+          <h2>Choose a Scenario</h2>
+          <p className="muted">Every scenario runs on the same generic contracts — no new contracts required.</p>
+        </div>
+        <div className="exp-grid">
+          {SCENARIOS.map(s => (
+            <button key={s.meta.name} className="exp-card" onClick={() => setScenario(s)}>
+              <div className="exp-card-name">{s.meta.name}</div>
+              <div className="exp-card-question muted">{s.meta.description}</div>
+              <div className="tag-row" style={{ marginTop: "0.5rem" }}>
+                {s.meta.tags.map(t => <span key={t} className="tag">{t}</span>)}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="step-panel">
@@ -232,8 +138,8 @@ export function ScenarioStep({ onLoad }) {
         <div className="metric-row">
           {scenario.simulation.metrics.map(m => (
             <div key={m.id} className="metric-chip">
-              <span className="metric-label">{m.label}</span>
-              <span className="metric-value">{m.startingValue}{m.unit}</span>
+              <span className="metric-label">{m.name}</span>
+              <span className="metric-value">{m.startingValue}</span>
             </div>
           ))}
         </div>
@@ -252,6 +158,9 @@ export function ScenarioStep({ onLoad }) {
       </section>
 
       <div className="step-footer">
+        <button className="btn-secondary" onClick={() => setScenario(null)}>
+          ← Choose a Different Scenario
+        </button>
         <button className="btn-primary" onClick={() => onLoad(scenario)}>
           Load Scenario → Deploy
         </button>

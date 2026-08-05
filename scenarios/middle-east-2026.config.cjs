@@ -397,10 +397,17 @@ const MIDDLE_EAST_2026 = {
         from: "ACTIVE_FRAGILE",
         to: "COLLAPSED",
       },
+      effects: { stability: { delta: -18 }, dealIntegrity: { set: 0 }, conflicts: { delta: 4 }, proxy: { delta: 20 }, dealActive: false },
       hypothesis:
         "Iran closes Hormuz within 3 cycles. " +
         "Oil prices spike. Saudi Arabia faces pressure. " +
         "Stability index drops below 20.",
+      hypothesisChecks: [
+        { label: "Hormuz closure impact (trade dropped >40%)", metric: "trade", op: "belowPctOfBaseline", value: 60 },
+        { label: "Stability dropped below 20", metric: "stability", op: "below", value: 20 },
+        { label: "Proxy activity surged >15 pts", metric: "proxy", op: "aboveBaselinePlus", value: 15 },
+        { label: "Hormuz closure cycles (trade <50)", metric: "trade", op: "cyclesBelow", value: 50 },
+      ],
     },
     {
       id: "exp_congress_blocks",
@@ -415,10 +422,17 @@ const MIDDLE_EAST_2026 = {
           value: true,
         },
       },
+      effects: { dealIntegrity: { delta: -25 }, proxy: { delta: 10 } },
       hypothesis:
         "Iran's hardliner pressure increases. " +
         "Deal integrity drops. " +
         "Proxy activity resumes within 5 cycles.",
+      hypothesisChecks: [
+        { label: "Deal integrity deteriorated >15 pts", metric: "dealIntegrity", op: "belowBaselineMinus", value: 15 },
+        { label: "Hardliner pressure rose (proxy >+8)", metric: "proxy", op: "aboveBaselinePlus", value: 8 },
+        { label: "Proxy activity resumed within 5 cycles", metric: "proxy", op: "aboveWithinFirstNCycles", value: 50, n: 5 },
+        { label: "Deal fully collapsed", metric: "dealIntegrity", op: "equals", value: 0 },
+      ],
     },
     {
       id: "exp_saudi_normalizes",
@@ -429,10 +443,17 @@ const MIDDLE_EAST_2026 = {
         from: "COLD",
         to: "PARTNER",
       },
+      effects: { trade: { delta: 200 }, stability: { delta: 12 }, proxy: { delta: 8 } },
       hypothesis:
         "Regional trade increases significantly. " +
         "Iran feels encircled — hardliner pressure rises. " +
         "Palestinian DAO loses leverage.",
+      hypothesisChecks: [
+        { label: "Trade increased >150", metric: "trade", op: "aboveBaselinePlus", value: 150 },
+        { label: "Iran hardliner response (proxy rose)", metric: "proxy", op: "aboveBaselinePlus", value: 5 },
+        { label: "Net stability gain", metric: "stability", op: "aboveBaselinePlus", value: 0 },
+        { label: "Trade and stability both up (dual win)", op: "and", refs: [0, 2] },
+      ],
     },
     {
       id: "exp_hardliners_win",
@@ -443,12 +464,35 @@ const MIDDLE_EAST_2026 = {
         from: 72,
         to: 95,
       },
+      effects: { dealIntegrity: { delta: -35 }, proxy: { delta: 25 }, stability: { delta: -10 }, isHardlinerEvent: true },
       hypothesis:
         "Iran exits the nuclear deal. " +
         "Hormuz threatened within 4 cycles. " +
         "Proxy activity surges to maximum.",
+      hypothesisChecks: [
+        { label: "Iran exits nuclear deal (integrity → 0)", metric: "dealIntegrity", op: "equals", value: 0 },
+        { label: "Proxy activity surged to max >80", metric: "proxy", op: "above", value: 80 },
+        { label: "Hormuz threatened (cycles below 50 trade)", metric: "trade", op: "cyclesBelow", value: 50 },
+        { label: "Significant stability drop >15 pts", metric: "stability", op: "belowBaselineMinus", value: 15 },
+      ],
     },
   ],
+
+
+  // ─────────────────────────────────────────────
+  // CITIZEN TOKEN DISTRIBUTION
+  // Data-driven per nation — no hardcoded nation IDs in the deploy
+  // scripts; see scripts/deploy.js / frontend/src/lib/contracts.js.
+  // Slot indices reference signers[0..5]: 0 = deployer/researcher,
+  // 1 = guardian-council-style role, 2 = royal/override-style role,
+  // 3-5 = population segments.
+  // ─────────────────────────────────────────────
+
+  citizenDistribution: {
+    israel:       [ { slot: 0, amount: 200000 }, { slot: 3, amount: 500000 }, { slot: 4, amount: 200000 }, { slot: 5, amount: 100000 } ],
+    iran:         [ { slot: 0, amount: 100000 }, { slot: 3, amount: 300000 }, { slot: 4, amount: 500000 }, { slot: 5, amount: 100000 } ],
+    saudi_arabia: [ { slot: 2, amount: 800000 }, { slot: 3, amount: 150000 }, { slot: 5, amount: 50000  } ],
+  },
 
 }
 

@@ -1,6 +1,21 @@
 import { useState } from "react";
 import { deployScenario } from "../lib/contracts";
 
+const GOV_LABELS = {
+  PARLIAMENTARY_DEMOCRACY: "Parliamentary Democracy",
+  THEOCRATIC_REPUBLIC:     "Theocratic Republic",
+  ABSOLUTE_MONARCHY:       "Absolute Monarchy",
+  FEDERAL_REPUBLIC:        "Federal Republic",
+  MILITARY_JUNTA:          "Military Junta",
+};
+
+function govDescription(nation) {
+  const base = GOV_LABELS[nation.governance.type] || nation.governance.type;
+  if (nation.governance.guardianVeto) return `${base} (Guardian Council veto)`;
+  if (nation.governance.royalVeto)    return `${base} (Royal veto)`;
+  return base;
+}
+
 export function DeployStep({ signer, scenario, onDeployed }) {
   const [log,      setLog]      = useState([]);
   const [deploying, setDeploying] = useState(false);
@@ -41,10 +56,16 @@ export function DeployStep({ signer, scenario, onDeployed }) {
       <div className="deploy-overview">
         <div className="deploy-item"><span className="deploy-icon">📋</span><span>WorldRegistry — simulation controller</span></div>
         <div className="deploy-item"><span className="deploy-icon">📊</span><span>MetricsOracle — measurement engine</span></div>
-        <div className="deploy-item"><span className="deploy-icon">🇮🇱</span><span>Israel — Parliamentary Democracy</span></div>
-        <div className="deploy-item"><span className="deploy-icon">🇮🇷</span><span>Iran — Theocratic Republic (Guardian Council veto)</span></div>
-        <div className="deploy-item"><span className="deploy-icon">🇸🇦</span><span>Saudi Arabia — Absolute Monarchy (Royal veto)</span></div>
-        <div className="deploy-item"><span className="deploy-icon">🤝</span><span>3 relationships + 2 global events</span></div>
+        {scenario.nations.map(n => (
+          <div key={n.id} className="deploy-item">
+            <span className="deploy-icon">{n.flag}</span>
+            <span>{n.name} — {govDescription(n)}</span>
+          </div>
+        ))}
+        <div className="deploy-item">
+          <span className="deploy-icon">🤝</span>
+          <span>{scenario.relationships.length} relationships + {scenario.activeEvents.length} global events</span>
+        </div>
       </div>
 
       {log.length > 0 && (
