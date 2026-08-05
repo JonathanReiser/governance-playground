@@ -612,6 +612,12 @@ describe("WorldRegistry", function () {
     );
 
     await registry.setMetricsOracle(await oracle.getAddress());
+
+    const CitizenTokenFactory = await ethers.getContractFactory("CitizenTokenFactory");
+    const tokenFactory = await CitizenTokenFactory.deploy();
+    const NationDAOFactory = await ethers.getContractFactory("NationDAOFactory");
+    const daoFactory = await NationDAOFactory.deploy();
+    await registry.setNationFactories(await tokenFactory.getAddress(), await daoFactory.getAddress());
   });
 
   describe("Scenario Initialization", function () {
@@ -815,6 +821,12 @@ describe("MetricsOracle", function () {
     );
 
     await registry.setMetricsOracle(await oracle.getAddress());
+
+    const CitizenTokenFactory = await ethers.getContractFactory("CitizenTokenFactory");
+    const tokenFactory = await CitizenTokenFactory.deploy();
+    const NationDAOFactory = await ethers.getContractFactory("NationDAOFactory");
+    const daoFactory = await NationDAOFactory.deploy();
+    await registry.setNationFactories(await tokenFactory.getAddress(), await daoFactory.getAddress());
     await registry.initializeScenario("Test", "1.0", 10n);
     await registry.startSimulation();
   });
@@ -989,6 +1001,12 @@ describe("Integration — Middle East Scenario", function () {
       await registry.getAddress(), owner.address
     );
     await registry.setMetricsOracle(await oracle.getAddress());
+
+    const CitizenTokenFactory = await ethers.getContractFactory("CitizenTokenFactory");
+    const tokenFactory = await CitizenTokenFactory.deploy();
+    const NationDAOFactory = await ethers.getContractFactory("NationDAOFactory");
+    const daoFactory = await NationDAOFactory.deploy();
+    await registry.setNationFactories(await tokenFactory.getAddress(), await daoFactory.getAddress());
     await registry.initializeScenario("Middle East 2026", "1.0.0", 20n);
 
     // Deploy Israel

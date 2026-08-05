@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
-import WorldRegistryABI  from "../abi/WorldRegistry.json";
-import MetricsOracleABI  from "../abi/MetricsOracle.json";
+import WorldRegistryABI       from "../abi/WorldRegistry.json";
+import MetricsOracleABI       from "../abi/MetricsOracle.json";
+import CitizenTokenFactoryABI from "../abi/CitizenTokenFactory.json";
+import NationDAOFactoryABI    from "../abi/NationDAOFactory.json";
 
 export const HARDHAT_CHAIN_ID = 31337;
 export const HARDHAT_RPC     = "http://127.0.0.1:8545";
@@ -64,6 +66,24 @@ export async function deployScenario(signer, scenario, onStatus) {
 
   onStatus("Wiring oracle…");
   await (await registry.setMetricsOracle(await oracle.getAddress())).wait();
+
+  onStatus("Deploying nation factories…");
+  const TokenFactoryFactory = new ethers.ContractFactory(
+    CitizenTokenFactoryABI.abi, CitizenTokenFactoryABI.bytecode, deployer
+  );
+  const tokenFactory = await TokenFactoryFactory.deploy();
+  await tokenFactory.waitForDeployment();
+
+  const DaoFactoryFactory = new ethers.ContractFactory(
+    NationDAOFactoryABI.abi, NationDAOFactoryABI.bytecode, deployer
+  );
+  const daoFactory = await DaoFactoryFactory.deploy();
+  await daoFactory.waitForDeployment();
+
+  await (await registry.setNationFactories(
+    await tokenFactory.getAddress(),
+    await daoFactory.getAddress()
+  )).wait();
 
   onStatus("Initializing scenario…");
   await (await registry.initializeScenario(

@@ -145,18 +145,33 @@ async function main() {
 
   console.log("\nStep 3: Wiring contracts together...");
 
-  await registry.setMetricsOracle(await oracle.getAddress());
+  await (await registry.setMetricsOracle(await oracle.getAddress())).wait();
   console.log("  MetricsOracle registered with WorldRegistry");
+
+  const CitizenTokenFactory = await ethers.getContractFactory("CitizenTokenFactory");
+  const tokenFactory        = await CitizenTokenFactory.deploy();
+  await tokenFactory.waitForDeployment();
+
+  const NationDAOFactory = await ethers.getContractFactory("NationDAOFactory");
+  const daoFactory       = await NationDAOFactory.deploy();
+  await daoFactory.waitForDeployment();
+
+  await (await registry.setNationFactories(
+    await tokenFactory.getAddress(),
+    await daoFactory.getAddress()
+  )).wait();
+  console.log(`  CitizenTokenFactory: ${await tokenFactory.getAddress()}`);
+  console.log(`  NationDAOFactory:    ${await daoFactory.getAddress()}`);
 
   // ── STEP 4: Initialize the scenario ──────────────────────
 
   console.log("\nStep 4: Initializing scenario...");
 
-  await registry.initializeScenario(
+  await (await registry.initializeScenario(
     SCENARIO.meta.name,
     SCENARIO.meta.version,
     BigInt(SCENARIO.simulation.defaultCycles)
-  );
+  )).wait();
 
   console.log(`  Scenario: "${SCENARIO.meta.name}" initialized`);
   console.log(`  Total cycles: ${SCENARIO.simulation.defaultCycles}`);
@@ -236,7 +251,7 @@ async function main() {
     const addresses = distribution.map(d => d.address);
     const amounts   = distribution.map(d => d.amount);
 
-    await registry.distributeCitizenship(nationId, addresses, amounts);
+    await (await registry.distributeCitizenship(nationId, addresses, amounts)).wait();
     console.log(`  Distributed tokens for ${deployedNations[nationId].name}`);
   }
 
@@ -247,14 +262,14 @@ async function main() {
   for (const rel of SCENARIO.relationships) {
     const relTypeEnum = RelationshipType[rel.type] ?? RelationshipType.NEUTRAL;
 
-    await registry.setRelationship(
+    await (await registry.setRelationship(
       rel.from,
       rel.to,
       relTypeEnum,
       BigInt(rel.stabilityScore),
       rel.treatyActive,
       rel.treatyName || ""
-    );
+    )).wait();
 
     console.log(
       `  ${rel.from} <-> ${rel.to}: ${rel.type} ` +
@@ -270,13 +285,13 @@ async function main() {
     if (event.type === "PEACE_DEAL" || event.type === "RESOURCE_EVENT") {
       const eventTypeEnum = EventType[event.type] ?? EventType.PEACE_DEAL;
 
-      await registry.createGlobalEvent(
+      await (await registry.createGlobalEvent(
         event.id,
         event.name,
         eventTypeEnum,
         event.parties || [],
         event.description
-      );
+      )).wait();
 
       console.log(`  Event registered: "${event.name}" — ${event.status}`);
     }
@@ -293,13 +308,13 @@ async function main() {
   const proxyMetric        = metrics.find(m => m.id === "proxy_activity");
   const dealIntegrityMetric = metrics.find(m => m.id === "deal_integrity");
 
-  await oracle.updateMetrics(
+  await (await oracle.updateMetrics(
     BigInt(stabilityMetric.startingValue),
     BigInt(conflictMetric.startingValue),
     BigInt(tradeMetric.startingValue),
     BigInt(proxyMetric.startingValue),
     BigInt(dealIntegrityMetric.startingValue)
-  );
+  )).wait();
 
   console.log(`  Stability Index:    ${stabilityMetric.startingValue}/100`);
   console.log(`  Conflict Events:    ${conflictMetric.startingValue}`);
@@ -310,7 +325,7 @@ async function main() {
   // ── STEP 10: Start the simulation ────────────────────────
 
   console.log("\nStep 10: Starting simulation...");
-  await registry.startSimulation();
+  await (await registry.startSimulation()).wait();
   console.log("  Simulation is ACTIVE");
 
   // ── DEPLOYMENT SUMMARY ───────────────────────────────────

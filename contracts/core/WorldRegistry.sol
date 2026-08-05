@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./NationDAO.sol";
 import "./CitizenToken.sol";
+import "./CitizenTokenFactory.sol";
+import "./NationDAOFactory.sol";
 
 /**
  * @title WorldRegistry
@@ -112,6 +114,14 @@ contract WorldRegistry is Ownable {
     // MetricsOracle address
     address public metricsOracle;
 
+    // Deploy the CitizenToken + NationDAO pair per nation — kept out of this
+    // contract's own bytecode (each `new` call inlines the full creation
+    // bytecode of what it deploys, and this contract doing that for two
+    // contracts at once pushed it well past the EIP-170 24KB limit that real
+    // networks enforce; local Hardhat's allowUnlimitedContractSize hid this).
+    CitizenTokenFactory public citizenTokenFactory;
+    NationDAOFactory    public nationDAOFactory;
+
     // ─────────────────────────────────────────
     // EVENTS
     // ─────────────────────────────────────────
@@ -134,6 +144,17 @@ contract WorldRegistry is Ownable {
     // ─────────────────────────────────────────
 
     constructor(address _initialOwner) Ownable(_initialOwner) {}
+
+    /**
+     * @notice Point this registry at its two nation factories. Must be
+     *         called once before registerNation(); separate from the
+     *         constructor so existing deploy call sites (tests, scripts)
+     *         don't all need extra constructor arguments.
+     */
+    function setNationFactories(address _tokenFactory, address _daoFactory) external onlyOwner {
+        citizenTokenFactory = CitizenTokenFactory(_tokenFactory);
+        nationDAOFactory    = NationDAOFactory(_daoFactory);
+    }
 
     // ─────────────────────────────────────────
     // SCENARIO SETUP
@@ -167,40 +188,41 @@ contract WorldRegistry is Ownable {
         uint256 _initialTreasury,
         uint256 _initialMilitaryPower
     ) external onlyOwner returns (address daoAddress, address tokenAddress) {
+        require(
+            address(citizenTokenFactory) != address(0) && address(nationDAOFactory) != address(0),
+            "WorldRegistry: factories not set"
+        );
 
-        // Deploy the CitizenToken
-        CitizenToken token = new CitizenToken(
+        address token = citizenTokenFactory.deployToken(
             _config.name,
             _config.nationId,
             _tokenSupply,
-            address(this)         // WorldRegistry owns the token
+            address(this)           // WorldRegistry owns the token
         );
 
-        // Deploy the NationDAO
-        NationDAO dao = new NationDAO(
+        address dao = nationDAOFactory.deployDAO(
             _config,
-            address(token),
-            address(this),        // WorldRegistry controls the DAO
+            token,
+            address(this),           // WorldRegistry owns the DAO
             _initialTreasury,
-            _initialMilitaryPower,
-            address(this)
+            _initialMilitaryPower
         );
 
         // Register
         nations[_config.nationId] = Nation({
             id:            _config.nationId,
             name:          _config.name,
-            daoAddress:    address(dao),
-            tokenAddress:  address(token),
+            daoAddress:    dao,
+            tokenAddress:  token,
             active:        true,
             registeredAt:  block.timestamp
         });
 
         nationIds.push(_config.nationId);
 
-        emit NationRegistered(_config.nationId, address(dao), address(token));
+        emit NationRegistered(_config.nationId, dao, token);
 
-        return (address(dao), address(token));
+        return (dao, token);
     }
 
     /**
