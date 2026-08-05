@@ -14,13 +14,30 @@
 
 const express   = require("express");
 const cors      = require("cors");
+const rateLimit = require("express-rate-limit");
 const Anthropic = require("@anthropic-ai/sdk").default;
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: "http://localhost:5173" }));
+// In production (Vercel) the frontend and this API share one domain, so
+// same-origin requests carry no Origin header at all and need no CORS entry.
+// The explicit origins below only matter for local dev, where the Vite dev
+// server (5173) and this server (3001) are genuinely cross-origin.
+app.use(cors({ origin: [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/] }));
 app.use(express.json());
+
+// Every request here calls the Anthropic API and costs real money — this is
+// a public demo server, not a trusted internal one, so it needs a real cap.
+// 30 decisions/hour/IP is ~10 full 10-cycle AI runs; generous for a demo,
+// cheap to abuse-proof.
+const agentDecideLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Rate limit reached for this demo (30 agent decisions/hour). Try again later, or run it locally for unlimited use — see the README." },
+});
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -365,7 +382,7 @@ function generateHeadlines(worldState) {
 // ROUTES
 // ─────────────────────────────────────────────────────────────
 
-app.post("/api/agent/decide", async (req, res) => {
+app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
   const { nation, worldState } = req.body;
 
   if (!SYSTEM_PROMPTS[nation]) {
@@ -423,9 +440,18 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 // START
 // ─────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`Governance Playground agent server running on http://localhost:${PORT}`);
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.warn("WARNING: ANTHROPIC_API_KEY is not set. /api/agent/decide will fail.");
-  }
-});
+// Only actually bind a port when run directly (`node server.js` / `npm run
+// server`). When Vercel's Node runtime instead requires() this file as a
+// serverless function (see api/index.js), it wants the bare Express app to
+// hand a request/response pair to itself — calling listen() here too would
+// be harmless but pointless in that context, so skip it.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Governance Playground agent server running on http://localhost:${PORT}`);
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.warn("WARNING: ANTHROPIC_API_KEY is not set. /api/agent/decide will fail.");
+    }
+  });
+}
+
+module.exports = app;
