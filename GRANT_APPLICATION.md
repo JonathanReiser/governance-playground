@@ -7,7 +7,11 @@
 
 Governance Playground is an open-source research sandbox where political scientists, students, and policy researchers can model governance systems, load real-world geopolitical scenarios, run controlled "what if" experiments, and measure outcomes — all recorded on-chain. Every finding is permanently verifiable, reproducible, and citable by block number.
 
-The first scenario: **The Middle East, May 2026** — a fragile post-war environment following the US/Israel-Iran peace deal. Four experiments are already running:
+**Live demo:** https://governance-playground.vercel.app — no install required.
+**Code:** https://github.com/JonathanReiser/governance-playground (public, ISC-licensed)
+**On-chain, independently verifiable:** [WorldRegistry on Sepolia Etherscan](https://sepolia.etherscan.io/address/0x16da77Aa3e63215F738baF61f280caeE8F211A75)
+
+The first scenario: **The Middle East, May 2026** — a fragile post-war environment following the US/Israel-Iran peace deal. It now runs in two modes. Four fixed-rule experiments are already running:
 
 | Experiment | Stability Outcome | Key Finding |
 |---|---|---|
@@ -17,6 +21,12 @@ The first scenario: **The Middle East, May 2026** — a fragile post-war environ
 | Hardliners gain power | 0/100 (Critical) | Identical outcome to deal collapse — different cause, same endpoint |
 
 80 simulation cycles are on-chain. The findings are citable. The code is reproducible.
+
+Alongside those fixed-rule experiments, a second mode is now live: three Claude-powered nation
+agents — grounded in real IR-theory frameworks (Selectorate Theory, Operational Code, Two-Level
+Games, Prospect Theory) — reason through the same scenario cycle by cycle, under genuinely
+quantum-modeled uncertainty (not a metaphor: a from-scratch complex-amplitude engine implementing
+unitary rotation, Born-rule measurement, and interference). See "The Agent Layer" below.
 
 ---
 
@@ -125,17 +135,41 @@ The Middle East scenario is the first application of a modular governance primit
 
 Each "scenario" is a config file. New scenarios require no new contracts.
 
-### The Agent Layer (Next Phase)
+### The Agent Layer (Built)
 
-The current simulation is rules-based. The next phase introduces real agents:
+The rules-based simulation above was the starting point. It's since been extended with a live
+AI agent layer and a genuine quantum-cognition model of uncertainty — not a roadmap item, a
+working system, verified end-to-end against real on-chain transactions.
 
-**Human Agents** — Researchers, students, and participants hold citizenship tokens, vote on proposals, and play roles (Iranian hardliner, Saudi moderate, Israeli security hawk). Their decisions feed into the simulation.
+**AI Agents** — Each nation is a Claude-powered agent grounded in a specific IR-theory framework,
+not generic roleplay: Iran runs on Selectorate Theory (a small winning coalition — Supreme Leader,
+IRGC, Guardian Council) and a zero-sum Operational Code; Israel runs on the Begin Doctrine and
+Two-Level Games (domestic coalition math constrains international moves); Saudi Arabia runs on
+loss-averse Prospect Theory and hedges rather than commits. Every cycle, all three reason
+independently over the current world state and commit a decision.
 
-**AI Agents** — LLM-powered actors given a role, goals, and constraints. They submit proposals and vote autonomously. Their reasoning is recorded on-chain alongside their actions. This enables running thousands of simulations at scale.
+**Quantum-modeled uncertainty** — A nation's posture is a probability amplitude, not a fixed
+scalar, until the moment of on-chain commit. Iran and Israel's postures are genuinely *entangled*
+— a structural encoding of the security dilemma, where neither side's stance is fully separable
+from the other's — using real complex-amplitude math (unitary rotation, Born-rule measurement,
+interference), built from scratch, not a third-party quantum computing SDK bolted on for effect.
+The same engine models a 4-instrument entangled economic field (oil, the Iranian rial, the Saudi
+riyal, US gas prices) and a synthetic-trader speculation layer where fat-tailed price moves emerge
+from interference structure rather than a bolted-on distribution choice.
 
-The blockchain is neutral — it doesn't care whether a vote came from a human or an AI. It enforces the rules and records everything.
+**Verified, not just built** — A real run: Iran, Israel, and Saudi Arabia's quantum states
+collapsed into a mutually-reinforcing hardline/hawkish configuration two cycles running, triggering
+the model's predicted "entangled escalation" effect both times; Iran's agent independently chose to
+exit the peace deal entirely (`EXIT_DEAL`, threatening Hormuz, partial nuclear breakout) as
+hardliner pressure and collapsing deal integrity converged — regional stability fell from 48/100 to
+13/100 in two cycles. Every metric change, every quantum collapse, and every agent decision from
+that run is a real, mined transaction, [citable by block number](https://sepolia.etherscan.io/address/0x16da77Aa3e63215F738baF61f280caeE8F211A75).
 
-Human agents make the findings valid. AI agents make the scale possible. The blockchain makes both trustworthy.
+**Human Agents (still the natural next step)** — Researchers, students, and participants holding
+citizenship tokens and voting on proposals directly, playing the same roles the AI agents currently
+play. The blockchain doesn't care whether a decision came from a human or an AI — it enforces the
+rules and records everything either way. Human-in-the-loop validation is the piece that would let
+the AI-agent findings above be checked against expert political-scientist judgment at scale.
 
 ---
 
@@ -143,14 +177,17 @@ Human agents make the findings valid. AI agents make the scale possible. The blo
 
 **Amount:** $10,000–15,000 USD (or ETH equivalent)
 
-**Use:**
+**Use:** The AI agent layer, quantum uncertainty model, frontend, and Sepolia deployment above were
+built without grant funding — this ask is scoped to what's genuinely still needed, not what's
+already done.
 
 | Item | Allocation |
 |---|---|
-| AI agent layer — LLM integration, role prompting, on-chain reasoning logs | 40% |
-| Frontend research playground — scenario loader, live experiment UI, results visualizer | 35% |
-| Additional scenarios — EU governance, additional Middle East nations (Palestine, Lebanon, Turkey, UAE) | 15% |
-| Documentation and researcher onboarding materials | 10% |
+| Sustained Claude API costs — running the public demo and continued experiment cycles at scale isn't free per-call, and this is the resource that's actually consumed by usage | 25% |
+| Additional scenarios — EU governance, additional Middle East nations (Palestine, Lebanon, Turkey, UAE), Taiwan Strait, Russia-Ukraine | 30% |
+| Live news grounding (real NewsAPI/GDELT integration, currently mock headlines) and Layer 2→1 feedback (economic distress currently doesn't loop back into nation decisions) | 20% |
+| Mainnet migration path — gas cost analysis, contract security review, the step from "verifiable on a testnet" to "verifiable on the network researchers would actually cite" | 15% |
+| Documentation, academic write-up of the quantum-cognition approach, researcher onboarding materials | 10% |
 
 ---
 
@@ -176,12 +213,20 @@ The prototype exists because this project required two skills that almost never 
 
 ## Repository
 
-All code is open source. The contracts, scenario config, experiment runner, and test suite are in a single repository.
+All code is open source at **https://github.com/JonathanReiser/governance-playground** — contracts,
+scenario config, experiment runner, quantum engine, AI agent layer, frontend, and test suite in a
+single repository.
 
-**Test status:** 76/76 passing  
-**Lines of Solidity:** ~800  
-**Experiments run:** 4 (80 blockchain cycles recorded)  
-**Reproducibility:** Any researcher can clone the repo, run `npx hardhat run scripts/run-all-experiments.js`, and reproduce every finding in this application.
+**Live demo:** https://governance-playground.vercel.app (no install required)
+**Test status:** 76/76 passing
+**Lines of Solidity:** ~900 (across WorldRegistry, NationDAO, CitizenToken, MetricsOracle, and two
+factory contracts split out to stay under Ethereum's 24KB contract-size limit — a real constraint
+hit and fixed during the Sepolia deployment, not a theoretical one)
+**Experiments run:** 4 fixed-rule (80 blockchain cycles recorded) + AI-agent runs verified live on
+Sepolia
+**Reproducibility:** Any researcher can clone the repo, run `npx hardhat run scripts/run-all-experiments.js`
+for the fixed-rule experiments, or follow the README's quickstart for the AI/quantum mode, and
+reproduce every finding in this application — or open the live demo and run their own.
 
 ---
 
