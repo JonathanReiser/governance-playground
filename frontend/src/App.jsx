@@ -25,6 +25,11 @@ export default function App() {
           <div className="logo">
             <span className="logo-icon">⬡</span>
             <span className="logo-text">Governance Playground</span>
+            {wallet?.networkName && (
+              <span className={`network-badge ${wallet.networkName === "Sepolia" ? "network-badge--live" : ""}`}>
+                {wallet.networkName}
+              </span>
+            )}
           </div>
           <nav className="stepper">
             {STEPS.map((s, i) => (

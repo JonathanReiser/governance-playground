@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { connectWallet, connectDirect } from "../lib/contracts";
+import { connectWallet, connectDirect, switchToSepolia } from "../lib/contracts";
 
 export function ConnectStep({ onConnect }) {
   const [error,   setError]   = useState("");
-  const [loading, setLoading] = useState(null); // "direct" | "metamask" | null
+  const [loading, setLoading] = useState(null); // "direct" | "metamask" | "switching" | null
 
   async function handle(mode) {
     setError("");
@@ -12,7 +12,23 @@ export function ConnectStep({ onConnect }) {
       const wallet = mode === "direct" ? await connectDirect() : await connectWallet();
       onConnect(wallet);
     } catch (e) {
-      setError(e.message);
+      // Keep the unsupportedNetwork flag intact so the UI can offer a
+      // one-click Sepolia switch instead of just failing.
+      setError(e);
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function handleSwitchAndRetry() {
+    setError("");
+    setLoading("switching");
+    try {
+      await switchToSepolia();
+      const wallet = await connectWallet();
+      onConnect(wallet);
+    } catch (e) {
+      setError(e);
     } finally {
       setLoading(null);
     }
@@ -31,9 +47,10 @@ export function ConnectStep({ onConnect }) {
       </div>
 
       <div className="connect-card">
-        <h2>Connect to Hardhat</h2>
+        <h2>Connect</h2>
         <p className="muted" style={{ fontSize: 12 }}>
-          Make sure <code style={{ fontFamily: "monospace", color: "#818cf8" }}>npx hardhat node</code> is running first.
+          Dev Mode needs <code style={{ fontFamily: "monospace", color: "#818cf8" }}>npx hardhat node</code> running
+          locally. MetaMask works with either your local Hardhat node or the public Sepolia testnet.
         </p>
 
         <div className="connect-options">
@@ -44,8 +61,8 @@ export function ConnectStep({ onConnect }) {
           >
             <span className="connect-option-icon">⚡</span>
             <div className="connect-option-text">
-              <strong>{loading === "direct" ? "Connecting…" : "Dev Mode (Recommended)"}</strong>
-              <span>Direct RPC — no confirmation prompts</span>
+              <strong>{loading === "direct" ? "Connecting…" : "Dev Mode (Recommended for local dev)"}</strong>
+              <span>Direct RPC to local Hardhat — no confirmation prompts</span>
             </div>
           </button>
 
@@ -57,12 +74,28 @@ export function ConnectStep({ onConnect }) {
             <span className="connect-option-icon">🦊</span>
             <div className="connect-option-text">
               <strong>{loading === "metamask" ? "Connecting…" : "MetaMask"}</strong>
-              <span>Requires approval for each transaction</span>
+              <span>Local Hardhat or Sepolia — requires approval for each transaction</span>
             </div>
           </button>
         </div>
 
-        {error && <div className="error-box">{error}</div>}
+        {error && (
+          <div className="error-box">
+            {error.message}
+            {error.unsupportedNetwork && (
+              <div style={{ marginTop: "0.6rem" }}>
+                <button
+                  className="btn-secondary"
+                  onClick={handleSwitchAndRetry}
+                  disabled={!!loading}
+                  style={{ fontSize: 12, padding: "0.4rem 0.75rem" }}
+                >
+                  {loading === "switching" ? "Switching…" : "Switch MetaMask to Sepolia →"}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="feature-row">

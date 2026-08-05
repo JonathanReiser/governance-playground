@@ -6,6 +6,26 @@ import NationDAOFactoryABI    from "../abi/NationDAOFactory.json";
 
 export const HARDHAT_CHAIN_ID = 31337;
 export const HARDHAT_RPC     = "http://127.0.0.1:8545";
+export const SEPOLIA_CHAIN_ID = 11155111;
+export const SEPOLIA_RPC      = "https://ethereum-sepolia-rpc.publicnode.com";
+
+// Networks connectWallet() (MetaMask) will accept. Dev Mode (connectDirect,
+// below) is intentionally NOT part of this — it signs with a publicly known
+// private key and must only ever be able to reach localhost, never a real
+// network, which is guaranteed by construction (its RPC URL is hardcoded to
+// 127.0.0.1 and never touches window.ethereum's selected network at all).
+const SUPPORTED_CHAINS = {
+  [HARDHAT_CHAIN_ID]: "Hardhat Local",
+  [SEPOLIA_CHAIN_ID]: "Sepolia",
+};
+
+const SEPOLIA_ADD_CHAIN_PARAMS = {
+  chainId: "0x" + SEPOLIA_CHAIN_ID.toString(16),
+  chainName: "Sepolia",
+  nativeCurrency: { name: "Sepolia ETH", symbol: "ETH", decimals: 18 },
+  rpcUrls: [SEPOLIA_RPC],
+  blockExplorerUrls: ["https://sepolia.etherscan.io"],
+};
 
 // First Hardhat default account — pre-funded with 10,000 ETH, no confirmations needed
 const HARDHAT_PRIVATE_KEY =
@@ -19,7 +39,32 @@ export async function connectDirect() {
   }
   const wallet = new ethers.Wallet(HARDHAT_PRIVATE_KEY, provider);
   const signer = new ethers.NonceManager(wallet);
-  return { provider, signer };
+  return { provider, signer, chainId: HARDHAT_CHAIN_ID, networkName: SUPPORTED_CHAINS[HARDHAT_CHAIN_ID] };
+}
+
+/**
+ * Prompt MetaMask to switch to Sepolia (EIP-3326), adding it first (EIP-3085)
+ * if the user has never had it in their wallet before. Only ever called from
+ * an explicit user click — never automatically — so the network-switch
+ * prompt doesn't appear out of nowhere.
+ */
+export async function switchToSepolia() {
+  if (!window.ethereum) throw new Error("MetaMask not found. Install it to continue.");
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: SEPOLIA_ADD_CHAIN_PARAMS.chainId }],
+    });
+  } catch (err) {
+    if (err.code === 4902) {
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [SEPOLIA_ADD_CHAIN_PARAMS],
+      });
+    } else {
+      throw err;
+    }
+  }
 }
 
 export async function connectWallet() {
@@ -27,13 +72,16 @@ export async function connectWallet() {
   const provider = new ethers.BrowserProvider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
   const network = await provider.getNetwork();
-  if (Number(network.chainId) !== HARDHAT_CHAIN_ID) {
-    throw new Error(
-      `Wrong network. Switch MetaMask to Hardhat localhost (chain ID ${HARDHAT_CHAIN_ID}).`
+  const chainId = Number(network.chainId);
+  if (!SUPPORTED_CHAINS[chainId]) {
+    const err = new Error(
+      `Unsupported network. Switch MetaMask to Hardhat localhost (${HARDHAT_CHAIN_ID}) or Sepolia (${SEPOLIA_CHAIN_ID}).`
     );
+    err.unsupportedNetwork = true; // lets the UI offer a one-click Sepolia switch
+    throw err;
   }
   const signer = await provider.getSigner();
-  return { provider, signer };
+  return { provider, signer, chainId, networkName: SUPPORTED_CHAINS[chainId] };
 }
 
 // Enum maps

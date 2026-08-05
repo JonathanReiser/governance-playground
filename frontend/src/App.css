@@ -46,6 +46,13 @@ body {
 .logo { display: flex; align-items: center; gap: 0.5rem; }
 .logo-icon { font-size: 1.4rem; color: var(--accent); }
 .logo-text  { font-weight: 600; letter-spacing: -0.01em; }
+.network-badge {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+  font-family: var(--font-mono); font-weight: 600;
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.15rem 0.45rem; color: var(--muted);
+}
+.network-badge--live { border-color: var(--green); color: var(--green); }
 
 .app-main {
   flex: 1;
