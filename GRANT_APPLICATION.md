@@ -157,6 +157,29 @@ The same engine models a 4-instrument entangled economic field (oil, the Iranian
 riyal, US gas prices) and a synthetic-trader speculation layer where fat-tailed price moves emerge
 from interference structure rather than a bolted-on distribution choice.
 
+This isn't a metaphor borrowed from physics for flavor — it follows an established research
+program. Quantum probability theory has been used for two decades to model human judgment because
+classical (Kolmogorov) probability provably cannot reproduce well-documented decision phenomena:
+order effects, where asking about Actor A before Actor B yields a different joint judgment than
+the reverse order (Pothos & Busemeyer, *"A quantum probability explanation for violations of
+rational decision theory,"* Proc. Royal Society B, 2009 — a study specifically about sequential
+geopolitical-style judgments); and the disjunction effect, where a decision made under known
+outcome A and known outcome not-A differs from the same decision made under genuine uncertainty
+between them, violating Savage's sure-thing principle (Busemeyer & Bruza, *Quantum Models of
+Cognition and Decision*, Cambridge University Press, 2012). This simulation's order-dependent
+cycle evolution (Iran → Israel → Saudi Arabia, not commutative) and its entangled-collapse
+"escalation" effect are direct implementations of exactly these two phenomena, not loose analogies
+to them.
+
+This grounding makes the model's central claim falsifiable, not just evocative: if the entangled
+formalism is doing real work, a scenario run through it should predict a specific non-additive
+interaction — P(Iran hardline ∧ Israel hawkish) measurably diverging from
+P(Iran hardline) × P(Israel hawkish) — that a classical baseline run of the identical scenario
+config cannot reproduce. That comparison (quantum vs. classical model fit against the same
+decision data, scored via AIC/BIC as in Busemeyer, Wang & Townsend, *"Quantum dynamics of human
+decision-making,"* Journal of Mathematical Psychology, 2006) is a concrete next experiment, not
+yet run.
+
 **Verified, not just built** — A real run: Iran, Israel, and Saudi Arabia's quantum states
 collapsed into a mutually-reinforcing hardline/hawkish configuration two cycles running, triggering
 the model's predicted "entangled escalation" effect both times; Iran's agent independently chose to

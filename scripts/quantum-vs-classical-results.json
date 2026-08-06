@@ -1,0 +1,44 @@
+{
+  "scenario": "taiwan-strait-2026",
+  "nTrials": 5000,
+  "nCycles": 3,
+  "initialMarginal": 0.78,
+  "meanEntanglementStrength": 0.15032920278415224,
+  "quantum": {
+    "stat": 304.7558237218358,
+    "p": 0,
+    "expected": [
+      2114.3204,
+      1111.6796,
+      1162.6796,
+      611.3204
+    ],
+    "observed": [
+      2395,
+      831,
+      882,
+      892
+    ],
+    "total": 5000
+  },
+  "classical": {
+    "stat": 0.09709318372099512,
+    "p": 0.7553463506297615,
+    "expected": [
+      2166.9528,
+      1075.0472,
+      1175.0472,
+      582.9528
+    ],
+    "observed": [
+      2162,
+      1080,
+      1180,
+      578
+    ],
+    "total": 5000
+  },
+  "quantumGap": 0.11227184000000001,
+  "classicalGap": 0.001981119999999982,
+  "syntheticInputCaveat": "Decision deltas are synthetic (uniform, production-matched bounds), not real logged Claude decisions. See file header."
+}

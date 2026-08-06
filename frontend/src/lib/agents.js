@@ -80,14 +80,14 @@ export class NationAgent {
 
 const clampUnit = (p) => Math.min(1, Math.max(0, p));
 
-function nationsById(scenario) {
+export function nationsById(scenario) {
   return Object.fromEntries(scenario.nations.map(n => [n.id, n]));
 }
 
 // Read a nation's driver field, applying the config's driverDirection so
 // the returned value is always "probability of axis[0]" regardless of
 // whether the underlying field rises toward axis[0] or axis[1].
-function driverProbability(nation, driverField, driverDirection) {
+export function driverProbability(nation, driverField, driverDirection) {
   const raw = clampUnit((nation.governance[driverField] ?? 50) / 100);
   return driverDirection === "inverse" ? 1 - raw : raw;
 }
@@ -136,7 +136,7 @@ function probReadout([p0, p1], labels) {
 // different order can compose to a different posture. Not a display gimmick:
 // this is the mechanism that produces the order effects described in
 // lib/quantum.js.
-function actionPhase(actionId = "") {
+export function actionPhase(actionId = "") {
   let h = 0;
   for (let i = 0; i < actionId.length; i++) h = (h * 31 + actionId.charCodeAt(i)) >>> 0;
   return (h % 1000) / 1000 * 2 * Math.PI;
@@ -286,7 +286,7 @@ export function buildWorldState(scenario, simState, cycle, agentMemory = {}) {
 // Sign of the rotation angle for a given delta + direction, matching the
 // convention already established: a delta that pushes toward axis[0]
 // rotates with negative theta, axis[1] with positive theta.
-function rotationTheta(delta, maxAbs, direction) {
+export function rotationTheta(delta, maxAbs, direction) {
   const magnitude = Math.min(1, Math.abs(delta) / maxAbs) * (Math.PI / 6);
   const risingPushesAxis0 = direction !== "inverse";
   const deltaPushesAxis0 = risingPushesAxis0 ? delta >= 0 : delta <= 0;
