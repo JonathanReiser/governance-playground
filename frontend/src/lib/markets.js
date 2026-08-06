@@ -4,27 +4,25 @@
  * lib/agents.js for Layer 1 (nation posture).
  *
  * LAYER 2 — ECONOMIC FIELD
- * Four instruments — oil, the Iranian rial, the Saudi riyal's fiscal
- * position, and the US retail gas price — as one 4-qubit entangled
- * register, not four independent scalars. The correlation is
- * structural, not incidental: an oil shock stresses Iran's currency
- * (sanctions-evasion trade breaks down, war risk) while it fills Saudi
- * coffers (they're the exporter); a calm oil market does the reverse
- * (Iran's currency isn't oil-exposed the same way; Saudi loses the
- * windfall it needs for Vision 2030 without added political will to cut
- * spending). The US gas qubit rides the same shock/calm branches —
- * pump prices are a damped, lagged echo of the crude spot price
- * (partial pass-through through refining/distribution) — encoded with
- * its own rotation triggers and phase so it doesn't move in lockstep
- * with crude every cycle. That's encoded as a GHZ-like state — the two
- * dominant joint branches are (SPIKING, WEAKENING, ROBUST, SURGING)
- * and (STABLE, RESILIENT, STRAINED, CALM) — not four separate
- * probabilities that happen to move together. The US gas qubit's
- * collapse outcome also carries a derived, non-qubit USD-direction note
- * (oil is USD-denominated: a pump-price surge pairs with a softer
- * dollar in this model) — that's a computed label, not a fifth qubit;
- * modeling USD strength as its own entangled instrument was
- * deliberately left out of scope for now.
+ * Four instruments as one 4-qubit entangled register, not four
+ * independent scalars — generic slots [primary, currencyA, currencyB,
+ * global], read out and displayed as scenario.aiAgents.marketInstruments
+ * describes them. The correlation itself, and WHICH real-world
+ * instruments fill those four slots, is genuinely bespoke content per
+ * scenario (see propagateGeopolitics* below) — the Middle East's
+ * oil/rial/riyal/gas correlation logic doesn't conceptually transplant
+ * to Taiwan Strait's semiconductor/TWD/CNY/shipping field (a Saudi-style
+ * "third party profits from the crisis" story doesn't fit China, which
+ * takes real economic damage from its own escalation) — so each
+ * scenario gets its own propagation function, dispatched by
+ * scenario.meta.id, rather than a forced shared schema. Labels/symbols/
+ * emoji themselves DO come from one place — scenario.aiAgents.
+ * marketInstruments — so there's no duplicated label data to drift.
+ *
+ * That's encoded as a GHZ-like state — the four instruments' "shock"
+ * branch (index0 of each) and "calm" branch (index1) move together as
+ * two dominant joint branches, not four separate probabilities that
+ * happen to correlate.
  *
  * The political layer (Layer 1) propagates INTO this one each cycle as
  * unitary rotations; it does not propagate back (one-directional, for
@@ -42,23 +40,17 @@
  * disproportionately large relative to any single trader's conviction.
  * That's a real, falsifiable prediction, not decoration: it says price
  * volatility should track interference structure, not headline size.
+ * This layer is scenario-agnostic — traders react to whatever
+ * fundamental collapsed, regardless of what it represents.
  */
 
 import {
   c, cAdd, cFromPolar, cPhase,
   ghzState, applyLocalRotationN, marginalProbability, measureQubit, interfere,
-} from "./quantum";
+} from "./quantum.js";
 
-const N_INSTRUMENTS = 4; // [OIL, RIAL, RIYAL, USGAS]
-const OIL = 0, RIAL = 1, RIYAL = 2, USGAS = 3;
-
-// Basis labels per instrument, index0 = the "shock-aligned" branch of the GHZ state.
-const LABELS = {
-  [OIL]:   ["SPIKING", "STABLE"],
-  [RIAL]:  ["WEAKENING", "RESILIENT"],
-  [RIYAL]: ["ROBUST", "STRAINED"], // note: index0 ROBUST is the shock-branch outcome for Saudi (oil windfall)
-  [USGAS]: ["SURGING", "CALM"],    // US retail pump price — shock branch mirrors OIL's SPIKING, damped
-};
+const N_INSTRUMENTS = 4; // [PRIMARY, CURRENCY_A, CURRENCY_B, GLOBAL]
+const PRIMARY = 0, CURRENCY_A = 1, CURRENCY_B = 2, GLOBAL = 3;
 
 const clampUnit = (p) => Math.min(1, Math.max(0, p));
 
@@ -71,109 +63,207 @@ function hashPhase(key = "") {
   return (h % 1000) / 1000 * 2 * Math.PI;
 }
 
+function labelsFor(scenario) {
+  return Object.fromEntries(
+    scenario.aiAgents.marketInstruments.map((inst, i) => [i, [inst.shockLabel, inst.calmLabel]])
+  );
+}
+
 // ─────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────
 
 export function initMarketBeliefs() {
-  // beta = PI/4: start maximally entangled / undecided between the
-  // (shock, weakening, robust) and (calm, resilient, strained) branches.
+  // beta = PI/4: start maximally entangled / undecided between the four
+  // instruments' shock and calm branches. Same starting structure for
+  // every scenario — only the propagation rules and labels differ.
   return { instruments: ghzState(N_INSTRUMENTS, Math.PI / 4) };
 }
 
-function instrumentReadout(joint, idx) {
+function instrumentReadout(joint, idx, labels) {
   const [p0, p1] = marginalProbability(joint, N_INSTRUMENTS, idx);
-  return { [LABELS[idx][0]]: p0, [LABELS[idx][1]]: p1 };
+  return { [labels[idx][0]]: p0, [labels[idx][1]]: p1 };
 }
 
-export function marketReadout(marketState) {
+export function marketReadout(marketState, scenario) {
   const { instruments } = marketState;
+  const labels = labelsFor(scenario);
   return {
-    oil:   instrumentReadout(instruments, OIL),
-    rial:  instrumentReadout(instruments, RIAL),
-    riyal: instrumentReadout(instruments, RIYAL),
-    usGas: instrumentReadout(instruments, USGAS),
+    primary:   instrumentReadout(instruments, PRIMARY,    labels),
+    currencyA: instrumentReadout(instruments, CURRENCY_A, labels),
+    currencyB: instrumentReadout(instruments, CURRENCY_B, labels),
+    global:    instrumentReadout(instruments, GLOBAL,     labels),
   };
 }
 
 // ─────────────────────────────────────────────────────────────
 // LAYER 1 -> LAYER 2 PROPAGATION (unitary rotations, per cycle)
+// One function per scenario — see file header for why this isn't
+// forced into a shared schema.
 // ─────────────────────────────────────────────────────────────
 
 /**
- * Fold this cycle's geopolitical outcome + classical decisions into the
- * economic field as unitary rotations. `geoEvent` is the Layer-1
- * collapse event (from evolveAndCollapseQuantumState), decisions are
- * the raw per-nation Claude output.
+ * Middle East: OIL(primary) / RIAL(currencyA) / RIYAL(currencyB) / GAS(global).
+ * PRIMARY pushed toward SPIKING by Hormuz threats/closure, a hardline Iran
+ * collapse, or Saudi cutting production. Each reason rotates the qubit
+ * separately (own phase) rather than being pre-summed into one number —
+ * that's what lets these reasons interfere across cycles instead of just
+ * adding.
  */
-function propagateGeopoliticsToMarkets(instruments, geoEvent, decisions, cycle) {
+function propagateMiddleEast(instruments, geoEvent, decisions, cycle) {
   let joint = instruments;
   const iranD  = decisions.iran?.decision;
   const saudiD = decisions.saudi_arabia?.decision;
 
-  // OIL: pushed toward SPIKING by Hormuz threats/closure, a hardline Iran
-  // collapse, or Saudi cutting production. Each reason rotates the qubit
-  // separately (own phase) rather than being pre-summed into one number —
-  // that's what lets these reasons interfere across cycles instead of
-  // just adding.
+  // PRIMARY (oil)
   if (iranD?.hormuzStatus === "CLOSED" || iranD?.hormuzStatus === "THREATENED") {
     const theta = iranD.hormuzStatus === "CLOSED" ? -Math.PI / 5 : -Math.PI / 10;
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, OIL, theta, hashPhase(`hormuz:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, PRIMARY, theta, hashPhase(`hormuz:${cycle}`));
   }
   if (geoEvent?.iran === "hardline") {
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, OIL, -Math.PI / 14, hashPhase(`iran-hardline:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, PRIMARY, -Math.PI / 14, hashPhase(`iran-hardline:${cycle}`));
   }
   if (saudiD?.oilProductionStance === "CUTTING") {
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, OIL, -Math.PI / 8, hashPhase(`opec-cut:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, PRIMARY, -Math.PI / 8, hashPhase(`opec-cut:${cycle}`));
   } else if (saudiD?.oilProductionStance === "INCREASING") {
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, OIL, Math.PI / 8, hashPhase(`opec-increase:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, PRIMARY, Math.PI / 8, hashPhase(`opec-increase:${cycle}`));
   }
 
-  // US GAS: retail pump price echoes the same crude-oil drivers as OIL,
-  // but damped — roughly half the rotation strength, reflecting partial
-  // pass-through and refining/distribution lag — and with its own phase
-  // (separate hashPhase key) so it doesn't move in lockstep with the
-  // crude spot price every single cycle.
+  // GLOBAL (US retail gas): echoes PRIMARY's drivers, damped — roughly half
+  // the rotation strength (partial pass-through, refining/distribution
+  // lag) — and with its own phase so it doesn't move in lockstep every cycle.
   if (iranD?.hormuzStatus === "CLOSED" || iranD?.hormuzStatus === "THREATENED") {
     const theta = iranD.hormuzStatus === "CLOSED" ? -Math.PI / 8 : -Math.PI / 16;
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, USGAS, theta, hashPhase(`hormuz-usgas:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, GLOBAL, theta, hashPhase(`hormuz-global:${cycle}`));
   }
   if (geoEvent?.iran === "hardline") {
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, USGAS, -Math.PI / 20, hashPhase(`iran-hardline-usgas:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, GLOBAL, -Math.PI / 20, hashPhase(`iran-hardline-global:${cycle}`));
   }
   if (saudiD?.oilProductionStance === "CUTTING") {
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, USGAS, -Math.PI / 12, hashPhase(`opec-cut-usgas:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, GLOBAL, -Math.PI / 12, hashPhase(`opec-cut-global:${cycle}`));
   } else if (saudiD?.oilProductionStance === "INCREASING") {
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, USGAS, Math.PI / 12, hashPhase(`opec-increase-usgas:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, GLOBAL, Math.PI / 12, hashPhase(`opec-increase-global:${cycle}`));
   }
 
-  // RIAL: pushed toward WEAKENING by falling deal integrity or a hardline
-  // Iran collapse; toward RESILIENT by rising deal integrity.
+  // CURRENCY_A (rial): pushed toward WEAKENING by falling deal integrity or
+  // a hardline Iran collapse; toward RESILIENT by rising deal integrity.
   const dealDelta = iranD?.metricDeltas?.dealIntegrity ?? 0;
   if (dealDelta !== 0) {
     const theta = clampUnit(Math.abs(dealDelta) / 20) * (Math.PI / 6) * (dealDelta < 0 ? -1 : 1);
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, RIAL, theta, hashPhase(`deal:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_A, theta, hashPhase(`deal:${cycle}`));
   }
   if (geoEvent?.iran === "hardline") {
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, RIAL, -Math.PI / 12, hashPhase(`iran-hardline-rial:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_A, -Math.PI / 12, hashPhase(`iran-hardline-currencyA:${cycle}`));
   }
 
-  // RIYAL: pushed toward STRAINED by a cautious Saudi collapse or falling
-  // reform pressure; toward ROBUST by rising trade / advancing normalization.
+  // CURRENCY_B (riyal): pushed toward ROBUST (the shock/windfall branch —
+  // Saudi is the oil exporter who benefits) by a cautious Saudi collapse or
+  // falling reform pressure; toward STRAINED by rising trade/normalization.
   const reformDelta = saudiD?.metricDeltas?.reformPressure ?? 0;
-  if (geoEvent?.saudi === "cautious") {
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, RIYAL, Math.PI / 10, hashPhase(`saudi-cautious:${cycle}`));
+  if (geoEvent?.saudi_arabia === "cautious") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_B, Math.PI / 10, hashPhase(`saudi-cautious:${cycle}`));
   }
   if (reformDelta !== 0) {
     const theta = clampUnit(Math.abs(reformDelta) / 15) * (Math.PI / 8) * (reformDelta < 0 ? 1 : -1);
-    joint = applyLocalRotationN(joint, N_INSTRUMENTS, RIYAL, theta, hashPhase(`reform:${cycle}`));
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_B, theta, hashPhase(`reform:${cycle}`));
   }
 
   return joint;
 }
 
+/**
+ * Taiwan Strait: SEMI(primary) / TWD(currencyA) / CNY(currencyB) /
+ * SHIP(global). PRIMARY pushed toward DISRUPTED by Chinese blockade/
+ * invasion posture and by Japan tightening chip export controls (a real
+ * lever — Japan supplies critical lithography/materials to TSMC).
+ * CURRENCY_B (CNY) doesn't play RIYAL's "windfall beneficiary" role —
+ * China isn't a windfall beneficiary of a Taiwan crisis, it takes real
+ * economic damage from its own escalation (capital flight, decoupling,
+ * export controls) — so CNY tracks China's own hardline collapse and
+ * Japan's export-control pressure, both toward STRAINED.
+ */
+function propagateTaiwanStrait(instruments, geoEvent, decisions, cycle) {
+  let joint = instruments;
+  const chinaD = decisions.china?.decision;
+  const japanD = decisions.japan?.decision;
+
+  // PRIMARY (semiconductors)
+  if (chinaD?.blockadeStatus === "BLOCKADE" || chinaD?.blockadeStatus === "GRAY_ZONE") {
+    const theta = chinaD.blockadeStatus === "BLOCKADE" ? -Math.PI / 5 : -Math.PI / 10;
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, PRIMARY, theta, hashPhase(`blockade:${cycle}`));
+  }
+  if (geoEvent?.china === "hardline") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, PRIMARY, -Math.PI / 14, hashPhase(`china-hardline:${cycle}`));
+  }
+  if (japanD?.chipExportControlStance === "TIGHTENING") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, PRIMARY, -Math.PI / 8, hashPhase(`chip-tighten:${cycle}`));
+  } else if (japanD?.chipExportControlStance === "LOOSENING") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, PRIMARY, Math.PI / 8, hashPhase(`chip-loosen:${cycle}`));
+  }
+
+  // GLOBAL (shipping/insurance): echoes PRIMARY's drivers, damped — same
+  // partial-pass-through logic as the Middle East's US gas instrument.
+  if (chinaD?.blockadeStatus === "BLOCKADE" || chinaD?.blockadeStatus === "GRAY_ZONE") {
+    const theta = chinaD.blockadeStatus === "BLOCKADE" ? -Math.PI / 8 : -Math.PI / 16;
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, GLOBAL, theta, hashPhase(`blockade-global:${cycle}`));
+  }
+  if (geoEvent?.china === "hardline") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, GLOBAL, -Math.PI / 20, hashPhase(`china-hardline-global:${cycle}`));
+  }
+  if (japanD?.chipExportControlStance === "TIGHTENING") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, GLOBAL, -Math.PI / 12, hashPhase(`chip-tighten-global:${cycle}`));
+  } else if (japanD?.chipExportControlStance === "LOOSENING") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, GLOBAL, Math.PI / 12, hashPhase(`chip-loosen-global:${cycle}`));
+  }
+
+  // CURRENCY_A (TWD): pushed toward WEAKENING by falling status-quo
+  // integrity or a hardline China collapse — same logic as the rial.
+  const dealDelta = chinaD?.metricDeltas?.dealIntegrity ?? 0;
+  if (dealDelta !== 0) {
+    const theta = clampUnit(Math.abs(dealDelta) / 20) * (Math.PI / 6) * (dealDelta < 0 ? -1 : 1);
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_A, theta, hashPhase(`deal:${cycle}`));
+  }
+  if (geoEvent?.china === "hardline") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_A, -Math.PI / 12, hashPhase(`china-hardline-currencyA:${cycle}`));
+  }
+
+  // CURRENCY_B (CNY): pushed toward STRAINED (China's own economic
+  // exposure, NOT a windfall) by a hardline China collapse or Japan
+  // tightening chip export controls (decoupling pressure on China's own
+  // semiconductor ambitions).
+  if (geoEvent?.china === "hardline") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_B, -Math.PI / 10, hashPhase(`china-hardline-cny:${cycle}`));
+  }
+  if (japanD?.chipExportControlStance === "TIGHTENING") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_B, -Math.PI / 8, hashPhase(`chip-tighten-cny:${cycle}`));
+  } else if (japanD?.chipExportControlStance === "LOOSENING") {
+    joint = applyLocalRotationN(joint, N_INSTRUMENTS, CURRENCY_B, Math.PI / 8, hashPhase(`chip-loosen-cny:${cycle}`));
+  }
+
+  return joint;
+}
+
+const PROPAGATORS = {
+  "middle-east-2026": propagateMiddleEast,
+  "taiwan-strait-2026": propagateTaiwanStrait,
+};
+
+// Derived qualitative label, not a separate qubit — a single computed note
+// alongside the four instruments' own outcomes. Middle East: oil is USD-
+// denominated, so a pump-price surge pairs with a softer dollar in this
+// model. Taiwan Strait: a shipping-insurance surge pairs with vessels
+// rerouting away from the strait entirely (added distance/cost, not just
+// higher premiums). Both are the same shape — a derived note keyed off the
+// GLOBAL instrument's shock/calm outcome — so the frontend can render
+// either generically via scenario.aiAgents without a per-scenario branch.
+const DERIVED_NOTES = {
+  "middle-east-2026":   { label: "Dollar Direction", shockValue: "SOFTENING", calmValue: "FIRMING" },
+  "taiwan-strait-2026": { label: "Trade Routing",     shockValue: "REROUTING", calmValue: "NORMAL" },
+};
+
 // ─────────────────────────────────────────────────────────────
 // LAYER 3 — SPECULATION (interference-based price resolution)
+// Scenario-agnostic: traders react to whatever fundamental collapsed.
 // ─────────────────────────────────────────────────────────────
 
 const TRADER_ARCHETYPES = [
@@ -249,64 +339,71 @@ function resolvePriceMove(shockDirection, instrumentKey, cycle, baseVolatility, 
 // ─────────────────────────────────────────────────────────────
 
 /**
- * @param marketState  { instruments } from initMarketBeliefs() or a prior cycle
+ * @param scenario      the scenario config (for aiAgents.marketInstruments labels + meta.id dispatch)
+ * @param marketState   { instruments } from initMarketBeliefs() or a prior cycle
  * @param geoEvent      the Layer-1 collapse event (evolveAndCollapseQuantumState's `event`)
  * @param decisions     raw per-nation Claude decisions this cycle
  * @param cycle         current cycle number (feeds trader jitter determinism)
  * @param rng           injectable RNG for testability
  */
-export function evolveAndCollapseMarkets(marketState, geoEvent, decisions, cycle, rng = Math.random) {
-  const rotated = propagateGeopoliticsToMarkets(marketState.instruments, geoEvent, decisions, cycle);
+export function evolveAndCollapseMarkets(scenario, marketState, geoEvent, decisions, cycle, rng = Math.random) {
+  const scenarioId = scenario.meta.id;
+  const propagate = PROPAGATORS[scenarioId];
+  if (!propagate) throw new Error(`evolveAndCollapseMarkets: unsupported scenario "${scenarioId}"`);
 
-  const preCollapse = marketReadout({ instruments: rotated });
+  const labels = labelsFor(scenario);
+  const rotated = propagate(marketState.instruments, geoEvent, decisions, cycle);
 
-  const oilM   = measureQubit(rotated, 4, OIL, rng);
-  const rialM  = measureQubit(oilM.reducedJoint, 3, 0, rng);
-  const riyalM = measureQubit(rialM.reducedJoint, 2, 0, rng);
-  const usGasM = measureQubit(riyalM.reducedJoint, 1, 0, rng);
+  const preCollapse = marketReadout({ instruments: rotated }, scenario);
+
+  const primaryM   = measureQubit(rotated, 4, PRIMARY, rng);
+  const currencyAM = measureQubit(primaryM.reducedJoint, 3, 0, rng);
+  const currencyBM = measureQubit(currencyAM.reducedJoint, 2, 0, rng);
+  const globalM    = measureQubit(currencyBM.reducedJoint, 1, 0, rng);
 
   const outcomes = {
-    oil:   LABELS[OIL][oilM.outcomeIndex],
-    rial:  LABELS[RIAL][rialM.outcomeIndex],
-    riyal: LABELS[RIYAL][riyalM.outcomeIndex],
-    usGas: LABELS[USGAS][usGasM.outcomeIndex],
+    primary:   labels[PRIMARY][primaryM.outcomeIndex],
+    currencyA: labels[CURRENCY_A][currencyAM.outcomeIndex],
+    currencyB: labels[CURRENCY_B][currencyBM.outcomeIndex],
+    global:    labels[GLOBAL][globalM.outcomeIndex],
   };
 
   // shock direction per instrument: +1 = the "shock branch" of the GHZ
-  // correlation (SPIKING / WEAKENING / ROBUST / SURGING), -1 = the calm branch.
-  const oilShock   = oilM.outcomeIndex === 0 ? 1 : -1;
-  const rialShock  = rialM.outcomeIndex === 0 ? 1 : -1;
-  const riyalShock = riyalM.outcomeIndex === 0 ? 1 : -1; // ROBUST is index0, i.e. the shock branch for Saudi
-  const usGasShock = usGasM.outcomeIndex === 0 ? 1 : -1;
+  // correlation (index0 in this scenario's labels), -1 = the calm branch.
+  const primaryShock   = primaryM.outcomeIndex === 0 ? 1 : -1;
+  const currencyAShock = currencyAM.outcomeIndex === 0 ? 1 : -1;
+  const currencyBShock = currencyBM.outcomeIndex === 0 ? 1 : -1;
+  const globalShock    = globalM.outcomeIndex === 0 ? 1 : -1;
 
-  const oilMove   = resolvePriceMove(oilShock, "oil", cycle, 4, rng);
-  const rialMove  = resolvePriceMove(rialShock, "rial", cycle, 3, rng);
-  const riyalMove = resolvePriceMove(riyalShock, "riyal", cycle, 2.5, rng);
-  const usGasMove = resolvePriceMove(usGasShock, "usgas", cycle, 2.2, rng); // damped vs. oil's own spot-price volatility
+  const primaryMove   = resolvePriceMove(primaryShock, "primary", cycle, 4, rng);
+  const currencyAMove = resolvePriceMove(currencyAShock, "currencyA", cycle, 3, rng);
+  const currencyBMove = resolvePriceMove(currencyBShock, "currencyB", cycle, 2.5, rng);
+  const globalMove    = resolvePriceMove(globalShock, "global", cycle, 2.2, rng); // damped vs. primary's own spot-price volatility
 
   // Rebuild a fresh, un-entangled one-hot basis state from the four
   // measured outcomes for persistence — same approach as Layer 1.
-  const flatIndex = oilM.outcomeIndex * 8 + rialM.outcomeIndex * 4 + riyalM.outcomeIndex * 2 + usGasM.outcomeIndex;
+  const flatIndex = primaryM.outcomeIndex * 8 + currencyAM.outcomeIndex * 4 + currencyBM.outcomeIndex * 2 + globalM.outcomeIndex;
   const collapsed = new Array(16).fill(c(0, 0));
   collapsed[flatIndex] = c(1, 0);
+
+  const derivedNote = DERIVED_NOTES[scenarioId];
 
   return {
     newMarketState: { instruments: collapsed },
     event: {
       outcomes,
       preCollapse,
-      oilPriceDelta:   oilShock > 0 ? oilMove.magnitude : -oilMove.magnitude * 0.4,
-      rialIndexDelta:  rialShock > 0 ? -rialMove.magnitude : rialMove.magnitude * 0.3,
-      riyalIndexDelta: riyalShock > 0 ? riyalMove.magnitude * 0.5 : -riyalMove.magnitude * 0.6,
-      // Damped pass-through: pump prices move less than crude on the way up
-      // (retailer margins, taxes absorb some shock) and drift down slowly
-      // rather than snapping back on the calm branch.
-      usGasIndexDelta: usGasShock > 0 ? usGasMove.magnitude * 0.7 : -usGasMove.magnitude * 0.3,
-      // Derived qualitative note, not a separate qubit: oil is USD-
-      // denominated, so a pump-price surge pairs with a softer dollar in
-      // this model (and vice versa on the calm branch).
-      usdDirection: usGasShock > 0 ? "SOFTENING" : "FIRMING",
-      speculation: { oil: oilMove, rial: rialMove, riyal: riyalMove, usGas: usGasMove },
+      primaryDelta:   primaryShock > 0 ? primaryMove.magnitude : -primaryMove.magnitude * 0.4,
+      currencyADelta: currencyAShock > 0 ? -currencyAMove.magnitude : currencyAMove.magnitude * 0.3,
+      currencyBDelta: currencyBShock > 0 ? currencyBMove.magnitude * 0.5 : -currencyBMove.magnitude * 0.6,
+      // Damped pass-through: the global instrument moves less than the
+      // primary one on the way up (margins/frictions absorb some shock)
+      // and drifts down slowly rather than snapping back on the calm branch.
+      globalDelta: globalShock > 0 ? globalMove.magnitude * 0.7 : -globalMove.magnitude * 0.3,
+      derivedNote: derivedNote
+        ? { label: derivedNote.label, value: globalShock > 0 ? derivedNote.shockValue : derivedNote.calmValue }
+        : null,
+      speculation: { primary: primaryMove, currencyA: currencyAMove, currencyB: currencyBMove, global: globalMove },
     },
   };
 }

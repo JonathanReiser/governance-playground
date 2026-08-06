@@ -55,6 +55,7 @@ const TAIWAN_STRAIT_2026 = {
   // ─────────────────────────────────────────────
 
   meta: {
+    id: "taiwan-strait-2026",
     name: "Taiwan Strait — 2026",
     version: "1.0.0",
     description:
@@ -69,6 +70,12 @@ const TAIWAN_STRAIT_2026 = {
       "What if Japan deepens security ties with Taiwan?",
       "What if PLA hardliners gain dominant influence over Taiwan policy?",
     ],
+    // The AI Agent Cycle mode (Claude-driven nation agents + the quantum
+    // uncertainty engine) reads its IR-theory system prompts, entanglement
+    // pairing, and economic-field instruments from this scenario's own
+    // `aiAgents` config block below — see frontend/src/lib/agents.js,
+    // markets.js, and server.js's SYSTEM_PROMPTS (all keyed by meta.id).
+    aiModeSupported: true,
   },
 
 
@@ -112,6 +119,7 @@ const TAIWAN_STRAIT_2026 = {
       id: "china",
       name: "China",
       flag: "🇨🇳",
+      color: "#dc2626",
 
       governance: {
         type: "FEDERAL_REPUBLIC",  // see header note — imperfect fit, least-wrong available label
@@ -168,6 +176,7 @@ const TAIWAN_STRAIT_2026 = {
       id: "taiwan",
       name: "Taiwan",
       flag: "🇹🇼",
+      color: "#0ea5e9",
 
       governance: {
         type: "PARLIAMENTARY_DEMOCRACY",
@@ -223,6 +232,7 @@ const TAIWAN_STRAIT_2026 = {
       id: "japan",
       name: "Japan",
       flag: "🇯🇵",
+      color: "#ec4899",
 
       governance: {
         type: "PARLIAMENTARY_DEMOCRACY",
@@ -521,6 +531,65 @@ const TAIWAN_STRAIT_2026 = {
       ],
     },
   ],
+
+
+  // ─────────────────────────────────────────────
+  // AI AGENT + QUANTUM LAYER CONFIG
+  //
+  // Mirrors middle-east-2026.config.cjs's aiAgents block structurally, but
+  // every design choice below was made on this scenario's own merits, not
+  // copied:
+  //
+  // ENTANGLEMENT — China x Taiwan, not China x Japan or Taiwan x Japan.
+  // This is the direct security-dilemma dyad: China's posture toward
+  // "reunification" and Taiwan's posture toward the status quo are not
+  // independently describable the same way Iran/Israel weren't — each
+  // side's hardening is partly constituted by (not just caused by) the
+  // other's. Japan's stakes are real (Senkaku/Yonaguni proximity, its own
+  // trade routes, alliance obligations) but structurally one step removed:
+  // Japan reacts to a China-Taiwan crisis, it isn't one of the crisis's
+  // two poles. That's the same logic that made Saudi Arabia the standalone
+  // hedging qubit rather than a third entangled party in the Middle East
+  // scenario.
+  //
+  // AXES — China: hardline (favors coercion/reunification timeline) vs.
+  // conciliatory (favors continued ambiguity). Taiwan: resistant (hardens
+  // deterrence posture, leans toward formal distancing from Beijing) vs.
+  // accommodating (favors reassurance, avoids provocation). Japan:
+  // assertive (deepens Taiwan security ties, expands SDF role) vs.
+  // restrained (prioritizes economic ties with China, avoids entanglement).
+  //
+  // ECONOMIC FIELD — the Middle East's OIL/RIAL/RIYAL/GAS logic doesn't
+  // transplant conceptually: Saudi Arabia's riyal instrument represented a
+  // THIRD party that profits from a rival's crisis (an oil windfall).
+  // China isn't a windfall beneficiary of a Taiwan crisis — a blockade or
+  // conflict hurts China's own economy too (capital flight, sanctions,
+  // decoupling), so CNY here tracks China's own escalation and Japan's
+  // export-control leverage, not a windfall. SEMI (semiconductors) takes
+  // oil's structural role as the chokepoint commodity the whole crisis
+  // pivots on; TWD takes rial's role as the directly-threatened nation's
+  // currency; SHIP (global shipping/insurance rates through the strait)
+  // takes US gas's role as the damped, lagged, globally-felt echo.
+  // ─────────────────────────────────────────────
+
+  aiAgents: {
+    // worldKey: the key this nation's data lives under in the flat
+    // worldState object buildWorldState() produces. All three of this
+    // scenario's ids are already single words, so worldKey === id here.
+    entangled: {
+      aId: "china",  aWorldKey: "china",  aAxis: ["hardline", "conciliatory"],   aDriverField: "hardlinerPressure", aDriverDirection: "direct",
+      bId: "taiwan", bWorldKey: "taiwan", bAxis: ["resistant", "accommodating"], bDriverField: "publicSentiment",   bDriverDirection: "inverse",
+    },
+    standalone: {
+      id: "japan", worldKey: "japan", axis: ["assertive", "restrained"], driverField: "reformPressure", driverDirection: "direct",
+    },
+    marketInstruments: [
+      { key: "primary",   label: "Semiconductor Export Index",      symbol: "SEMI", emoji: "💾", shockLabel: "DISRUPTED", calmLabel: "FLOWING" },
+      { key: "currencyA", label: "Taiwan Dollar Index",             symbol: "TWD",  emoji: "🇹🇼", shockLabel: "WEAKENING", calmLabel: "RESILIENT" },
+      { key: "currencyB", label: "Chinese Yuan Index",              symbol: "CNY",  emoji: "🇨🇳", shockLabel: "STRAINED",  calmLabel: "STABLE" },
+      { key: "global",    label: "Global Shipping Insurance Index", symbol: "SHIP", emoji: "🚢", shockLabel: "SURGING",   calmLabel: "CALM" },
+    ],
+  },
 
 }
 

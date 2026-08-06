@@ -25,6 +25,7 @@ const MIDDLE_EAST_2026 = {
   // ─────────────────────────────────────────────
 
   meta: {
+    id: "middle-east-2026",
     name: "Middle East — May 2026",
     version: "1.0.0",
     description:
@@ -39,12 +40,10 @@ const MIDDLE_EAST_2026 = {
       "What if Iran's hardliners gain domestic power?",
     ],
     // The AI Agent Cycle mode (Claude-driven nation agents + the quantum
-    // uncertainty engine) is currently hardcoded to this scenario's specific
-    // nations — real IR-theory system prompts for Iran/Israel/Saudi Arabia,
-    // an Iran/Israel entangled pair, a Middle-East-specific economic field
-    // (oil/rial/riyal/US gas). Classic Experiments mode is scenario-agnostic;
-    // AI mode is not, yet. See frontend/src/lib/agents.js, markets.js, and
-    // server.js's SYSTEM_PROMPTS.
+    // uncertainty engine) reads its IR-theory system prompts, entanglement
+    // pairing, and economic-field instruments from this scenario's own
+    // `aiAgents` config block below — see frontend/src/lib/agents.js,
+    // markets.js, and server.js's SYSTEM_PROMPTS (all keyed by meta.id).
     aiModeSupported: true,
   },
 
@@ -92,6 +91,7 @@ const MIDDLE_EAST_2026 = {
       id: "israel",
       name: "Israel",
       flag: "🇮🇱",
+      color: "#6366f1",
 
       governance: {
         type: "PARLIAMENTARY_DEMOCRACY",
@@ -143,6 +143,7 @@ const MIDDLE_EAST_2026 = {
       id: "iran",
       name: "Iran",
       flag: "🇮🇷",
+      color: "#f97316",
 
       governance: {
         type: "THEOCRATIC_REPUBLIC",
@@ -203,6 +204,7 @@ const MIDDLE_EAST_2026 = {
       id: "saudi_arabia",
       name: "Saudi Arabia",
       flag: "🇸🇦",
+      color: "#eab308",
 
       governance: {
         type: "ABSOLUTE_MONARCHY",
@@ -500,6 +502,48 @@ const MIDDLE_EAST_2026 = {
     israel:       [ { slot: 0, amount: 200000 }, { slot: 3, amount: 500000 }, { slot: 4, amount: 200000 }, { slot: 5, amount: 100000 } ],
     iran:         [ { slot: 0, amount: 100000 }, { slot: 3, amount: 300000 }, { slot: 4, amount: 500000 }, { slot: 5, amount: 100000 } ],
     saudi_arabia: [ { slot: 2, amount: 800000 }, { slot: 3, amount: 150000 }, { slot: 5, amount: 50000  } ],
+  },
+
+
+  // ─────────────────────────────────────────────
+  // AI AGENT + QUANTUM LAYER CONFIG
+  //
+  // The structural design decisions the AI Agent Cycle mode needs and
+  // can't infer from the rest of the config: which two nations' postures
+  // are genuinely entangled (a structural coupling, not incidental —
+  // see quantum_extension design rationale), which nation hedges as a
+  // standalone qubit, which of each nation's own governance fields drives
+  // its qubit's rotation each cycle, and what the derived economic field
+  // (Layer 2/3) actually represents here. frontend/src/lib/agents.js and
+  // markets.js read this generically; server.js's SYSTEM_PROMPTS and the
+  // headline generator are keyed by meta.id since prompt text itself
+  // isn't data-driveable the same way.
+  //
+  // driverDirection: "direct" = rising driver value rotates toward axis[0]
+  // (the first label); "inverse" = rising driver value rotates toward
+  // axis[1]. E.g. Iran's hardlinerPressure rising pushes toward "hardline"
+  // (axis[0], direct); Israel's publicSentiment FALLING (not rising) is
+  // what pushes toward "hawkish" (axis[0], inverse).
+  // ─────────────────────────────────────────────
+
+  aiAgents: {
+    // worldKey: the key this nation's data lives under in the flat
+    // worldState object buildWorldState() produces (usually === id, except
+    // where the id has an underscore and the worldState convention is
+    // camelCase — e.g. saudi_arabia -> saudiArabia).
+    entangled: {
+      aId: "iran",   aWorldKey: "iran",   aAxis: ["hardline", "pragmatic"], aDriverField: "hardlinerPressure", aDriverDirection: "direct",
+      bId: "israel", bWorldKey: "israel", bAxis: ["hawkish", "dovish"],      bDriverField: "publicSentiment",   bDriverDirection: "inverse",
+    },
+    standalone: {
+      id: "saudi_arabia", worldKey: "saudiArabia", axis: ["bold", "cautious"], driverField: "reformPressure", driverDirection: "direct",
+    },
+    marketInstruments: [
+      { key: "primary",   label: "Oil Index",   symbol: "OIL",  emoji: "🛢",  shockLabel: "SPIKING",   calmLabel: "STABLE" },
+      { key: "currencyA", label: "Rial Index",  symbol: "RIAL", emoji: "🇮🇷", shockLabel: "WEAKENING", calmLabel: "RESILIENT" },
+      { key: "currencyB", label: "Riyal Index", symbol: "RIYAL",emoji: "🇸🇦", shockLabel: "ROBUST",    calmLabel: "STRAINED" },
+      { key: "global",    label: "US Gas / USD",symbol: "GAS",  emoji: "⛽",  shockLabel: "SURGING",   calmLabel: "CALM" },
+    ],
   },
 
 }

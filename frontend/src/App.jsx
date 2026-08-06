@@ -72,8 +72,8 @@ export default function App() {
                 <div className="exp-card-name">AI Agent Cycle ✦</div>
                 <div className="exp-card-question muted">
                   {scenario.meta.aiModeSupported
-                    ? "Iran, Israel, and Saudi Arabia reason through each cycle using political science frameworks. Review and edit before committing on-chain."
-                    : `Not yet available for ${scenario.meta.name} — the AI agent layer's system prompts and quantum uncertainty model are still specific to the Middle East scenario. Use Classic Experiments for this scenario.`}
+                    ? `${scenario.nations.map(n => n.name).join(", ")} reason through each cycle using political science frameworks. Review and edit before committing on-chain.`
+                    : `Not yet available for ${scenario.meta.name} — the AI agent layer's system prompts and quantum uncertainty model haven't been built for this scenario yet. Use Classic Experiments for this scenario.`}
                 </div>
               </button>
             </div>

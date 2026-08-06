@@ -1,5 +1,6 @@
 {
   "meta": {
+    "id": "taiwan-strait-2026",
     "name": "Taiwan Strait — 2026",
     "version": "1.0.0",
     "description": "Escalated cross-strait tension scenario following intensified PLA military exercises near Taiwan and a contested Taiwanese presidential transition. The decades-old 'status quo' ambiguity — never a signed peace, just mutual deterrence — faces its most serious test since 1996.",
@@ -15,7 +16,8 @@
       "What if the US ends strategic ambiguity?",
       "What if Japan deepens security ties with Taiwan?",
       "What if PLA hardliners gain dominant influence over Taiwan policy?"
-    ]
+    ],
+    "aiModeSupported": true
   },
   "resources": [
     {
@@ -45,6 +47,7 @@
       "id": "china",
       "name": "China",
       "flag": "🇨🇳",
+      "color": "#dc2626",
       "governance": {
         "type": "FEDERAL_REPUBLIC",
         "description": "Unitary single-party state under the Chinese Communist Party. Power concentrated in the Politburo Standing Committee; the National People's Congress ratifies rather than deliberates. No meaningful political opposition.",
@@ -90,6 +93,7 @@
       "id": "taiwan",
       "name": "Taiwan",
       "flag": "🇹🇼",
+      "color": "#0ea5e9",
       "governance": {
         "type": "PARLIAMENTARY_DEMOCRACY",
         "description": "Semi-presidential multi-party democracy. President and Legislative Yuan directly elected. High citizen participation. No formal mutual-defense treaty with any external power.",
@@ -135,6 +139,7 @@
       "id": "japan",
       "name": "Japan",
       "flag": "🇯🇵",
+      "color": "#ec4899",
       "governance": {
         "type": "PARLIAMENTARY_DEMOCRACY",
         "description": "Constitutional monarchy with a parliamentary system. National Diet elected; Self-Defense Forces constitutionally constrained but expanding role under evolving security doctrine.",
@@ -533,5 +538,69 @@
         }
       ]
     }
-  ]
+  ],
+  "aiAgents": {
+    "entangled": {
+      "aId": "china",
+      "aWorldKey": "china",
+      "aAxis": [
+        "hardline",
+        "conciliatory"
+      ],
+      "aDriverField": "hardlinerPressure",
+      "aDriverDirection": "direct",
+      "bId": "taiwan",
+      "bWorldKey": "taiwan",
+      "bAxis": [
+        "resistant",
+        "accommodating"
+      ],
+      "bDriverField": "publicSentiment",
+      "bDriverDirection": "inverse"
+    },
+    "standalone": {
+      "id": "japan",
+      "worldKey": "japan",
+      "axis": [
+        "assertive",
+        "restrained"
+      ],
+      "driverField": "reformPressure",
+      "driverDirection": "direct"
+    },
+    "marketInstruments": [
+      {
+        "key": "primary",
+        "label": "Semiconductor Export Index",
+        "symbol": "SEMI",
+        "emoji": "💾",
+        "shockLabel": "DISRUPTED",
+        "calmLabel": "FLOWING"
+      },
+      {
+        "key": "currencyA",
+        "label": "Taiwan Dollar Index",
+        "symbol": "TWD",
+        "emoji": "🇹🇼",
+        "shockLabel": "WEAKENING",
+        "calmLabel": "RESILIENT"
+      },
+      {
+        "key": "currencyB",
+        "label": "Chinese Yuan Index",
+        "symbol": "CNY",
+        "emoji": "🇨🇳",
+        "shockLabel": "STRAINED",
+        "calmLabel": "STABLE"
+      },
+      {
+        "key": "global",
+        "label": "Global Shipping Insurance Index",
+        "symbol": "SHIP",
+        "emoji": "🚢",
+        "shockLabel": "SURGING",
+        "calmLabel": "CALM"
+      }
+    ]
+  }
 }

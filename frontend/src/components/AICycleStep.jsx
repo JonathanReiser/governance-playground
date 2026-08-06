@@ -4,27 +4,62 @@ import { stabilityLabel, stabilityColor } from "../lib/simulation";
 
 const MAX_CYCLES = 10;
 
-const NATION_META = {
-  iran:         { label: "Iran",         flag: "🇮🇷", color: "#f97316" },
-  israel:       { label: "Israel",       flag: "🇮🇱", color: "#6366f1" },
-  saudi_arabia: { label: "Saudi Arabia", flag: "🇸🇦", color: "#eab308" },
+// Metric config ids (shared across every scenario, see simulation.metrics
+// in each scenario config) -> the camelCase keys used throughout
+// simState/metricDeltas. Only the *display name* varies by scenario
+// (e.g. "Deal Integrity" vs. "Status Quo Integrity") — read from the
+// scenario's own metric.name, not hardcoded here.
+const METRIC_ID_TO_KEY = {
+  stability_index: "stability",
+  proxy_activity:  "proxyActivity",
+  trade_volume:    "tradeVolume",
+  conflict_events: "conflictEvents",
+  deal_integrity:  "dealIntegrity",
 };
+
+function buildMetricLabels(scenario) {
+  const labels = {};
+  for (const m of scenario.simulation.metrics) {
+    const key = METRIC_ID_TO_KEY[m.id];
+    if (key) labels[key] = m.name;
+  }
+  return labels;
+}
+
+function buildNationMeta(scenario) {
+  return Object.fromEntries(scenario.nations.map(n => [n.id, { label: n.name, flag: n.flag, color: n.color }]));
+}
 
 // nationId (as used in decisions/agents) -> key in the worldState object
-// built by buildWorldState()
-const WORLD_STATE_KEY = {
-  iran: "iran",
-  israel: "israel",
-  saudi_arabia: "saudiArabia",
-};
+// built by buildWorldState() — sourced from the scenario's own aiAgents
+// config, not hardcoded per scenario.
+function buildWorldStateKeyMap(scenario) {
+  const { entangled, standalone } = scenario.aiAgents;
+  return {
+    [entangled.aId]: entangled.aWorldKey,
+    [entangled.bId]: entangled.bWorldKey,
+    [standalone.id]: standalone.worldKey,
+  };
+}
 
-const METRIC_LABELS = {
-  stability:     "Stability",
-  proxyActivity: "Proxy Activity",
-  tradeVolume:   "Trade Volume",
-  conflictEvents:"Conflict Events",
-  dealIntegrity: "Deal Integrity",
-};
+function joinWithAnd(items) {
+  if (items.length <= 1) return items.join("");
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+// Decision fields that are NOT scenario-specific status flags — every other
+// string field on a decision is rendered generically as a status flag, so
+// a new scenario's bespoke vocabulary (blockadeStatus, chipExportControlStance,
+// ...) shows up automatically with no frontend changes needed.
+const NON_STATUS_DECISION_KEYS = new Set([
+  "primaryAction", "supportingActions", "reasoning", "metricDeltas",
+  "coalitionSignal", "coalitionStatus", "researchNote", "existentialFrameActive",
+]);
+
+function humanizeKey(key) {
+  return key.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()).trim();
+}
 
 // ─────────────────────────────────────────────
 // Starting sim state from scenario config
@@ -38,10 +73,7 @@ function initSimState(scenario) {
     proxy:        m.find(x => x.id === "proxy_activity").startingValue,
     dealIntegrity:m.find(x => x.id === "deal_integrity").startingValue,
     // Layer 2 economic field — index values, 100 = baseline at scenario start.
-    oilPrice:     100,
-    rialIndex:    100,
-    riyalIndex:   100,
-    usGasIndex:   100,
+    market: { primary: 100, currencyA: 100, currencyB: 100, global: 100 },
   };
 }
 
@@ -56,7 +88,7 @@ function simStateToMetrics(s) {
   };
 }
 
-// Aggregate all three nations' metricDeltas into one object
+// Aggregate every nation's metricDeltas into one object
 function aggregateDeltas(decisions) {
   const agg = { stability: 0, proxyActivity: 0, tradeVolume: 0, conflictEvents: 0, dealIntegrity: 0 };
   for (const result of Object.values(decisions)) {
@@ -100,8 +132,8 @@ function QuantumBeliefBar({ belief }) {
   );
 }
 
-function NationCard({ nationId, result, quantumBeliefState }) {
-  const meta = NATION_META[nationId];
+function NationCard({ nationId, result, quantumBeliefState, nationMeta, metricLabels }) {
+  const meta = nationMeta[nationId];
   const d    = result?.decision;
 
   if (result?.error) {
@@ -119,6 +151,7 @@ function NationCard({ nationId, result, quantumBeliefState }) {
   if (!d) return null;
 
   const deltas = d.metricDeltas || {};
+  const statusFlags = Object.entries(d).filter(([k, v]) => !NON_STATUS_DECISION_KEYS.has(k) && typeof v === "string");
 
   return (
     <div className="nation-card" style={{ "--nation-color": meta.color }}>
@@ -145,22 +178,22 @@ function NationCard({ nationId, result, quantumBeliefState }) {
 
       <div className="nation-deltas">
         {Object.entries(deltas)
-          .filter(([k]) => k in METRIC_LABELS)
+          .filter(([k]) => k in metricLabels)
           .map(([k, v]) => (
             <div key={k} className="delta-row">
-              <span className="delta-label">{METRIC_LABELS[k]}</span>
+              <span className="delta-label">{metricLabels[k]}</span>
               <span className="delta-val" style={{ color: deltaColor(v) }}>{sign(v)}</span>
             </div>
           ))}
       </div>
 
-      {/* Nation-specific status flags */}
+      {/* Nation-specific status flags — rendered generically from whatever
+          string fields the decision carries beyond the known shared ones */}
       <div className="nation-status-flags">
-        {d.hormuzStatus    && <span className="status-flag">Hormuz: {d.hormuzStatus}</span>}
-        {d.nuclearStatus   && <span className="status-flag">Nuclear: {d.nuclearStatus}</span>}
+        {statusFlags.map(([k, v]) => (
+          <span key={k} className="status-flag">{humanizeKey(k)}: {v}</span>
+        ))}
         {d.existentialFrameActive && <span className="status-flag status-flag--alert">EXISTENTIAL FRAME</span>}
-        {d.oilProductionStance    && <span className="status-flag">Oil: {d.oilProductionStance}</span>}
-        {d.normalizationStatus    && <span className="status-flag">Normalization: {d.normalizationStatus}</span>}
       </div>
 
       <div className="nation-research-note muted">{d.researchNote}</div>
@@ -169,10 +202,10 @@ function NationCard({ nationId, result, quantumBeliefState }) {
 }
 
 
-function MetricEditor({ metrics, onChange }) {
+function MetricEditor({ metrics, metricLabels, onChange }) {
   return (
     <div className="metric-editor">
-      {Object.entries(METRIC_LABELS).map(([key, label]) => (
+      {Object.entries(metricLabels).map(([key, label]) => (
         <div key={key} className="metric-editor-row">
           <label className="metric-editor-label">{label}</label>
           <input
@@ -193,10 +226,16 @@ function MetricEditor({ metrics, onChange }) {
 // ─────────────────────────────────────────────
 
 export function AICycleStep({ signer, scenario, deployment, onResults }) {
+  const nationMeta     = buildNationMeta(scenario);
+  const worldStateKey  = buildWorldStateKeyMap(scenario);
+  const metricLabels   = buildMetricLabels(scenario);
+  const nationIds      = scenario.nations.map(n => n.id);
+  const { entangled, standalone, marketInstruments } = scenario.aiAgents;
+
   const [phase,       setPhase]       = useState("idle");    // idle|thinking|review|committing
   const [cycle,       setCycle]       = useState(1);
   const [simState,    setSimState]    = useState(() => initSimState(scenario));
-  const [agentMemory, setAgentMemory] = useState(() => ({ quantum: initQuantumBeliefs(scenario), markets: initMarketBeliefs() }));
+  const [agentMemory, setAgentMemory] = useState(() => ({ quantum: initQuantumBeliefs(scenario), markets: initMarketBeliefs(scenario) }));
   const [decisions,   setDecisions]   = useState(null);
   const [proposed,    setProposed]    = useState(null);      // editable aggregated metrics
   const [history,     setHistory]     = useState([]);
@@ -212,24 +251,23 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
   const runAgents = useCallback(async () => {
     setError("");
     setPhase("thinking");
-    setThinking({ iran: true, israel: true, saudi_arabia: true });
+    setThinking(Object.fromEntries(nationIds.map(id => [id, true])));
 
     const worldState = buildWorldState(scenario, simState, cycle, agentMemory);
     setWorldSnapshot(worldState);
 
-    // Fire all three in parallel, update loading state as each resolves
-    const nations  = ["iran", "israel", "saudi_arabia"];
-    const agents   = nations.map(id => new NationAgent(id));
-    const results  = {};
+    // Fire every nation in parallel, update loading state as each resolves
+    const agents  = nationIds.map(id => new NationAgent(id));
+    const results = {};
 
     await Promise.allSettled(
       agents.map((agent, i) =>
-        agent.decide(worldState).then(r => {
-          results[nations[i]] = r;
-          setThinking(prev => ({ ...prev, [nations[i]]: false }));
+        agent.decide(worldState, scenario.meta.id).then(r => {
+          results[nationIds[i]] = r;
+          setThinking(prev => ({ ...prev, [nationIds[i]]: false }));
         }).catch(err => {
-          results[nations[i]] = { error: err.message };
-          setThinking(prev => ({ ...prev, [nations[i]]: false }));
+          results[nationIds[i]] = { error: err.message };
+          setThinking(prev => ({ ...prev, [nationIds[i]]: false }));
         })
       )
     );
@@ -237,7 +275,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
     const agg = aggregateDeltas(results);
     // Proposed = current + aggregated deltas
     const proposedMetrics = {};
-    for (const [k, label] of Object.entries(METRIC_LABELS)) {
+    for (const k of Object.keys(metricLabels)) {
       const currentVal = currentMetrics[k] ?? 0;
       proposedMetrics[k] = currentVal + (agg[k] || 0);
     }
@@ -245,7 +283,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
     setDecisions(results);
     setProposed(proposedMetrics);
     setPhase("review");
-  }, [scenario, simState, cycle, agentMemory]);
+  }, [scenario, simState, cycle, agentMemory]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   // ── Step 2: researcher edits proposed values ──────────────
@@ -263,26 +301,28 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
     // once, right here at commit, not before. The researcher's edits below
     // are the classical baseline; the entangled effect (if any) is the
     // measurement's own contribution, observed only now.
-    const { newSimState, newAgentMemory } = applyDecisions(simState, decisions, agentMemory, cycle);
+    const { newSimState, newAgentMemory } = applyDecisions(scenario, simState, decisions, agentMemory, cycle);
     const quantum = newAgentMemory.quantum.lastEvent;
     const market  = newAgentMemory.markets.lastEvent;
 
     const clamp = (v, min, max) => Math.min(max, Math.max(min, Math.round(v)));
 
     // Override with researcher's edits, then layer the quantum measurement's
-    // own effect on top (not something the researcher pre-edited). Oil/rial/
-    // riyal are entirely Layer 2/3 output — nothing for the researcher to
-    // pre-edit — so they're taken straight from newSimState.
+    // own effect on top (not something the researcher pre-edited). The
+    // economic field is entirely Layer 2/3 output — nothing for the
+    // researcher to pre-edit — so it's taken straight from newSimState.
     const committed = {
       stability:     clamp(proposed.stability     + (quantum.entangledEffect?.stability      ?? 0), 0, 100),
       proxy:         clamp(proposed.proxyActivity, 0, 100),
       trade:         clamp(proposed.tradeVolume,   0, 500),
       conflicts:     clamp(proposed.conflictEvents + (quantum.entangledEffect?.conflictEvents ?? 0), 0, 999),
       dealIntegrity: clamp(proposed.dealIntegrity  + (quantum.entangledEffect?.dealIntegrity  ?? 0), 0, 100),
-      oilPrice:      clamp(newSimState.oilPrice,   0, 300),
-      rialIndex:     clamp(newSimState.rialIndex,  0, 300),
-      riyalIndex:    clamp(newSimState.riyalIndex, 0, 300),
-      usGasIndex:    clamp(newSimState.usGasIndex, 0, 300),
+      market: {
+        primary:   clamp(newSimState.market.primary,   0, 300),
+        currencyA: clamp(newSimState.market.currencyA, 0, 300),
+        currencyB: clamp(newSimState.market.currencyB, 0, 300),
+        global:    clamp(newSimState.market.global,    0, 300),
+      },
     };
 
     setQuantumEvent(quantum);
@@ -332,6 +372,10 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
   // Render
   // ─────────────────────────────────────────────
 
+  const aNation = scenario.nations.find(n => n.id === entangled.aId);
+  const bNation = scenario.nations.find(n => n.id === entangled.bId);
+  const cNation = scenario.nations.find(n => n.id === standalone.id);
+
   return (
     <div className="step-panel">
 
@@ -339,7 +383,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
       <div className="panel-header">
         <h2>AI Agent Simulation</h2>
         <p className="muted">
-          Each cycle, Iran, Israel, and Saudi Arabia reason through the world state and decide their move.
+          Each cycle, {joinWithAnd(scenario.nations.map(n => n.name))} reason through the world state and decide their move.
           Review their decisions, edit the proposed outcome if needed, then commit to the blockchain.
         </p>
       </div>
@@ -350,7 +394,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
         <div className="ai-metrics">
           {Object.entries(currentMetrics).map(([key, val]) => (
             <div key={key} className="ai-metric">
-              <span className="ai-metric-label">{METRIC_LABELS[key]}</span>
+              <span className="ai-metric-label">{metricLabels[key]}</span>
               <span
                 className="ai-metric-val"
                 style={{ color: key === "stability" ? stabilityColor(val) : "var(--text)" }}
@@ -368,22 +412,12 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
         </div>
         {/* Layer 2/3 economic field — read-only, entirely quantum-collapse output, nothing for the researcher to pre-edit */}
         <div className="ai-metrics ai-metrics--markets">
-          <div className="ai-metric">
-            <span className="ai-metric-label">🛢 Oil Index</span>
-            <span className="ai-metric-val">{Math.round(simState.oilPrice ?? 100)}</span>
-          </div>
-          <div className="ai-metric">
-            <span className="ai-metric-label">Rial Index</span>
-            <span className="ai-metric-val">{Math.round(simState.rialIndex ?? 100)}</span>
-          </div>
-          <div className="ai-metric">
-            <span className="ai-metric-label">Riyal Index</span>
-            <span className="ai-metric-val">{Math.round(simState.riyalIndex ?? 100)}</span>
-          </div>
-          <div className="ai-metric">
-            <span className="ai-metric-label">⛽ US Gas Index</span>
-            <span className="ai-metric-val">{Math.round(simState.usGasIndex ?? 100)}</span>
-          </div>
+          {marketInstruments.map(inst => (
+            <div key={inst.key} className="ai-metric">
+              <span className="ai-metric-label">{inst.emoji} {inst.label}</span>
+              <span className="ai-metric-val">{Math.round(simState.market?.[inst.key] ?? 100)}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -407,12 +441,12 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
       {/* Thinking state */}
       {phase === "thinking" && (
         <div className="thinking-grid">
-          {Object.entries(NATION_META).map(([id, meta]) => (
+          {nationIds.map(id => (
             <div key={id} className={`thinking-card ${thinking[id] ? "thinking-card--active" : "thinking-card--done"}`}>
-              <span className="thinking-flag">{meta.flag}</span>
-              <span>{meta.label}</span>
+              <span className="thinking-flag">{nationMeta[id].flag}</span>
+              <span>{nationMeta[id].label}</span>
               {thinking[id]
-                ? <span className="pulse" style={{ color: meta.color }}>●</span>
+                ? <span className="pulse" style={{ color: nationMeta[id].color }}>●</span>
                 : <span style={{ color: "#22c55e" }}>✓</span>
               }
             </div>
@@ -431,7 +465,9 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
                   key={id}
                   nationId={id}
                   result={result}
-                  quantumBeliefState={worldSnapshot?.[WORLD_STATE_KEY[id]]?.quantumBeliefState}
+                  quantumBeliefState={worldSnapshot?.[worldStateKey[id]]?.quantumBeliefState}
+                  nationMeta={nationMeta}
+                  metricLabels={metricLabels}
                 />
               ))}
             </div>
@@ -440,38 +476,28 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
           <div className="section">
             <h3 className="section-label">Economic Field (Layer 2/3)</h3>
             <p className="muted" style={{ marginBottom: "0.75rem" }}>
-              Oil, the rial, and the riyal's fiscal position as one entangled instrument — this doesn't
+              {joinWithAnd(marketInstruments.map(i => i.label))} as one entangled instrument — this doesn't
               feed the agents above (political → economic is one-directional for now), it's downstream
               of their decisions. Resolves at commit, same as the political layer.
             </p>
             <div className="nation-cards-grid">
-              <div className="nation-card">
-                <div className="nation-card-header"><span>🛢</span><span className="nation-name">Oil</span></div>
-                <QuantumBeliefBar belief={worldSnapshot?.markets?.oil} />
-              </div>
-              <div className="nation-card">
-                <div className="nation-card-header"><span>🇮🇷</span><span className="nation-name">Rial</span></div>
-                <QuantumBeliefBar belief={worldSnapshot?.markets?.rial} />
-              </div>
-              <div className="nation-card">
-                <div className="nation-card-header"><span>🇸🇦</span><span className="nation-name">Riyal</span></div>
-                <QuantumBeliefBar belief={worldSnapshot?.markets?.riyal} />
-              </div>
-              <div className="nation-card">
-                <div className="nation-card-header"><span>⛽</span><span className="nation-name">US Gas / USD</span></div>
-                <QuantumBeliefBar belief={worldSnapshot?.markets?.usGas} />
-              </div>
+              {marketInstruments.map(inst => (
+                <div key={inst.key} className="nation-card">
+                  <div className="nation-card-header"><span>{inst.emoji}</span><span className="nation-name">{inst.symbol}</span></div>
+                  <QuantumBeliefBar belief={worldSnapshot?.markets?.[inst.key]} />
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="section">
             <h3 className="section-label">Proposed World State After Cycle {cycle}</h3>
             <p className="muted" style={{ marginBottom: "0.75rem" }}>
-              These values are aggregated from all three agents' metric deltas. Edit before committing.
+              These values are aggregated from every agent's metric deltas. Edit before committing.
               The quantum belief state above will collapse — and may add its own small entangled
               effect on top of these — only when you commit.
             </p>
-            <MetricEditor metrics={proposed} onChange={editProposed} />
+            <MetricEditor metrics={proposed} metricLabels={metricLabels} onChange={editProposed} />
           </div>
         </>
       )}
@@ -481,10 +507,10 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
         <div className="section quantum-event-banner">
           <h3 className="section-label">⚛ Quantum Measurement — Cycle {history.at(-1)?.cycle ?? cycle - 1}</h3>
           <p className="muted" style={{ marginBottom: "0.5rem" }}>
-            Iran collapsed to <strong>{quantumEvent.iran.toUpperCase()}</strong>, Israel to{" "}
-            <strong>{quantumEvent.israel.toUpperCase()}</strong>, Saudi Arabia to{" "}
-            <strong>{quantumEvent.saudi.toUpperCase()}</strong>
-            {" "}(pre-collapse: Iran {Math.round(quantumEvent.preCollapse.iranProbabilities.hardline * 100)}% hardline,
+            {aNation.name} collapsed to <strong>{quantumEvent[entangled.aId]?.toUpperCase()}</strong>, {bNation.name} to{" "}
+            <strong>{quantumEvent[entangled.bId]?.toUpperCase()}</strong>, {cNation.name} to{" "}
+            <strong>{quantumEvent[standalone.id]?.toUpperCase()}</strong>
+            {" "}(pre-collapse: {aNation.name} {Math.round((quantumEvent.preCollapse.aProbabilities[entangled.aAxis[0]] ?? 0) * 100)}% {entangled.aAxis[0]},
             entanglement strength {quantumEvent.preCollapse.entanglementStrength.toFixed(2)}).
           </p>
           {quantumEvent.entangledEffect && (
@@ -500,16 +526,18 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
         <div className="section quantum-event-banner">
           <h3 className="section-label">⚛ Economic Field Measurement — Cycle {history.at(-1)?.cycle ?? cycle - 1}</h3>
           <p className="muted" style={{ marginBottom: "0.5rem" }}>
-            Oil collapsed to <strong>{marketEvent.outcomes.oil}</strong> ({sign(Math.round(marketEvent.oilPriceDelta))}),
-            {" "}Rial to <strong>{marketEvent.outcomes.rial}</strong> ({sign(Math.round(marketEvent.rialIndexDelta))}),
-            {" "}Riyal to <strong>{marketEvent.outcomes.riyal}</strong> ({sign(Math.round(marketEvent.riyalIndexDelta))}),
-            {" "}US Gas to <strong>{marketEvent.outcomes.usGas}</strong> ({sign(Math.round(marketEvent.usGasIndexDelta))},
-            {" "}dollar {marketEvent.usdDirection?.toLowerCase()}).
+            {marketInstruments.map((inst, i) => (
+              <span key={inst.key}>
+                {i > 0 && ", "}
+                {inst.symbol} to <strong>{marketEvent.outcomes[inst.key]}</strong> ({sign(Math.round(marketEvent[`${inst.key}Delta`]))})
+              </span>
+            ))}
+            {marketEvent.derivedNote && <>, {marketEvent.derivedNote.label.toLowerCase()} {marketEvent.derivedNote.value.toLowerCase()}</>}.
           </p>
           <p className="muted" style={{ fontSize: "11px" }}>
-            Oil speculation: interference weight {marketEvent.speculation.oil.interferenceWeight} vs.
-            classical-additive benchmark {marketEvent.speculation.oil.classicalWeight}
-            {" "}(tail weight {marketEvent.speculation.oil.tailWeight} — how much of the move came from
+            {marketInstruments[0].symbol} speculation: interference weight {marketEvent.speculation.primary.interferenceWeight} vs.
+            classical-additive benchmark {marketEvent.speculation.primary.classicalWeight}
+            {" "}(tail weight {marketEvent.speculation.primary.tailWeight} — how much of the move came from
             the fat-tailed component rather than an ordinary one).
           </p>
         </div>

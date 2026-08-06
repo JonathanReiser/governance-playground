@@ -1,5 +1,6 @@
 {
   "meta": {
+    "id": "middle-east-2026",
     "name": "Middle East — May 2026",
     "version": "1.0.0",
     "description": "Post-war scenario following the US/Israel-Iran peace deal. Iran has agreed to cap nuclear enrichment and reopen the Hormuz Strait. The US has lifted partial sanctions. Regional stability is fragile.",
@@ -46,6 +47,7 @@
       "id": "israel",
       "name": "Israel",
       "flag": "🇮🇱",
+      "color": "#6366f1",
       "governance": {
         "type": "PARLIAMENTARY_DEMOCRACY",
         "description": "Multi-party parliamentary system. Requires coalition majorities. High citizen participation. No formal constitution.",
@@ -89,6 +91,7 @@
       "id": "iran",
       "name": "Iran",
       "flag": "🇮🇷",
+      "color": "#f97316",
       "governance": {
         "type": "THEOCRATIC_REPUBLIC",
         "description": "Dual-layer system. Citizens vote for president and parliament but the Supreme Leader and Guardian Council hold veto power over all legislation and candidate eligibility.",
@@ -139,6 +142,7 @@
       "id": "saudi_arabia",
       "name": "Saudi Arabia",
       "flag": "🇸🇦",
+      "color": "#eab308",
       "governance": {
         "type": "ABSOLUTE_MONARCHY",
         "description": "Power concentrated in the royal family (Al Saud). Council of Ministers appointed by the King. No elected national legislature. Vision 2030 reform program ongoing but political opening is limited.",
@@ -539,6 +543,70 @@
       {
         "slot": 5,
         "amount": 50000
+      }
+    ]
+  },
+  "aiAgents": {
+    "entangled": {
+      "aId": "iran",
+      "aWorldKey": "iran",
+      "aAxis": [
+        "hardline",
+        "pragmatic"
+      ],
+      "aDriverField": "hardlinerPressure",
+      "aDriverDirection": "direct",
+      "bId": "israel",
+      "bWorldKey": "israel",
+      "bAxis": [
+        "hawkish",
+        "dovish"
+      ],
+      "bDriverField": "publicSentiment",
+      "bDriverDirection": "inverse"
+    },
+    "standalone": {
+      "id": "saudi_arabia",
+      "worldKey": "saudiArabia",
+      "axis": [
+        "bold",
+        "cautious"
+      ],
+      "driverField": "reformPressure",
+      "driverDirection": "direct"
+    },
+    "marketInstruments": [
+      {
+        "key": "primary",
+        "label": "Oil Index",
+        "symbol": "OIL",
+        "emoji": "🛢",
+        "shockLabel": "SPIKING",
+        "calmLabel": "STABLE"
+      },
+      {
+        "key": "currencyA",
+        "label": "Rial Index",
+        "symbol": "RIAL",
+        "emoji": "🇮🇷",
+        "shockLabel": "WEAKENING",
+        "calmLabel": "RESILIENT"
+      },
+      {
+        "key": "currencyB",
+        "label": "Riyal Index",
+        "symbol": "RIYAL",
+        "emoji": "🇸🇦",
+        "shockLabel": "ROBUST",
+        "calmLabel": "STRAINED"
+      },
+      {
+        "key": "global",
+        "label": "US Gas / USD",
+        "symbol": "GAS",
+        "emoji": "⛽",
+        "shockLabel": "SURGING",
+        "calmLabel": "CALM"
       }
     ]
   }

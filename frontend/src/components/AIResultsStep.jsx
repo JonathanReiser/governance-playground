@@ -3,11 +3,22 @@ import {
 } from "recharts";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 
-const NATION_META = {
-  iran:         { label: "Iran",         flag: "🇮🇷", color: "#f97316" },
-  israel:       { label: "Israel",       flag: "🇮🇱", color: "#6366f1" },
-  saudi_arabia: { label: "Saudi Arabia", flag: "🇸🇦", color: "#eab308" },
+const METRIC_ID_TO_KEY = {
+  stability_index: "stability",
+  proxy_activity:  "proxy",
+  trade_volume:    "trade",
+  conflict_events: "conflicts",
+  deal_integrity:  "dealIntegrity",
 };
+
+// Same 4-slot palette regardless of which real-world instruments fill the
+// slots — see scenario.aiAgents.marketInstruments for what "primary"/
+// "currencyA"/"currencyB"/"global" mean in a given scenario.
+const MARKET_COLORS = { primary: "#f97316", currencyA: "#22c55e", currencyB: "#818cf8", global: "#ef4444" };
+
+function buildNationMeta(scenario) {
+  return Object.fromEntries(scenario.nations.map(n => [n.id, { label: n.name, flag: n.flag, color: n.color }]));
+}
 
 function sign(v) {
   const r = Math.round(v ?? 0);
@@ -21,11 +32,18 @@ function truncate(s, n) {
 
 export function AIResultsStep({ results, scenario, onReset }) {
   const { history, finalState, startState, registryAddress, oracleAddress } = results;
+  const nationMeta = buildNationMeta(scenario);
+  const { entangled, standalone, marketInstruments } = scenario.aiAgents;
 
+  const aNation = scenario.nations.find(n => n.id === entangled.aId);
+  const bNation = scenario.nations.find(n => n.id === entangled.bId);
+  const cNation = scenario.nations.find(n => n.id === standalone.id);
+
+  const defaultMarket = { primary: 100, currencyA: 100, currencyB: 100, global: 100 };
   const start = startState ?? {
     stability: history[0]?.stability, proxy: history[0]?.proxy, trade: history[0]?.trade,
     conflicts: history[0]?.conflicts, dealIntegrity: history[0]?.dealIntegrity,
-    oilPrice: 100, rialIndex: 100, riyalIndex: 100, usGasIndex: 100,
+    market: defaultMarket,
   };
   const end = finalState ?? history.at(-1) ?? start;
 
@@ -34,12 +52,14 @@ export function AIResultsStep({ results, scenario, onReset }) {
   }));
 
   const marketData = history.map(h => ({
-    cycle: h.cycle, oil: h.oilPrice, rial: h.rialIndex, riyal: h.riyalIndex, usGas: h.usGasIndex,
+    cycle: h.cycle,
+    primary: h.market?.primary, currencyA: h.market?.currencyA,
+    currencyB: h.market?.currencyB, global: h.market?.global,
   }));
 
   const entangledCycles = history.filter(h => h.quantum?.entangledEffect);
   const tailWeights = history
-    .map(h => h.market?.speculation?.oil?.tailWeight)
+    .map(h => h.market?.speculation?.primary?.tailWeight)
     .filter(v => typeof v === "number");
   const avgTailWeight = tailWeights.length
     ? tailWeights.reduce((a, b) => a + b, 0) / tailWeights.length
@@ -49,7 +69,7 @@ export function AIResultsStep({ results, scenario, onReset }) {
   const decisionRows = [];
   for (const h of history) {
     for (const [id, result] of Object.entries(h.decisions || {})) {
-      const meta = NATION_META[id] ?? { label: id, flag: "🏳", color: "#888" };
+      const meta = nationMeta[id] ?? { label: id, flag: "🏳", color: "#888" };
       if (result.error) {
         decisionRows.push({ key: `${h.cycle}-${id}`, cycle: h.cycle, meta, error: result.error });
         continue;
@@ -67,16 +87,19 @@ export function AIResultsStep({ results, scenario, onReset }) {
     }
   }
 
+  const metricLabels = Object.fromEntries(
+    scenario.simulation.metrics
+      .map(m => [METRIC_ID_TO_KEY[m.id], m.name])
+      .filter(([key]) => key)
+  );
+
   const comparisonRows = [
-    ["Stability Index", start.stability, end.stability],
-    ["Proxy Activity",  start.proxy,     end.proxy],
-    ["Trade Volume",    start.trade,     end.trade],
-    ["Conflict Events", start.conflicts, end.conflicts],
-    ["Deal Integrity",  start.dealIntegrity, end.dealIntegrity],
-    ["Oil Index",       start.oilPrice,  end.oilPrice],
-    ["Rial Index",      start.rialIndex, end.rialIndex],
-    ["Riyal Index",     start.riyalIndex,end.riyalIndex],
-    ["US Gas Index",    start.usGasIndex,end.usGasIndex],
+    [metricLabels.stability,     start.stability,      end.stability],
+    [metricLabels.proxy,         start.proxy,          end.proxy],
+    [metricLabels.trade,         start.trade,          end.trade],
+    [metricLabels.conflicts,     start.conflicts,      end.conflicts],
+    [metricLabels.dealIntegrity, start.dealIntegrity,  end.dealIntegrity],
+    ...marketInstruments.map(inst => [inst.label, start.market?.[inst.key] ?? 100, end.market?.[inst.key] ?? 100]),
   ];
 
   return (
@@ -100,9 +123,9 @@ export function AIResultsStep({ results, scenario, onReset }) {
               <YAxis domain={[0, 100]} stroke="#666" />
               <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 6 }} labelStyle={{ color: "#aaa" }} />
               <Legend />
-              <Line type="monotone" dataKey="stability"     stroke="#6366f1" strokeWidth={2} dot={false} name="Stability" />
-              <Line type="monotone" dataKey="dealIntegrity" stroke="#eab308" strokeWidth={2} dot={false} name="Deal Integrity" />
-              <Line type="monotone" dataKey="proxy"         stroke="#ef4444" strokeWidth={2} dot={false} name="Proxy Activity" />
+              <Line type="monotone" dataKey="stability"     stroke="#6366f1" strokeWidth={2} dot={false} name={metricLabels.stability} />
+              <Line type="monotone" dataKey="dealIntegrity" stroke="#eab308" strokeWidth={2} dot={false} name={metricLabels.dealIntegrity} />
+              <Line type="monotone" dataKey="proxy"         stroke="#ef4444" strokeWidth={2} dot={false} name={metricLabels.proxy} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -119,10 +142,9 @@ export function AIResultsStep({ results, scenario, onReset }) {
               <YAxis stroke="#666" />
               <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 6 }} labelStyle={{ color: "#aaa" }} />
               <Legend />
-              <Line type="monotone" dataKey="oil"   stroke="#f97316" strokeWidth={2} dot={false} name="Oil Index" />
-              <Line type="monotone" dataKey="rial"  stroke="#22c55e" strokeWidth={2} dot={false} name="Rial Index" />
-              <Line type="monotone" dataKey="riyal" stroke="#818cf8" strokeWidth={2} dot={false} name="Riyal Index" />
-              <Line type="monotone" dataKey="usGas" stroke="#ef4444" strokeWidth={2} dot={false} name="US Gas Index" />
+              {marketInstruments.map(inst => (
+                <Line key={inst.key} type="monotone" dataKey={inst.key} stroke={MARKET_COLORS[inst.key]} strokeWidth={2} dot={false} name={inst.label} />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -201,18 +223,20 @@ export function AIResultsStep({ results, scenario, onReset }) {
               </div>
               {h.quantum && (
                 <p className="muted" style={{ marginTop: "0.3rem" }}>
-                  Iran → <strong>{h.quantum.iran?.toUpperCase()}</strong>,{" "}
-                  Israel → <strong>{h.quantum.israel?.toUpperCase()}</strong>,{" "}
-                  Saudi Arabia → <strong>{h.quantum.saudi?.toUpperCase()}</strong>
+                  {aNation.name} → <strong>{h.quantum[entangled.aId]?.toUpperCase()}</strong>,{" "}
+                  {bNation.name} → <strong>{h.quantum[entangled.bId]?.toUpperCase()}</strong>,{" "}
+                  {cNation.name} → <strong>{h.quantum[standalone.id]?.toUpperCase()}</strong>
                 </p>
               )}
               {h.market && (
                 <p className="muted" style={{ fontSize: "11px", marginTop: "0.2rem" }}>
-                  Oil → {h.market.outcomes?.oil} ({sign(h.market.oilPriceDelta)}),{" "}
-                  Rial → {h.market.outcomes?.rial} ({sign(h.market.rialIndexDelta)}),{" "}
-                  Riyal → {h.market.outcomes?.riyal} ({sign(h.market.riyalIndexDelta)}),{" "}
-                  US Gas → {h.market.outcomes?.usGas} ({sign(h.market.usGasIndexDelta)},{" "}
-                  dollar {h.market.usdDirection?.toLowerCase()})
+                  {marketInstruments.map((inst, i) => (
+                    <span key={inst.key}>
+                      {i > 0 && ", "}
+                      {inst.symbol} → {h.market.outcomes?.[inst.key]} ({sign(h.market[`${inst.key}Delta`])})
+                    </span>
+                  ))}
+                  {h.market.derivedNote && <>, {h.market.derivedNote.label.toLowerCase()} {h.market.derivedNote.value.toLowerCase()}</>}
                 </p>
               )}
             </div>
