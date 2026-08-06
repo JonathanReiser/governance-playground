@@ -74,7 +74,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
 | More scenarios (Palestine, Taiwan Strait, Russia-Ukraine, …) | ⬜ Planned |
-| Sepolia testnet deployment | ✅ Live — [verified on Etherscan](https://sepolia.etherscan.io/address/0x16da77Aa3e63215F738baF61f280caeE8F211A75) |
+| Sepolia testnet deployment | ✅ Live — [verified on Etherscan](https://sepolia.etherscan.io/address/0xA6CA0a47f77B3902bd5BdaFd991410B118F8A278) |
 | Hosted/always-on version | ✅ Live at [governance-playground.vercel.app](https://governance-playground.vercel.app) |
 
 ## Running it locally

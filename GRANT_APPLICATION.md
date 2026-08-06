@@ -9,7 +9,7 @@ Governance Playground is an open-source research sandbox where political scienti
 
 **Live demo:** https://governance-playground.vercel.app — no install required.
 **Code:** https://github.com/JonathanReiser/governance-playground (public, ISC-licensed)
-**On-chain, independently verifiable:** [WorldRegistry on Sepolia Etherscan](https://sepolia.etherscan.io/address/0x16da77Aa3e63215F738baF61f280caeE8F211A75)
+**On-chain, independently verifiable:** [WorldRegistry on Sepolia Etherscan](https://sepolia.etherscan.io/address/0xA6CA0a47f77B3902bd5BdaFd991410B118F8A278)
 
 The first scenario: **The Middle East, May 2026** — a fragile post-war environment following the US/Israel-Iran peace deal. It now runs in two modes. Four fixed-rule experiments are already running:
 
@@ -163,7 +163,7 @@ the model's predicted "entangled escalation" effect both times; Iran's agent ind
 exit the peace deal entirely (`EXIT_DEAL`, threatening Hormuz, partial nuclear breakout) as
 hardliner pressure and collapsing deal integrity converged — regional stability fell from 48/100 to
 13/100 in two cycles. Every metric change, every quantum collapse, and every agent decision from
-that run is a real, mined transaction, [citable by block number](https://sepolia.etherscan.io/address/0x16da77Aa3e63215F738baF61f280caeE8F211A75).
+that run is a real, mined transaction, [citable by block number](https://sepolia.etherscan.io/address/0xA6CA0a47f77B3902bd5BdaFd991410B118F8A278).
 
 **Human Agents (still the natural next step)** — Researchers, students, and participants holding
 citizenship tokens and voting on proposals directly, playing the same roles the AI agents currently
