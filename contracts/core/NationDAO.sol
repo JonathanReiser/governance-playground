@@ -314,7 +314,9 @@ contract NationDAO is Ownable {
 
         hasVoted[_proposalId][msg.sender] = true;
 
-        uint256 weight = _getVotingWeight(msg.sender);
+        // Snapshotted at proposal.votingStart, not msg.sender's live balance
+        // — see _getVotingWeightAt()'s doc comment for why this matters.
+        uint256 weight = _getVotingWeightAt(msg.sender, proposal.votingStart);
         require(weight > 0, "NationDAO: no voting power");
 
         if (_support == 0) {
@@ -350,7 +352,7 @@ contract NationDAO is Ownable {
             "NationDAO: already finalized"
         );
 
-        uint256 totalSupply = _getTotalSupply();
+        uint256 totalSupply = _getTotalSupplyAt(proposal.votingStart);
         uint256 totalVotes  = proposal.votesFor
                             + proposal.votesAgainst
                             + proposal.votesAbstain;
@@ -547,23 +549,44 @@ contract NationDAO is Ownable {
     // ─────────────────────────────────────────
 
     /**
-     * @dev Get the voting weight of an address.
-     *      For COUNCIL_WEIGHTED governance, weight is amplified
-     *      for council members (represented by high token balance).
+     * @dev Get an address's CURRENT voting weight — used only where there's
+     *      no proposal snapshot yet to check against (the propose() threshold
+     *      check, which happens before the proposal, and thus its
+     *      votingStart block, exist). Safe to call at any time, including
+     *      the current block.
      */
     function _getVotingWeight(address voter)
         internal
         view
         returns (uint256)
     {
-        // In a full implementation this would call CitizenToken.getVotes()
-        // For now we use a simplified balance check
-        // CitizenToken(citizenToken).getVotes(voter)
-        return IERC20(citizenToken).balanceOf(voter);
+        return IERC20Votes(citizenToken).getVotes(voter);
+    }
+
+    /**
+     * @dev Get an address's voting weight AS OF a specific past block —
+     *      used by castVote() to snapshot weight at proposal.votingStart.
+     *      This is the fix for a real vulnerability: reading a live,
+     *      freely-transferable balance instead of a checkpoint would let
+     *      the same tokens vote multiple times by transferring between
+     *      addresses between votes. hasVoted only blocks the same ADDRESS
+     *      from voting twice, not the same underlying tokens.
+     */
+    function _getVotingWeightAt(address voter, uint256 blockNumber)
+        internal
+        view
+        returns (uint256)
+    {
+        return IERC20Votes(citizenToken).getPastVotes(voter, blockNumber);
     }
 
     function _getTotalSupply() internal view returns (uint256) {
         return IERC20(citizenToken).totalSupply();
+    }
+
+    /// @dev Snapshotted total supply, for the same reason votes are snapshotted.
+    function _getTotalSupplyAt(uint256 blockNumber) internal view returns (uint256) {
+        return IERC20Votes(citizenToken).getPastTotalSupply(blockNumber);
     }
 
     /**
@@ -608,4 +631,14 @@ contract NationDAO is Ownable {
 interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
     function totalSupply() external view returns (uint256);
+}
+
+// CitizenToken is an ERC20Votes token — this exposes its checkpointed
+// voting power so NationDAO can snapshot weight instead of reading a live,
+// freely-transferable balance (which would let the same tokens vote
+// multiple times by transferring between addresses between votes).
+interface IERC20Votes {
+    function getVotes(address account) external view returns (uint256);
+    function getPastVotes(address account, uint256 timepoint) external view returns (uint256);
+    function getPastTotalSupply(uint256 timepoint) external view returns (uint256);
 }

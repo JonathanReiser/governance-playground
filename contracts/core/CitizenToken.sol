@@ -74,6 +74,18 @@ contract CitizenToken is ERC20Votes, Ownable {
     /**
      * @notice Grant citizenship tokens to an address.
      * @dev Called by WorldRegistry during scenario setup.
+     *
+     * Auto-delegates first-time recipients to themselves so their tokens
+     * count as votes immediately (ERC20Votes requires an explicit delegate
+     * before a balance counts for getVotes()/getPastVotes() — recipients
+     * who receive tokens via this path shouldn't need a separate
+     * transaction just to be able to vote at all). This does NOT weaken
+     * NationDAO's vote-snapshotting fix: getPastVotes() is evaluated at a
+     * fixed historical block, so no delegation or transfer after that
+     * block can retroactively change what a voter's power was at that
+     * snapshot — auto-delegating here only affects when a citizen's power
+     * starts counting going forward, never a past snapshot. A citizen can
+     * still re-delegate to someone else at any time via delegate().
      */
     function grantCitizenship(address citizen, uint256 amount)
         external
@@ -83,6 +95,9 @@ contract CitizenToken is ERC20Votes, Ownable {
             totalSupply() + amount <= maxSupply,
             "CitizenToken: exceeds max supply"
         );
+        if (delegates(citizen) == address(0)) {
+            _delegate(citizen, citizen);
+        }
         _mint(citizen, amount);
         emit CitizenshipGranted(citizen, amount);
     }
