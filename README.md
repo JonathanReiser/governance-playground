@@ -105,6 +105,23 @@ npm run dev
 
 Walk through: **Connect → Scenario → Deploy → choose "AI Agent Cycle" → Run → Results.**
 
+### Troubleshooting: MetaMask stuck on "Review alert"
+
+MetaMask runs every transaction through a third-party security scanner before letting you confirm
+it. Occasionally that scanner's alert fails to load its own content, leaving you with a
+**grayed-out, unclickable "Review alert" button and no visible warning text** — a MetaMask bug,
+not anything wrong with this app or its contracts. If you hit this:
+
+- Check for a pending MetaMask extension update (`chrome://extensions` → MetaMask → reload icon).
+- Temporarily disable other extensions (ad blockers, VPNs, other wallets) that might be blocking
+  the network call MetaMask makes to fetch the alert's content.
+- If you run a DNS-level blocker (Pi-hole, NextDNS, a VPN with ad-blocking) try disabling it —
+  it can silently block MetaMask's alert-provider API.
+- Reload the extension itself (`chrome://extensions` → MetaMask → reload icon) or lock/unlock it
+  (account icon → Lock, then unlock) to reset its internal state.
+- As a fallback, **[read a real, already-verified run instead](https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313)**
+  — a live 2-cycle simulation with real on-chain tx hashes, no wallet required.
+
 ## Project structure
 
 ```
