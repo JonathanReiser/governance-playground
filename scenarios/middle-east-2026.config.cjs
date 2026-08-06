@@ -38,6 +38,14 @@ const MIDDLE_EAST_2026 = {
       "What if Saudi Arabia formally normalizes with Israel?",
       "What if Iran's hardliners gain domestic power?",
     ],
+    // The AI Agent Cycle mode (Claude-driven nation agents + the quantum
+    // uncertainty engine) is currently hardcoded to this scenario's specific
+    // nations — real IR-theory system prompts for Iran/Israel/Saudi Arabia,
+    // an Iran/Israel entangled pair, a Middle-East-specific economic field
+    // (oil/rial/riyal/US gas). Classic Experiments mode is scenario-agnostic;
+    // AI mode is not, yet. See frontend/src/lib/agents.js, markets.js, and
+    // server.js's SYSTEM_PROMPTS.
+    aiModeSupported: true,
   },
 
 

@@ -63,9 +63,18 @@ export default function App() {
                 <div className="exp-card-name">Classic Experiments</div>
                 <div className="exp-card-question muted">Apply a pre-built scenario change and observe fixed-rule simulation outcomes.</div>
               </button>
-              <button className="exp-card" style={{ maxWidth: 320 }} onClick={() => setMode("ai")}>
+              <button
+                className="exp-card"
+                style={{ maxWidth: 320, opacity: scenario.meta.aiModeSupported ? 1 : 0.5, cursor: scenario.meta.aiModeSupported ? "pointer" : "not-allowed" }}
+                onClick={() => scenario.meta.aiModeSupported && setMode("ai")}
+                disabled={!scenario.meta.aiModeSupported}
+              >
                 <div className="exp-card-name">AI Agent Cycle ✦</div>
-                <div className="exp-card-question muted">Iran, Israel, and Saudi Arabia reason through each cycle using political science frameworks. Review and edit before committing on-chain.</div>
+                <div className="exp-card-question muted">
+                  {scenario.meta.aiModeSupported
+                    ? "Iran, Israel, and Saudi Arabia reason through each cycle using political science frameworks. Review and edit before committing on-chain."
+                    : `Not yet available for ${scenario.meta.name} — the AI agent layer's system prompts and quantum uncertainty model are still specific to the Middle East scenario. Use Classic Experiments for this scenario.`}
+                </div>
               </button>
             </div>
           </div>
