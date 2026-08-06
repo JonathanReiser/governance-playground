@@ -89,7 +89,7 @@ If a researcher disagrees with a parameter, they fork the file, change it, and r
 
 ### Test Suite
 
-76 unit and integration tests covering every critical contract behavior: citizenship minting and delegation, proposal lifecycle, veto mechanisms, relationship management, metric recording, baseline comparison, anomaly detection, and the full integrated scenario.
+83 unit and integration tests covering every critical contract behavior: citizenship minting and delegation, proposal lifecycle, veto mechanisms, relationship management, metric recording, baseline comparison, anomaly detection, the combined single-transaction cycle commit, and the full integrated scenario.
 
 ---
 
@@ -219,7 +219,7 @@ scenario config, experiment runner, quantum engine, AI agent layer, frontend, an
 single repository.
 
 **Live demo:** https://governance-playground.vercel.app (no install required)
-**Test status:** 76/76 passing
+**Test status:** 83/83 passing
 **Lines of Solidity:** ~900 (across WorldRegistry, NationDAO, CitizenToken, MetricsOracle, and two
 factory contracts split out to stay under Ethereum's 24KB contract-size limit — a real constraint
 hit and fixed during the Sepolia deployment, not a theoretical one)

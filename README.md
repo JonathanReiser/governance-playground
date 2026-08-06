@@ -69,7 +69,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 
 | Piece | Status |
 |---|---|
-| Smart contracts + test suite (76/76) | ✅ Done |
+| Smart contracts + test suite (83/83) | ✅ Done |
 | Classic (fixed-rule) experiments, 4 pre-built scenarios | ✅ Done |
 | AI agent layer (Claude-driven nation decisions) | ✅ Done, verified live |
 | Quantum extension — entangled political layer | ✅ Done, verified live |
@@ -138,7 +138,7 @@ server.js            Express server proxying Claude API calls for the agent laye
 frontend/
   src/lib/           quantum.js (engine), markets.js (Layer 2/3), agents.js (Layer 1 + Claude)
   src/components/    Step-by-step UI: Connect → Scenario → Deploy → Run → Results
-test/                76-test Hardhat/Chai suite
+test/                83-test Hardhat/Chai suite
 ```
 
 ## Why blockchain
