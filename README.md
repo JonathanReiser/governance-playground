@@ -112,6 +112,8 @@ it. Occasionally that scanner's alert fails to load its own content, leaving you
 **grayed-out, unclickable "Review alert" button and no visible warning text** — a MetaMask bug,
 not anything wrong with this app or its contracts. If you hit this:
 
+- Turn off MetaMask's security-alert scanning: **Settings → Transactions** (not Security &
+  Privacy — it moved there in newer versions) → disable the security-alerts toggle.
 - Check for a pending MetaMask extension update (`chrome://extensions` → MetaMask → reload icon).
 - Temporarily disable other extensions (ad blockers, VPNs, other wallets) that might be blocking
   the network call MetaMask makes to fetch the alert's content.
