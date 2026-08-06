@@ -162,8 +162,9 @@ collapsed into a mutually-reinforcing hardline/hawkish configuration two cycles 
 the model's predicted "entangled escalation" effect both times; Iran's agent independently chose to
 exit the peace deal entirely (`EXIT_DEAL`, threatening Hormuz, partial nuclear breakout) as
 hardliner pressure and collapsing deal integrity converged — regional stability fell from 48/100 to
-13/100 in two cycles. Every metric change, every quantum collapse, and every agent decision from
-that run is a real, mined transaction, [citable by block number](https://sepolia.etherscan.io/address/0xA6CA0a47f77B3902bd5BdaFd991410B118F8A278).
+13/100 in two cycles. Every metric change, every quantum collapse, and every agent decision was a
+real, mined transaction — [full methodology and code](https://github.com/JonathanReiser/governance-playground).
+The contracts themselves are separately [verified live on Sepolia](https://sepolia.etherscan.io/address/0xA6CA0a47f77B3902bd5BdaFd991410B118F8A278).
 
 **Human Agents (still the natural next step)** — Researchers, students, and participants holding
 citizenship tokens and voting on proposals directly, playing the same roles the AI agents currently
