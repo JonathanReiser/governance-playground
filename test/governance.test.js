@@ -800,6 +800,72 @@ describe("WorldRegistry", function () {
       ).to.be.revertedWith("WorldRegistry: simulation not active");
     });
   });
+
+  describe("Combined Cycle Commit (commitCycle)", function () {
+    beforeEach(async function () {
+      await registry.initializeScenario("Test", "1.0", 3n);
+      await registry.startSimulation();
+    });
+
+    it("updates oracle metrics AND advances the cycle in one call", async function () {
+      await expect(
+        registry.commitCycle(65n, 2n, 150n, 30n, 70n)
+      ).to.emit(registry, "CycleAdvanced").withArgs(1n);
+
+      expect(await registry.currentCycle()).to.equal(1n);
+      expect(await oracle.regionalStabilityIndex()).to.equal(65n);
+      expect(await oracle.totalConflictEvents()).to.equal(2n);
+      expect(await oracle.totalTradeVolume()).to.equal(150n);
+      expect(await oracle.totalProxyActivity()).to.equal(30n);
+      expect(await oracle.peaceDealIntegrity()).to.equal(70n);
+    });
+
+    it("produces the same permanent snapshot as the two-call path", async function () {
+      await registry.commitCycle(45n, 3n, 120n, 40n, 55n);
+      const snap = await oracle.getCycleSnapshot(1n);
+      expect(snap.regionalStabilityIndex).to.equal(45n);
+      expect(snap.totalConflictEvents).to.equal(3n);
+      expect(snap.totalTradeVolume).to.equal(120n);
+    });
+
+    it("propagates MetricsOracle's own validation (stability 0-100)", async function () {
+      await expect(
+        registry.commitCycle(101n, 0n, 0n, 0n, 0n)
+      ).to.be.revertedWith("MetricsOracle: stability 0-100");
+    });
+
+    it("propagates MetricsOracle's own validation (deal integrity 0-100)", async function () {
+      await expect(
+        registry.commitCycle(50n, 0n, 0n, 0n, 101n)
+      ).to.be.revertedWith("MetricsOracle: integrity 0-100");
+    });
+
+    it("still respects onlyOwner", async function () {
+      await expect(
+        registry.connect(alice).commitCycle(50n, 0n, 0n, 0n, 50n)
+      ).to.be.revertedWithCustomError(registry, "OwnableUnauthorizedAccount");
+    });
+
+    it("still ends simulation at total cycles, same as the two-call path", async function () {
+      await registry.commitCycle(50n, 0n, 0n, 0n, 50n);
+      await registry.commitCycle(50n, 0n, 0n, 0n, 50n);
+      await expect(
+        registry.commitCycle(50n, 0n, 0n, 0n, 50n)
+      ).to.emit(registry, "SimulationEnded");
+      expect(await registry.simulationActive()).to.equal(false);
+    });
+
+    it("reverts if the oracle isn't wired", async function () {
+      const WorldRegistry = await ethers.getContractFactory("WorldRegistry");
+      const bareRegistry = await WorldRegistry.deploy(owner.address);
+      await bareRegistry.initializeScenario("Test", "1.0", 3n);
+      await bareRegistry.startSimulation();
+
+      await expect(
+        bareRegistry.commitCycle(50n, 0n, 0n, 0n, 50n)
+      ).to.be.revertedWith("WorldRegistry: oracle not wired");
+    });
+  });
 });
 
 // ─────────────────────────────────────────────────────────────

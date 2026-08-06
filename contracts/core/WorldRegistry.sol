@@ -380,6 +380,41 @@ contract WorldRegistry is Ownable {
      *      The MetricsOracle calculates scores at the end of each cycle.
      */
     function advanceCycle() external onlyOwner {
+        _advanceCycle();
+    }
+
+    /**
+     * @notice Update this cycle's metrics AND advance the simulation, in
+     *         ONE transaction.
+     * @dev Ergonomics-only addition, not a new capability: the AI Agent
+     *      Cycle flow always called oracle.updateMetrics() immediately
+     *      followed by registry.advanceCycle() from the same signer —
+     *      two separate MetaMask approvals per cycle on a real network
+     *      (Sepolia) for what's really one logical step. This combines
+     *      them. oracle.updateMetrics() directly and advanceCycle()
+     *      separately both remain available for any caller that wants
+     *      finer-grained control (e.g. the CLI experiment scripts, which
+     *      sign locally and don't pay the same per-tx approval cost).
+     */
+    function commitCycle(
+        uint256 _stabilityIndex,
+        uint256 _conflictEvents,
+        uint256 _tradeVolume,
+        uint256 _proxyActivity,
+        uint256 _dealIntegrity
+    ) external onlyOwner {
+        require(metricsOracle != address(0), "WorldRegistry: oracle not wired");
+        IMetricsOracle(metricsOracle).updateMetrics(
+            _stabilityIndex,
+            _conflictEvents,
+            _tradeVolume,
+            _proxyActivity,
+            _dealIntegrity
+        );
+        _advanceCycle();
+    }
+
+    function _advanceCycle() private {
         require(simulationActive, "WorldRegistry: simulation not active");
         require(currentCycle < totalCycles, "WorldRegistry: simulation complete");
 
@@ -576,5 +611,12 @@ interface IMetricsOracle {
         string calldata parameter,
         uint256 newValue,
         uint256 cycle
+    ) external;
+    function updateMetrics(
+        uint256 stabilityIndex,
+        uint256 conflictEvents,
+        uint256 tradeVolume,
+        uint256 proxyActivity,
+        uint256 dealIntegrity
     ) external;
 }

@@ -2,7 +2,8 @@ import { useState, useCallback } from "react";
 import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 
-const MAX_CYCLES = 10;
+const DEFAULT_MAX_CYCLES = 10;
+const CYCLE_COUNT_OPTIONS = [3, 5, 10];
 
 // Metric config ids (shared across every scenario, see simulation.metrics
 // in each scenario config) -> the camelCase keys used throughout
@@ -233,6 +234,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
   const { entangled, standalone, marketInstruments } = scenario.aiAgents;
 
   const [phase,       setPhase]       = useState("idle");    // idle|thinking|review|committing
+  const [maxCycles,   setMaxCycles]   = useState(DEFAULT_MAX_CYCLES); // locked in once cycle 1 starts
   const [cycle,       setCycle]       = useState(1);
   const [simState,    setSimState]    = useState(() => initSimState(scenario));
   const [agentMemory, setAgentMemory] = useState(() => ({ quantum: initQuantumBeliefs(scenario), markets: initMarketBeliefs(scenario) }));
@@ -329,16 +331,15 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
     setMarketEvent(market);
 
     try {
-      // Write to oracle
-      await deployment.oracle.updateMetrics(
+      // Update metrics AND advance the cycle in one transaction — one
+      // MetaMask approval per cycle instead of two on a real network.
+      await deployment.registry.commitCycle(
         BigInt(committed.stability),
         BigInt(committed.conflicts),
         BigInt(committed.trade),
         BigInt(committed.proxy),
         BigInt(committed.dealIntegrity)
       );
-      // Advance cycle on registry
-      await deployment.registry.advanceCycle();
     } catch (err) {
       // On-chain write failed — still advance locally so researcher isn't blocked
       console.warn("On-chain write failed:", err.message);
@@ -353,7 +354,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
     setDecisions(null);
     setProposed(null);
 
-    if (cycle >= MAX_CYCLES) {
+    if (cycle >= maxCycles) {
       onResults({
         history: newHistory,
         finalState: committed,
@@ -390,7 +391,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
 
       {/* Cycle + metrics bar */}
       <div className="ai-status-bar">
-        <div className="ai-cycle-badge">Cycle {cycle} / {MAX_CYCLES}</div>
+        <div className="ai-cycle-badge">Cycle {cycle} / {maxCycles}</div>
         <div className="ai-metrics">
           {Object.entries(currentMetrics).map(([key, val]) => (
             <div key={key} className="ai-metric">
@@ -543,11 +544,36 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
         </div>
       )}
 
+      {/* Cycle-count picker — only shown before cycle 1 starts, locked in after.
+          Each cycle is one on-chain commit (a MetaMask approval on a real
+          network), so this matters most for Sepolia — a shorter run is
+          still a legitimate citable finding at a fraction of the clicks. */}
+      {phase === "idle" && cycle === 1 && history.length === 0 && (
+        <div className="section" style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+          <span className="muted" style={{ fontSize: 13 }}>Cycles to run:</span>
+          {CYCLE_COUNT_OPTIONS.map(n => (
+            <button
+              key={n}
+              className="btn-secondary"
+              style={{
+                padding: "0.35rem 0.9rem",
+                fontSize: 13,
+                borderColor: maxCycles === n ? "var(--accent, #6366f1)" : undefined,
+                opacity: maxCycles === n ? 1 : 0.6,
+              }}
+              onClick={() => setMaxCycles(n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Footer button */}
       <div className="step-footer">
         {phase === "idle" && (
           <button className="btn-primary" onClick={runAgents}>
-            {cycle === 1 ? "Start — Run Cycle 1" : `Run Cycle ${cycle}`}
+            {cycle === 1 ? `Start — Run Cycle 1 of ${maxCycles}` : `Run Cycle ${cycle}`}
           </button>
         )}
         {phase === "thinking" && (
