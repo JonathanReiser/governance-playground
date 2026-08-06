@@ -16,7 +16,8 @@ function govDescription(nation) {
   return base;
 }
 
-export function DeployStep({ signer, scenario, onDeployed }) {
+export function DeployStep({ signer, scenario, networkName, onDeployed }) {
+  const targetLabel = networkName || "your local Hardhat network";
   const [log,      setLog]      = useState([]);
   const [deploying, setDeploying] = useState(false);
   const [done,     setDone]     = useState(false);
@@ -48,7 +49,7 @@ export function DeployStep({ signer, scenario, onDeployed }) {
       <div className="panel-header">
         <h2>Deploy Scenario</h2>
         <p className="muted">
-          Deploys WorldRegistry, MetricsOracle, and all three nation DAOs to your local Hardhat network.
+          Deploys WorldRegistry, MetricsOracle, and all three nation DAOs to {targetLabel}.
           This creates the on-chain record that all experiment results will be written to.
         </p>
       </div>
@@ -98,7 +99,7 @@ export function DeployStep({ signer, scenario, onDeployed }) {
       <div className="step-footer">
         {!done ? (
           <button className="btn-primary" onClick={handleDeploy} disabled={deploying}>
-            {deploying ? "Deploying…" : "Deploy to Hardhat"}
+            {deploying ? "Deploying…" : `Deploy to ${networkName || "Hardhat"}`}
           </button>
         ) : (
           <div className="success-msg">

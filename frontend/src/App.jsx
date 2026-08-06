@@ -48,6 +48,7 @@ export default function App() {
         {step === 2 && (
           <DeployStep
             signer={wallet.signer}
+            networkName={wallet.networkName}
             scenario={scenario}
             onDeployed={(d) => { setDeployment(d); setStep(3); }}
           />
