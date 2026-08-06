@@ -7,12 +7,16 @@ scenario, let three Claude-powered nation agents reason through it under quantum
 uncertainty, and watch the result get written — immutably, cycle by cycle — to a blockchain.
 Every finding is citable by block number.
 
-**[Try it live →](https://governance-playground.vercel.app)** — no install needed. Connect via
-MetaMask (works with Sepolia testnet — get free test ETH from a faucet, see Quickstart below) and
-run a real scenario yourself.
+**[Read a real, already-verified run →](https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313)**
+(a 2-cycle simulation: Iran exits a peace deal — real Claude reasoning, real on-chain transactions,
+no wallet needed). Everything in it is independently checkable on
+[Sepolia Etherscan](https://sepolia.etherscan.io/address/0x863c9db5437AfA4F32d02661ba1EA9752dce592E)
+— you don't have to take a live demo's word for it.
 
-**[Or read a real run first →](https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313)**
-(a 2-cycle simulation: Iran exits a peace deal, verified on-chain)
+**[Or try it live yourself →](https://governance-playground.vercel.app)** — no install needed.
+Connect via MetaMask (works with Sepolia testnet — get free test ETH from a faucet, see Quickstart
+below). Note: MetaMask itself occasionally has extension bugs unrelated to this app — see
+Troubleshooting below if a transaction confirmation won't respond.
 
 ---
 
