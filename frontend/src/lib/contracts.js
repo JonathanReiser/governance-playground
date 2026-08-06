@@ -33,7 +33,16 @@ const HARDHAT_PRIVATE_KEY =
 
 export async function connectDirect() {
   const provider = new ethers.JsonRpcProvider(HARDHAT_RPC);
-  const network  = await provider.getNetwork();
+  let network;
+  try {
+    network = await provider.getNetwork();
+  } catch {
+    // Nothing listening at all (most common case: this is the hosted
+    // deployment, or a local Hardhat node just isn't running) — the raw
+    // fetch/connection error isn't useful to a researcher, so replace it
+    // with the same actionable message the wrong-network case below gives.
+    throw new Error(`Hardhat node not found at ${HARDHAT_RPC}. Run: npx hardhat node — or use MetaMask instead if you're on the hosted site.`);
+  }
   if (Number(network.chainId) !== HARDHAT_CHAIN_ID) {
     throw new Error(`Hardhat node not found at ${HARDHAT_RPC}. Run: npx hardhat node`);
   }
