@@ -565,6 +565,73 @@ body {
 .metric-editor-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
 }
+
+/* ── Human-in-the-loop decision controls ────────────────────── */
+.human-control-section { margin-bottom: 1rem; }
+.human-control-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.85rem;
+  margin-top: 0.6rem;
+}
+.human-control-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.75rem 0.85rem;
+  display: flex; flex-direction: column; gap: 0.65rem;
+}
+.human-control-header { display: flex; align-items: center; gap: 0.5rem; }
+.human-control-toggle {
+  margin-left: auto; display: flex; gap: 0.2rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 2px;
+}
+.toggle-pill {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 0.25rem 0.6rem; border-radius: 999px; border: none; background: transparent;
+  color: var(--muted); cursor: pointer;
+}
+.toggle-pill--active { background: var(--accent2); color: #fff; }
+.toggle-pill:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.source-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.05em;
+  background: rgba(34,197,94,0.12); color: var(--green);
+  border: 1px solid var(--green); border-radius: 4px; padding: 0.1rem 0.35rem;
+}
+
+.human-form { display: flex; flex-direction: column; gap: 0.75rem; }
+.human-form--unavailable { padding: 0.5rem 0; }
+.human-form-section { display: flex; flex-direction: column; gap: 0.4rem; }
+.human-form-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600;
+}
+
+.action-category { display: flex; flex-direction: column; gap: 0.3rem; }
+.action-category-label {
+  font-family: var(--font-mono); font-size: 9px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.action-chip-row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.action-chip {
+  font-family: var(--font-mono); font-size: 10px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.25rem 0.5rem; color: var(--text); cursor: pointer;
+}
+.action-chip:hover { border-color: var(--accent2); }
+.action-chip--selected { background: rgba(99,102,241,0.12); font-weight: 700; }
+
+.human-form-deltas { display: flex; flex-direction: column; gap: 0.35rem; }
+.human-delta-row { display: flex; align-items: center; gap: 0.5rem; }
+.human-delta-row .delta-label { flex: 1; }
+.human-delta-input {
+  width: 60px; font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.2rem 0.35rem; color: var(--text);
+}
+.human-delta-range { font-size: 9px; width: 70px; }
+
+.human-reasoning-input {
+  font-family: inherit; font-size: 12px; line-height: 1.5;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.5rem 0.6rem; color: var(--text); resize: vertical;
+}
 .metric-editor-input {
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: 6px; padding: 0.4rem 0.6rem;

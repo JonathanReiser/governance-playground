@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
+import { nationActionMenu } from "../lib/nationActions";
 
 const DEFAULT_MAX_CYCLES = 10;
 const CYCLE_COUNT_OPTIONS = [3, 5, 10];
@@ -159,6 +160,7 @@ function NationCard({ nationId, result, quantumBeliefState, nationMeta, metricLa
       <div className="nation-card-header">
         <span className="nation-flag">{meta.flag}</span>
         <span className="nation-name">{meta.label}</span>
+        {d.source === "human" && <span className="source-badge">HUMAN</span>}
         <span className="nation-coalition" style={{ color: meta.color }}>
           {d.coalitionSignal || d.coalitionStatus || "—"}
         </span>
@@ -200,6 +202,100 @@ function NationCard({ nationId, result, quantumBeliefState, nationMeta, metricLa
       <div className="nation-research-note muted">{d.researchNote}</div>
     </div>
   );
+}
+
+// Human-in-the-loop decision form — lets a real person take a nation's turn
+// instead of the AI agent, using the exact same decision schema (primaryAction
+// from the same categorized menu the AI's own prompt offers, metricDeltas
+// clamped to the same bounds, a required reasoning field) so the result
+// plugs into applyDecisions()/the quantum cascade/on-chain commit with zero
+// downstream changes. See lib/nationActions.js for where the menu data
+// comes from and its one real caveat (hand-kept in sync with server.js).
+function HumanDecisionForm({ nationId, scenarioId, nationMeta, metricLabels, draft, onChange }) {
+  const meta = nationMeta[nationId];
+  const menu = nationActionMenu(scenarioId, nationId);
+
+  if (!menu) {
+    return (
+      <div className="human-form human-form--unavailable">
+        <span className="muted">Human mode isn't set up for {meta.label} in this scenario yet.</span>
+      </div>
+    );
+  }
+
+  const d = draft || { primaryAction: "", reasoning: "", metricDeltas: {} };
+
+  function setAction(action) {
+    onChange(nationId, { ...d, primaryAction: action });
+  }
+  function setReasoning(reasoning) {
+    onChange(nationId, { ...d, reasoning });
+  }
+  function setDelta(key, value) {
+    onChange(nationId, { ...d, metricDeltas: { ...d.metricDeltas, [key]: value } });
+  }
+
+  return (
+    <div className="human-form">
+      <div className="human-form-section">
+        <span className="human-form-label">Choose {meta.label}'s move</span>
+        {Object.entries(menu.categories).map(([category, actions]) => (
+          <div key={category} className="action-category">
+            <span className="action-category-label">{category}</span>
+            <div className="action-chip-row">
+              {actions.map(action => (
+                <button
+                  key={action}
+                  type="button"
+                  className={`action-chip ${d.primaryAction === action ? "action-chip--selected" : ""}`}
+                  style={d.primaryAction === action ? { borderColor: meta.color, color: meta.color } : undefined}
+                  onClick={() => setAction(action)}
+                >
+                  {action}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="human-form-section">
+        <span className="human-form-label">Expected metric effects</span>
+        <div className="human-form-deltas">
+          {Object.entries(menu.metricBounds).map(([key, [min, max]]) => (
+            <div key={key} className="human-delta-row">
+              <span className="delta-label">{metricLabels[key] || humanizeKey(key)}</span>
+              <input
+                type="number"
+                min={min}
+                max={max}
+                value={d.metricDeltas?.[key] ?? 0}
+                onChange={e => setDelta(key, clampNum(Number(e.target.value), min, max))}
+                className="human-delta-input"
+              />
+              <span className="human-delta-range muted">{min} to {max}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="human-form-section">
+        <span className="human-form-label">Reasoning (kept on the record, same as an AI agent's)</span>
+        <textarea
+          className="human-reasoning-input"
+          value={d.reasoning}
+          onChange={e => setReasoning(e.target.value)}
+          placeholder="Why this move — what constraint or objective is driving it?"
+          rows={2}
+        />
+      </div>
+    </div>
+  );
+}
+
+function clampNum(v, min, max) {
+  if (Number.isNaN(v)) return 0;
+  return Math.min(max, Math.max(min, v));
 }
 
 
@@ -246,30 +342,76 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
   const [worldSnapshot,   setWorldSnapshot]   = useState(null); // last worldState built, for quantum readouts
   const [quantumEvent,    setQuantumEvent]    = useState(null); // Layer 1 collapse outcome from the last commit
   const [marketEvent,     setMarketEvent]     = useState(null); // Layer 2/3 collapse outcome from the last commit
+  const [humanControlled, setHumanControlled] = useState({});   // { [nationId]: boolean } — "take this nation's turn myself" toggle
+  const [humanDrafts,     setHumanDrafts]     = useState({});   // { [nationId]: { primaryAction, reasoning, metricDeltas } }
+
+  function updateHumanDraft(nationId, draft) {
+    setHumanDrafts(prev => ({ ...prev, [nationId]: draft }));
+  }
+
+  function toggleHumanControl(nationId) {
+    setHumanControlled(prev => ({ ...prev, [nationId]: !prev[nationId] }));
+  }
+
+  // A human-controlled nation needs a chosen action + non-empty reasoning
+  // before a cycle can run — same bar the AI's own output format requires.
+  const humanDraftInvalid = (id) => {
+    if (!humanControlled[id]) return false;
+    const d = humanDrafts[id];
+    return !d?.primaryAction || !d?.reasoning?.trim();
+  };
+  const anyHumanDraftInvalid = nationIds.some(humanDraftInvalid);
 
   const currentMetrics = simStateToMetrics(simState);
 
-  // ── Step 1: ask agents ────────────────────────────────────
+  // ── Step 1: ask agents (or take a human-controlled nation's decision as-is) ──
   const runAgents = useCallback(async () => {
+    if (nationIds.some(humanDraftInvalid)) return; // footer button is disabled too; belt and suspenders
+
     setError("");
     setPhase("thinking");
-    setThinking(Object.fromEntries(nationIds.map(id => [id, true])));
+    setThinking(Object.fromEntries(nationIds.map(id => [id, !humanControlled[id]])));
 
     const worldState = buildWorldState(scenario, simState, cycle, agentMemory);
     setWorldSnapshot(worldState);
 
-    // Fire every nation in parallel, update loading state as each resolves
-    const agents  = nationIds.map(id => new NationAgent(id));
     const results = {};
+
+    // Human-controlled nations resolve instantly — no API call, no waiting —
+    // wrapped in the exact same { nation, cycle, decision, usage } shape a
+    // Claude call returns, so every downstream consumer (aggregation, the
+    // quantum cascade, applyDecisions, the exported run-data JSON) is
+    // unchanged and can't tell the difference except via decision.source.
+    for (const id of nationIds) {
+      if (humanControlled[id]) {
+        const draft = humanDrafts[id];
+        results[id] = {
+          nation: id,
+          cycle,
+          decision: {
+            primaryAction: draft.primaryAction,
+            supportingActions: [],
+            reasoning: draft.reasoning,
+            metricDeltas: draft.metricDeltas || {},
+            source: "human",
+          },
+          usage: null,
+        };
+      }
+    }
+
+    // Fire the remaining (AI-controlled) nations in parallel, same as before
+    const aiNationIds = nationIds.filter(id => !humanControlled[id]);
+    const agents = aiNationIds.map(id => new NationAgent(id));
 
     await Promise.allSettled(
       agents.map((agent, i) =>
         agent.decide(worldState, scenario.meta.id).then(r => {
-          results[nationIds[i]] = r;
-          setThinking(prev => ({ ...prev, [nationIds[i]]: false }));
+          results[aiNationIds[i]] = { ...r, decision: { ...r.decision, source: "ai" } };
+          setThinking(prev => ({ ...prev, [aiNationIds[i]]: false }));
         }).catch(err => {
-          results[nationIds[i]] = { error: err.message };
-          setThinking(prev => ({ ...prev, [nationIds[i]]: false }));
+          results[aiNationIds[i]] = { error: err.message };
+          setThinking(prev => ({ ...prev, [aiNationIds[i]]: false }));
         })
       )
     );
@@ -285,7 +427,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
     setDecisions(results);
     setProposed(proposedMetrics);
     setPhase("review");
-  }, [scenario, simState, cycle, agentMemory]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scenario, simState, cycle, agentMemory, humanControlled, humanDrafts]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   // ── Step 2: researcher edits proposed values ──────────────
@@ -544,6 +686,66 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
         </div>
       )}
 
+      {/* Per-nation human/AI control, before each cycle runs. A nation switched
+          to Human skips its Claude call entirely for this cycle — you pick
+          its move from the same categorized action menu the AI would choose
+          from, and it feeds into the identical decision pipeline (quantum
+          cascade, on-chain commit, exported run data) tagged decision.source
+          so it's distinguishable afterward, not silently blended in. */}
+      {phase === "idle" && (
+        <div className="section human-control-section">
+          <h3 className="section-label">Who decides each nation this cycle?</h3>
+          <div className="human-control-grid">
+            {nationIds.map(id => {
+              const meta = nationMeta[id];
+              const isHuman = !!humanControlled[id];
+              const menuAvailable = !!nationActionMenu(scenario.meta.id, id);
+              return (
+                <div key={id} className="human-control-card">
+                  <div className="human-control-header">
+                    <span className="nation-flag">{meta.flag}</span>
+                    <span className="nation-name">{meta.label}</span>
+                    <div className="human-control-toggle">
+                      <button
+                        type="button"
+                        className={`toggle-pill ${!isHuman ? "toggle-pill--active" : ""}`}
+                        onClick={() => isHuman && toggleHumanControl(id)}
+                      >
+                        AI
+                      </button>
+                      <button
+                        type="button"
+                        className={`toggle-pill ${isHuman ? "toggle-pill--active" : ""}`}
+                        disabled={!menuAvailable}
+                        title={menuAvailable ? undefined : "Human mode not set up for this nation yet"}
+                        onClick={() => !isHuman && toggleHumanControl(id)}
+                      >
+                        Human
+                      </button>
+                    </div>
+                  </div>
+                  {isHuman && (
+                    <HumanDecisionForm
+                      nationId={id}
+                      scenarioId={scenario.meta.id}
+                      nationMeta={nationMeta}
+                      metricLabels={metricLabels}
+                      draft={humanDrafts[id]}
+                      onChange={updateHumanDraft}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {anyHumanDraftInvalid && (
+            <p className="muted" style={{ fontSize: 12, marginTop: "0.5rem" }}>
+              Pick a move and add reasoning for every human-controlled nation before running this cycle.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Cycle-count picker — only shown before cycle 1 starts, locked in after.
           Each cycle is one on-chain commit (a MetaMask approval on a real
           network), so this matters most for Sepolia — a shorter run is
@@ -572,7 +774,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
       {/* Footer button */}
       <div className="step-footer">
         {phase === "idle" && (
-          <button className="btn-primary" onClick={runAgents}>
+          <button className="btn-primary" onClick={runAgents} disabled={anyHumanDraftInvalid}>
             {cycle === 1 ? `Start — Run Cycle 1 of ${maxCycles}` : `Run Cycle ${cycle}`}
           </button>
         )}
