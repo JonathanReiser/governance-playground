@@ -1,0 +1,721 @@
+{
+  "scenarioId": "middle-east-2026",
+  "exportedAt": "2026-08-07T15:14:11.309Z",
+  "aiAgents": {
+    "entangled": {
+      "aId": "iran",
+      "aWorldKey": "iran",
+      "aAxis": [
+        "hardline",
+        "pragmatic"
+      ],
+      "aDriverField": "hardlinerPressure",
+      "aDriverDirection": "direct",
+      "bId": "israel",
+      "bWorldKey": "israel",
+      "bAxis": [
+        "hawkish",
+        "dovish"
+      ],
+      "bDriverField": "publicSentiment",
+      "bDriverDirection": "inverse"
+    },
+    "standalone": {
+      "id": "saudi_arabia",
+      "worldKey": "saudiArabia",
+      "axis": [
+        "bold",
+        "cautious"
+      ],
+      "driverField": "reformPressure",
+      "driverDirection": "direct"
+    },
+    "marketInstruments": [
+      {
+        "key": "primary",
+        "label": "Oil Index",
+        "symbol": "OIL",
+        "emoji": "🛢",
+        "shockLabel": "SPIKING",
+        "calmLabel": "STABLE"
+      },
+      {
+        "key": "currencyA",
+        "label": "Rial Index",
+        "symbol": "RIAL",
+        "emoji": "🇮🇷",
+        "shockLabel": "WEAKENING",
+        "calmLabel": "RESILIENT"
+      },
+      {
+        "key": "currencyB",
+        "label": "Riyal Index",
+        "symbol": "RIYAL",
+        "emoji": "🇸🇦",
+        "shockLabel": "ROBUST",
+        "calmLabel": "STRAINED"
+      },
+      {
+        "key": "global",
+        "label": "US Gas / USD",
+        "symbol": "GAS",
+        "emoji": "⛽",
+        "shockLabel": "SURGING",
+        "calmLabel": "CALM"
+      }
+    ]
+  },
+  "history": [
+    {
+      "cycle": 1,
+      "stability": 33,
+      "proxy": 49,
+      "trade": 138,
+      "conflicts": 5,
+      "dealIntegrity": 50,
+      "market": {
+        "outcomes": {
+          "primary": "STABLE",
+          "currencyA": "RESILIENT",
+          "currencyB": "STRAINED",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "SPIKING": 0.5000000000000002,
+            "STABLE": 0.5
+          },
+          "currencyA": {
+            "WEAKENING": 0.5000000000000001,
+            "RESILIENT": 0.5
+          },
+          "currencyB": {
+            "ROBUST": 0.5000000000000001,
+            "STRAINED": 0.5
+          },
+          "global": {
+            "SURGING": 0.5000000000000002,
+            "CALM": 0.5
+          }
+        },
+        "primaryDelta": -2.2399999999999998,
+        "currencyADelta": 2.25,
+        "currencyBDelta": -0.48,
+        "globalDelta": -0.87,
+        "derivedNote": {
+          "label": "Dollar Direction",
+          "value": "FIRMING"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 5.6,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 7.5,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 0.8,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 2.9,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "saudi_arabia": {
+          "nation": "saudi_arabia",
+          "cycle": 1,
+          "decision": {
+            "primaryAction": "BACK_CHANNEL_IRAN",
+            "supportingActions": [
+              "RELIGIOUS_ESTABLISHMENT_SIGNAL",
+              "MAINTAIN_POSTURE",
+              "VISION_2030_SIGNAL"
+            ],
+            "reasoning": "Iran's hardline parliamentary push threatens deal fragility; quiet diplomacy through Beijing channels preserves optionality while signaling to our religious establishment that we are defending Islamic interests, not abandoning them. This hedging posture maintains both coalition credibility and strategic flexibility without committing to costly escalation or premature normalization that risks domestic legitimacy.",
+            "metricDeltas": {
+              "stability": 3,
+              "proxyActivity": -5,
+              "tradeVolume": 8,
+              "conflictEvents": -1,
+              "dealIntegrity": 5,
+              "reformPressure": 2
+            },
+            "oilProductionStance": "STABLE",
+            "normalizationStatus": "PAUSED",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Two-Level Games (Putnam): back-channel Iran diplomacy satisfies domestic religious establishment constraint while maintaining international hedge; Prospect Theory: loss-aversion favors reversible economic/diplomatic tools over military commitment in uncertain environment."
+          },
+          "usage": {
+            "input_tokens": 1320,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 318,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "israel": {
+          "nation": "israel",
+          "cycle": 1,
+          "decision": {
+            "primaryAction": "COALITION_MANAGEMENT",
+            "supportingActions": [
+              "MAINTAIN_DETERRENCE",
+              "DEMAND_VERIFICATION"
+            ],
+            "reasoning": "The far-right coalition partners are publicly hostile to the deal, and public sentiment (58/100) is not yet strong enough to override their veto leverage. I must shore up the coalition first by demonstrating resolve on verification and deterrence — this shows the right flank that security concerns are being actively managed, not ignored. Simultaneously, honoring the deal's verification mechanisms preserves the US alliance and centrist support, balancing both wings of the coalition.",
+            "metricDeltas": {
+              "stability": -2,
+              "proxyActivity": -3,
+              "tradeVolume": 5,
+              "conflictEvents": 1,
+              "dealIntegrity": 4,
+              "publicSentiment": 3
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Selectorate theory dominates: the fractious Knesset coalition requires careful sequencing of domestic reassurance before diplomatic deepening; hawkish posture on verification satisfies far-right demands while maintaining deal credibility with centrists and Washington."
+          },
+          "usage": {
+            "input_tokens": 1346,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 302,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "iran": {
+          "nation": "iran",
+          "cycle": 1,
+          "decision": {
+            "primaryAction": "DELAY_COMPLIANCE",
+            "supportingActions": [
+              "ELEVATE_IRGC",
+              "ESCALATE_PROXY"
+            ],
+            "reasoning": "Delaying compliance on nuclear inspection schedules placates hardliners (72/100 pressure) by signaling resistance while preserving deal optionality—critical given sanctions relief is still pending. Elevating IRGC authority over nuclear affairs consolidates the winning coalition. Escalating proxy tempo in Iraq/Syria demonstrates defiance to domestic audiences without triggering deal collapse, maintaining our zero-sum operational code.",
+            "metricDeltas": {
+              "stability": -8,
+              "proxyActivity": 12,
+              "tradeVolume": 5,
+              "conflictEvents": 2,
+              "dealIntegrity": -12,
+              "hardlinerPressure": -6
+            },
+            "hormuzStatus": "OPEN",
+            "nuclearStatus": "CAPPED",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory (mixed frame at stability 38) and selectorate theory dominate: tactical ambiguity on compliance preserves both IRGC loyalty and deal survival odds until sanctions relief clarity emerges, avoiding a premature legitimacy crisis."
+          },
+          "usage": {
+            "input_tokens": 1349,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 311,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "iran": "pragmatic",
+        "israel": "dovish",
+        "saudi_arabia": "bold",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.7009800006813722,
+            "pragmatic": 0.2990199993186279
+          },
+          "bProbabilities": {
+            "hawkish": 0.7092324335849338,
+            "dovish": 0.2907675664150663
+          },
+          "entanglementStrength": 0.2571683777367919,
+          "cProbabilities": {
+            "bold": 0.47089156934302623,
+            "cautious": 0.5291084306569738
+          }
+        },
+        "entangledEffect": {
+          "stability": 2,
+          "dealIntegrity": 1,
+          "label": "entangled de-escalation"
+        }
+      }
+    },
+    {
+      "cycle": 2,
+      "stability": 35,
+      "proxy": 46,
+      "trade": 156,
+      "conflicts": 5,
+      "dealIntegrity": 43,
+      "market": {
+        "outcomes": {
+          "primary": "STABLE",
+          "currencyA": "RESILIENT",
+          "currencyB": "STRAINED",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "SPIKING": 0,
+            "STABLE": 1
+          },
+          "currencyA": {
+            "WEAKENING": 0.14644660940672624,
+            "RESILIENT": 0.8535533905932738
+          },
+          "currencyB": {
+            "ROBUST": 0.006155829702431137,
+            "STRAINED": 0.9938441702975689
+          },
+          "global": {
+            "SURGING": 0,
+            "CALM": 1
+          }
+        },
+        "primaryDelta": -0.04000000000000001,
+        "currencyADelta": 0,
+        "currencyBDelta": -1.38,
+        "globalDelta": -0.84,
+        "derivedNote": {
+          "label": "Dollar Direction",
+          "value": "FIRMING"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 0.1,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 0,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 2.3,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 2.8,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "israel": {
+          "nation": "israel",
+          "cycle": 2,
+          "decision": {
+            "primaryAction": "DEMAND_VERIFICATION",
+            "supportingActions": [
+              "MAINTAIN_DETERRENCE",
+              "COALITION_MANAGEMENT",
+              "DEEPEN_US_TIES"
+            ],
+            "reasoning": "Verification demands satisfy the security-first operational code while preserving deal integrity (50/100) and avoiding right-wing coalition collapse. Maintaining deterrence signals resolve to far-right partners; deepening US ties anchors the agreement. Public sentiment at 61 permits cautious diplomacy, but only if backed by credible military posture and transparent verification—core to Begin Doctrine.",
+            "metricDeltas": {
+              "stability": 2,
+              "proxyActivity": -3,
+              "tradeVolume": 5,
+              "conflictEvents": 0,
+              "dealIntegrity": 3,
+              "publicSentiment": 2
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Two-Level Games (Putnam): verification demands signal strength to domestic hawks while preserving diplomatic optionality; Selectorate Theory sustains large fractious coalition through visible security vigilance rather than concession."
+          },
+          "usage": {
+            "input_tokens": 1333,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 290,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "saudi_arabia": {
+          "nation": "saudi_arabia",
+          "cycle": 2,
+          "decision": {
+            "primaryAction": "BACK_CHANNEL_IRAN",
+            "supportingActions": [
+              "MAINTAIN_POSTURE",
+              "VISION_2030_SIGNAL",
+              "DE_ESCALATE_YEMEN"
+            ],
+            "reasoning": "Iran normalization is fragile at 50/100 integrity; back-channel engagement preserves optionality while avoiding public commitment that alienates the religious establishment. Maintaining military posture signals resolve to the coalition while de-escalating Yemen reduces proxy costs and stabilizes the deal ecosystem. Vision 2030 signals reassure reformists that economic modernization proceeds despite regional tensions, satisfying the winning coalition's dual need for stability and diversification.",
+            "metricDeltas": {
+              "stability": 6,
+              "proxyActivity": -12,
+              "tradeVolume": 8,
+              "conflictEvents": -2,
+              "dealIntegrity": 4,
+              "reformPressure": 3
+            },
+            "oilProductionStance": "STABLE",
+            "normalizationStatus": "PAUSED",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Prospect theory and two-level games dominate: loss-aversion favors reversible back-channel diplomacy over public commitment; hedging doctrine preserves relationships with all parties while managing religious establishment veto through restraint on normalization."
+          },
+          "usage": {
+            "input_tokens": 1307,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 330,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "iran": {
+          "nation": "iran",
+          "cycle": 2,
+          "decision": {
+            "primaryAction": "DELAY_COMPLIANCE",
+            "supportingActions": [
+              "ESCALATE_PROXY",
+              "DEMAND_RENEGOTIATION",
+              "ACCELERATE_CHINA_TIES"
+            ],
+            "reasoning": "Delaying compliance on nuclear caps preserves optionality while signaling resolve to the hardline coalition (IRGC, Guardian Council) without triggering immediate deal collapse. Proxy escalation in Iraq and Syria reasserts our resistance axis identity and demonstrates that the deal does not constrain our regional posture. This satisfies the operational code: agreements are tools, not constraints. Hardliner pressure at 66 remains manageable if we couple restraint on Hormuz with visible defiance on compliance and proxy tempo.",
+            "metricDeltas": {
+              "stability": -8,
+              "proxyActivity": 12,
+              "tradeVolume": 5,
+              "conflictEvents": 2,
+              "dealIntegrity": -15,
+              "hardlinerPressure": -6
+            },
+            "hormuzStatus": "OPEN",
+            "nuclearStatus": "CAPPED",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory in mixed frame (stability 33): tactical opportunism via compliance delay and proxy escalation minimizes coalition defection risk while probing Western resolve; two-level game logic prioritizes winning coalition over public, accepting deal erosion to manage hardliner pressure."
+          },
+          "usage": {
+            "input_tokens": 1336,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 350,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "iran": "pragmatic",
+        "israel": "dovish",
+        "saudi_arabia": "bold",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.04322727117869954,
+            "pragmatic": 0.9567727288213004
+          },
+          "bProbabilities": {
+            "hawkish": 0.010926199633097178,
+            "dovish": 0.9890738003669028
+          },
+          "entanglementStrength": 0,
+          "cProbabilities": {
+            "bold": 0.9755282581475768,
+            "cautious": 0.024471741852423207
+          }
+        },
+        "entangledEffect": {
+          "stability": 2,
+          "dealIntegrity": 1,
+          "label": "entangled de-escalation"
+        }
+      }
+    },
+    {
+      "cycle": 3,
+      "stability": 31,
+      "proxy": 47,
+      "trade": 175,
+      "conflicts": 7,
+      "dealIntegrity": 41,
+      "market": {
+        "outcomes": {
+          "primary": "STABLE",
+          "currencyA": "RESILIENT",
+          "currencyB": "STRAINED",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "SPIKING": 0.09549150281252627,
+            "STABLE": 0.9045084971874737
+          },
+          "currencyA": {
+            "WEAKENING": 0.09549150281252625,
+            "RESILIENT": 0.9045084971874737
+          },
+          "currencyB": {
+            "ROBUST": 0.002739052315863331,
+            "STRAINED": 0.9972609476841368
+          },
+          "global": {
+            "SURGING": 0.03806023374435661,
+            "CALM": 0.9619397662556435
+          }
+        },
+        "primaryDelta": -1.2400000000000002,
+        "currencyADelta": 0.18,
+        "currencyBDelta": -1.26,
+        "globalDelta": -2.49,
+        "derivedNote": {
+          "label": "Dollar Direction",
+          "value": "FIRMING"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 3.1,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 0.6,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 2.1,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 8.3,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "saudi_arabia": {
+          "nation": "saudi_arabia",
+          "cycle": 3,
+          "decision": {
+            "primaryAction": "BACK_CHANNEL_IRAN",
+            "supportingActions": [
+              "MAINTAIN_POSTURE",
+              "VISION_2030_SIGNAL",
+              "RELIGIOUS_ESTABLISHMENT_SIGNAL"
+            ],
+            "reasoning": "Iran normalization is fragile (43/100 integrity) and public Israeli-Saudi talks would destabilize it—risking Hormuz closure and oil revenue. Back-channel engagement preserves optionality while signaling to the religious establishment that we are not abandoning the Palestinians or Iran's regional role. Vision 2030 messaging reinforces that stability funds reform, satisfying both technocrats and traditionalists.",
+            "metricDeltas": {
+              "stability": 4,
+              "proxyActivity": -8,
+              "tradeVolume": 6,
+              "conflictEvents": -1,
+              "dealIntegrity": 5,
+              "reformPressure": 2
+            },
+            "oilProductionStance": "STABLE",
+            "normalizationStatus": "PAUSED",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Two-level games logic: domestic constraint (religious establishment) forces hedging on Israel normalization; Iran deal preservation via quiet diplomacy maximizes economic and strategic payoff without coalition fracture. Loss-aversion drives preference for reversible back-channel over public commitment."
+          },
+          "usage": {
+            "input_tokens": 1307,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 330,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "iran": {
+          "nation": "iran",
+          "cycle": 3,
+          "decision": {
+            "primaryAction": "DELAY_COMPLIANCE",
+            "supportingActions": [
+              "ESCALATE_PROXY",
+              "ACCELERATE_CHINA_TIES"
+            ],
+            "reasoning": "Delaying compliance on nuclear inspections preserves ambiguity while keeping the deal formally intact—satisfying the IRGC's demand for strategic optionality without triggering full exit that would unite international pressure. Escalating proxy activity signals to hardliners that resistance continues despite the deal, while deepening China ties hedges against sanctions relief failure. This posture maximizes winning-coalition satisfaction (IRGC retains operational freedom, clerical authority appears uncompromised) while the mixed-frame risk tolerance (stability 35) justifies tactical probing.",
+            "metricDeltas": {
+              "stability": -8,
+              "proxyActivity": 12,
+              "tradeVolume": 8,
+              "conflictEvents": 2,
+              "dealIntegrity": -12,
+              "hardlinerPressure": -5
+            },
+            "hormuzStatus": "THREATENED",
+            "nuclearStatus": "CAPPED",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory (mixed-frame positioning at stability 35) and selectorate logic (small winning coalition, IRGC veto power) jointly explain this choice: delay maintains strategic ambiguity valued by the IRGC while proxy escalation demonstrates resistance to hardline constituency, avoiding the legitimacy collapse that outright deal abandonment would trigger."
+          },
+          "usage": {
+            "input_tokens": 1336,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 367,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "israel": {
+          "nation": "israel",
+          "cycle": 3,
+          "decision": {
+            "primaryAction": "DEMAND_VERIFICATION",
+            "supportingActions": [
+              "MAINTAIN_DETERRENCE",
+              "COALITION_MANAGEMENT"
+            ],
+            "reasoning": "Demand verification holds the deal intact while signaling resolve to both far-right coalition partners (who need visible security vigilance) and the security establishment. It preserves the 63/100 public sentiment advantage without triggering existential risk protocols, and keeps the US alliance stable by showing good-faith compliance while protecting against Iranian breakout.",
+            "metricDeltas": {
+              "stability": -2,
+              "proxyActivity": -3,
+              "tradeVolume": 5,
+              "conflictEvents": 1,
+              "dealIntegrity": 4,
+              "publicSentiment": 3
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Two-level games (Putnam) dominates: verification satisfies far-right pressure for vigilance while maintaining centrist/security establishment backing; selectorate coalition logic requires visible hawkishness without breaking the deal."
+          },
+          "usage": {
+            "input_tokens": 1333,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 271,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "iran": "pragmatic",
+        "israel": "dovish",
+        "saudi_arabia": "bold",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.03015368960704579,
+            "pragmatic": 0.9698463103929541
+          },
+          "bProbabilities": {
+            "hawkish": 0.024471741852423203,
+            "dovish": 0.9755282581475767
+          },
+          "entanglementStrength": 6.938893903907228e-18,
+          "cProbabilities": {
+            "bold": 0.9890738003669032,
+            "cautious": 0.010926199633097183
+          }
+        },
+        "entangledEffect": {
+          "stability": 2,
+          "dealIntegrity": 1,
+          "label": "entangled de-escalation"
+        }
+      }
+    }
+  ],
+  "finalState": {
+    "stability": 31,
+    "proxy": 47,
+    "trade": 175,
+    "conflicts": 7,
+    "dealIntegrity": 41,
+    "market": {
+      "primary": 97,
+      "currencyA": 102,
+      "currencyB": 98,
+      "global": 96
+    }
+  },
+  "startState": {
+    "stability": 38,
+    "conflicts": 3,
+    "trade": 120,
+    "proxy": 45,
+    "dealIntegrity": 52,
+    "market": {
+      "primary": 100,
+      "currencyA": 100,
+      "currencyB": 100,
+      "global": 100
+    }
+  },
+  "registryAddress": "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
+  "oracleAddress": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2"
+}

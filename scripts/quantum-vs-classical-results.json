@@ -1,47 +1,65 @@
 {
   "scenario": "middle-east-2026",
   "inputMode": "real-data",
-  "realDataPoolSize": 10,
-  "realDataSourceCount": 1,
+  "realDataPoolSize": 42,
+  "realDataSourceCount": 7,
   "nTrials": 5000,
   "nCycles": 3,
   "initialMarginal": 0.72,
-  "meanEntanglementStrength": 0.18713309302477205,
+  "meanEntanglementStrength": 0.21483597344850633,
   "quantum": {
-    "stat": 1055.2472326835777,
+    "stat": 1536.554953840266,
     "p": 0,
     "expected": [
-      1921.8848,
-      1154.1152,
-      1202.1152,
-      721.8848
+      1994.2362,
+      1074.7638,
+      1254.7638,
+      676.2362
     ],
     "observed": [
-      2463,
-      613,
-      661,
-      1263
+      2638,
+      431,
+      611,
+      1320
     ],
     "total": 5000
   },
   "classical": {
-    "stat": 0.00007724066004750852,
-    "p": 0.9929877076259714,
+    "stat": 43.03034550324053,
+    "p": 5.4172444308164813e-11,
     "expected": [
-      1347.845,
-      1321.155,
-      1177.155,
-      1153.845
+      1621.8732,
+      1396.1268,
+      1065.1268,
+      916.8732
     ],
     "observed": [
-      1348,
-      1321,
-      1177,
-      1154
+      1735,
+      1283,
+      952,
+      1030
     ],
     "total": 5000
   },
-  "quantumGap": 0.21644608,
-  "classicalGap": 0.00006200000000003425,
-  "caveat": "Bootstrap-resampled from 10 real logged cycles across 1 run file(s) — small-pool result, not yet a robust finding."
+  "classicalShuffled": {
+    "stat": 0.09835573046420765,
+    "p": 0.7538119537402439,
+    "expected": [
+      1640.6088,
+      1413.3912,
+      1045.3912,
+      900.6088
+    ],
+    "observed": [
+      1646,
+      1408,
+      1040,
+      906
+    ],
+    "total": 5000
+  },
+  "quantumGap": 0.25750552,
+  "classicalGap": 0.04525072000000001,
+  "classicalShuffledGap": 0.002156480000000016,
+  "caveat": "Bootstrap-resampled from 42 real logged cycles across 7 run file(s) — small-pool result, not yet a robust finding."
 }

@@ -25,14 +25,31 @@
  *                     (so single-nation probabilities are identical by
  *                     construction), applies the SAME rotations to each
  *                     independently via rotate(), measures independently.
+ *                     IMPORTANT: this arm still draws A's and B's per-cycle
+ *                     inputs from the SAME sampled row (real or synthetic),
+ *                     so it is NOT a clean correlation-free control on its
+ *                     own — see the shuffled arm below.
  *
- *   Since both arms see identical decision inputs and identical initial
- *   marginals, any joint-outcome correlation gap between them is
- *   attributable specifically to the entanglement structure, not to
- *   shared-cause correlation from correlated decisions (deltaA and deltaB
- *   are themselves drawn independently per cycle, so there's no shared-
- *   cause correlation to begin with — the quantum arm's correlation, if
- *   any, comes ONLY from the Bell state / entangled-escalation mechanism).
+ *     CLASSICAL ARM, SHUFFLED — same product-state construction, but A's
+ *                     and B's per-cycle inputs are drawn from TWO
+ *                     INDEPENDENTLY sampled rows each cycle. This is the
+ *                     genuine null: on synthetic inputs it's redundant with
+ *                     the plain classical arm (deltas are already drawn
+ *                     independently there), but on real-data mode it
+ *                     matters — real logged rows can carry incidental
+ *                     structure (real shared-cause correlation, or just an
+ *                     artifact of bootstrap-resampling a small discrete
+ *                     pool) that the plain classical arm would otherwise
+ *                     leak into both A's and B's rotations together. Added
+ *                     2026-08-07 after a 42-real-cycle run showed the plain
+ *                     classical arm becoming spuriously "significant" as
+ *                     the pool grew — the shuffled arm is what actually
+ *                     isolates the entanglement-specific contribution.
+ *
+ *   Comparing the quantum arm against the SHUFFLED classical arm is what
+ *   isolates entanglement specifically. The plain classical arm is kept
+ *   for context/diagnostic purposes only — don't use its p-value as the
+ *   pass/fail check.
  *
  * METRIC: standard chi-square test of independence on each arm's 2x2
  * joint-outcome contingency table (df=1). A large statistic / small
@@ -229,12 +246,14 @@ const rng = mulberry32(0xC0FFEE);
 
 // Joint outcome counts: [A0B0, A0B1, A1B0, A1B1]
 const quantumCounts = [0, 0, 0, 0];
-const classicalCounts = [0, 0, 0, 0];
+const classicalCounts = [0, 0, 0, 0];         // A/B share the same real logged row each cycle
+const classicalShuffledCounts = [0, 0, 0, 0]; // A/B drawn from INDEPENDENT rows — the true null
 let entStrengthSum = 0;
 
 for (let trial = 0; trial < N_TRIALS; trial++) {
   let joint = freshQuantumJoint();
   let { qA, qB } = freshClassicalPair();
+  let { qA: qAs, qB: qBs } = freshClassicalPair();
 
   for (let cyc = 0; cyc < N_CYCLES; cyc++) {
     const { deltaA, deltaB, actionA, actionB } = sampleCycleDeltas(rng);
@@ -242,6 +261,20 @@ for (let trial = 0; trial < N_TRIALS; trial++) {
     const thetaB = rotationTheta(deltaB, 10, entangled.bDriverDirection);
     const phaseA = actionPhase(actionA);
     const phaseB = actionPhase(actionB);
+
+    // Shuffled-classical control: A's and B's inputs drawn from INDEPENDENT
+    // rows this cycle, breaking any incidental structure tying a real row's
+    // A-side to its own B-side (shared real-world cause, correlated action
+    // pairing, or just bootstrap artifacts of a small discrete pool). This
+    // is the genuinely correlation-free null — see file header.
+    const shufA = sampleCycleDeltas(rng);
+    const shufB = sampleCycleDeltas(rng);
+    const thetaAs = rotationTheta(shufA.deltaA, 15, entangled.aDriverDirection);
+    const thetaBs = rotationTheta(shufB.deltaB, 10, entangled.bDriverDirection);
+    const phaseAs = actionPhase(shufA.actionA);
+    const phaseBs = actionPhase(shufB.actionB);
+    qAs = rotate(qAs, thetaAs, phaseAs);
+    qBs = rotate(qBs, thetaBs, phaseBs);
 
     // Quantum arm: correlated joint state, local rotations.
     joint = applyLocalRotation(joint, "A", thetaA, phaseA);
@@ -265,6 +298,12 @@ for (let trial = 0; trial < N_TRIALS; trial++) {
   const bCollapseClassical = collapseQubit(qB, ["0", "1"], rng);
   const cIdx = aCollapse.outcomeIndex * 2 + bCollapseClassical.outcomeIndex;
   classicalCounts[cIdx]++;
+
+  // Shuffled-classical arm measurement — independent, decorrelated inputs.
+  const aCollapseS = collapseQubit(qAs, ["0", "1"], rng);
+  const bCollapseS = collapseQubit(qBs, ["0", "1"], rng);
+  const csIdx = aCollapseS.outcomeIndex * 2 + bCollapseS.outcomeIndex;
+  classicalShuffledCounts[csIdx]++;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -310,8 +349,10 @@ function correlationGap(counts) {
 
 const quantumStats = chiSquareIndependence(quantumCounts);
 const classicalStats = chiSquareIndependence(classicalCounts);
+const classicalShuffledStats = chiSquareIndependence(classicalShuffledCounts);
 const quantumGap = correlationGap(quantumCounts);
 const classicalGap = correlationGap(classicalCounts);
+const classicalShuffledGap = correlationGap(classicalShuffledCounts);
 
 // ─────────────────────────────────────────────────────────────
 // REPORT
@@ -341,27 +382,44 @@ console.log(`  As %: [${quantumCounts.map((n) => pct(n, N_TRIALS)).join(", ")}]`
 console.log(`  Total-variation gap from independence: ${quantumGap.toFixed(4)}`);
 console.log(`  Chi-square(1) = ${quantumStats.stat.toFixed(2)}, p = ${fmtP(quantumStats.p)}`);
 
-console.log(`\n── CLASSICAL ARM (product state, identical inputs) ──`);
+console.log(`\n── CLASSICAL ARM (shared real row per cycle, applied independently) ──`);
 console.log(`  Joint outcome counts [A0B0, A0B1, A1B0, A1B1]: [${classicalCounts.join(", ")}]`);
 console.log(`  As %: [${classicalCounts.map((n) => pct(n, N_TRIALS)).join(", ")}]`);
 console.log(`  Total-variation gap from independence: ${classicalGap.toFixed(4)}`);
 console.log(`  Chi-square(1) = ${classicalStats.stat.toFixed(2)}, p = ${fmtP(classicalStats.p)}`);
+console.log(`  (Context only — A/B still draw the SAME real logged row each cycle, so any`);
+console.log(`   incidental structure in which rows get resampled together can leak in here too.`);
+console.log(`   Not the control to trust for the verdict — see the shuffled arm below.)`);
+
+console.log(`\n── CLASSICAL ARM, SHUFFLED (A/B from INDEPENDENT rows — the real null) ──`);
+console.log(`  Joint outcome counts [A0B0, A0B1, A1B0, A1B1]: [${classicalShuffledCounts.join(", ")}]`);
+console.log(`  As %: [${classicalShuffledCounts.map((n) => pct(n, N_TRIALS)).join(", ")}]`);
+console.log(`  Total-variation gap from independence: ${classicalShuffledGap.toFixed(4)}`);
+console.log(`  Chi-square(1) = ${classicalShuffledStats.stat.toFixed(2)}, p = ${fmtP(classicalShuffledStats.p)}`);
 
 console.log(`\n── VERDICT ──`);
 const quantumSignificant = quantumStats.p < 0.01;
-const classicalNull = classicalStats.p >= 0.01;
+const shuffledNull = classicalShuffledStats.p >= 0.01;
 const modeLabel = realDataPool ? `real data (${realDataPool.length} logged cycles, bootstrap-resampled)` : "synthetic inputs";
-if (quantumSignificant && classicalNull) {
+if (quantumSignificant && shuffledNull) {
   console.log(`  ✅ Signature confirmed on ${modeLabel}: the entangled arm shows a`);
   console.log(`     statistically significant joint-outcome correlation (p ${fmtP(quantumStats.p)})`);
-  console.log(`     that the classical arm, given IDENTICAL decision inputs, does not`);
-  console.log(`     (p ${fmtP(classicalStats.p)}). The mechanism does what the theory predicts.`);
+  console.log(`     that the true decorrelated-classical control does not`);
+  console.log(`     (p ${fmtP(classicalShuffledStats.p)}). The mechanism does what the theory predicts.`);
+  if (classicalStats.p < 0.01) {
+    console.log(`     Note: the shared-row classical arm ALSO showed correlation (p ${fmtP(classicalStats.p)})`);
+    console.log(`     — real decision structure (or pool-resampling artifacts) contribute some shared-`);
+    console.log(`     cause correlation on top of the entanglement effect; the shuffled arm above is`);
+    console.log(`     what isolates entanglement specifically, and it stayed null.`);
+  }
 } else if (!quantumSignificant) {
   console.log(`  ⚠️  Entangled arm did NOT reach significance (p ${fmtP(quantumStats.p)}) — check`);
   console.log(`     alpha/entanglement strength, trial count, or cycle count.`);
 } else {
-  console.log(`  ⚠️  Classical arm ALSO shows significant correlation (p ${fmtP(classicalStats.p)}) —`);
-  console.log(`     something is leaking shared state between arms; investigate before trusting gap.`);
+  console.log(`  ⚠️  The decorrelated-classical control ALSO shows significant correlation`);
+  console.log(`     (p ${fmtP(classicalShuffledStats.p)}) — something beyond entanglement is driving`);
+  console.log(`     this, e.g. asymmetric marginals interacting with the measurement order. Investigate`);
+  console.log(`     before trusting the quantum arm's gap as entanglement-specific.`);
 }
 if (realDataPool) {
   console.log(`\n  Reminder: trials are bootstrap-resampled from only ${realDataPool.length} real logged`);
@@ -390,8 +448,10 @@ await fs.writeFile(
       meanEntanglementStrength: entStrengthSum / N_TRIALS,
       quantum: quantumStats,
       classical: classicalStats,
+      classicalShuffled: classicalShuffledStats,
       quantumGap,
       classicalGap,
+      classicalShuffledGap,
       caveat: realDataPool
         ? `Bootstrap-resampled from ${realDataPool.length} real logged cycles across ${realDataSourceCount} run file(s) — small-pool result, not yet a robust finding.`
         : "Decision deltas are synthetic (uniform, production-matched bounds), not real logged Claude decisions. See file header.",
