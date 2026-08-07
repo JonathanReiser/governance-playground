@@ -69,9 +69,15 @@
  *   ACTUAL per-cycle Claude decisions from one or more runs exported via the
  *   "⬇ Download Run Data (JSON)" button on AIResultsStep.jsx (Dev Mode
  *   produces these with zero MetaMask/wallet involvement — see README's
- *   Dev Mode quickstart). Any entry that's a directory (e.g. scripts/data)
- *   is expanded to every *.json file directly inside it, so the list only
- *   needs to grow as you add real files there, not be edited by hand. Each
+ *   Dev Mode quickstart). Any entry that's a directory is expanded to every
+ *   *.json file directly inside it (non-recursive), so the list only needs
+ *   to grow as you add real files there, not be edited by hand. ALL files in
+ *   one invocation must share the same scenarioId (checked, throws if not)
+ *   — real runs live one subdirectory per scenario,
+ *   scripts/data/middle-east-2026/ and scripts/data/taiwan-strait-2026/, so
+ *   point --real-data at the specific scenario's subdirectory, not
+ *   scripts/data itself (which has no files directly inside it and would
+ *   resolve to an empty pool). Each
  *   synthetic "trial" here draws N_CYCLES real logged cycles WITH
  *   REPLACEMENT from the pooled set of every cycle across every resolved
  *   file, preserving each cycle's real A/B deltas as a joint record (not
@@ -86,7 +92,8 @@
  *   node scripts/quantum-vs-classical-test.mjs [scenarioPath] [nTrials] [nCycles]
  *   node scripts/quantum-vs-classical-test.mjs ../scenarios/middle-east-2026.config.cjs 5000 3
  *   node scripts/quantum-vs-classical-test.mjs --real-data run1.json,run2.json [nTrials]
- *   node scripts/quantum-vs-classical-test.mjs --real-data scripts/data [nTrials]
+ *   node scripts/quantum-vs-classical-test.mjs --real-data scripts/data/middle-east-2026 [nTrials]
+ *   node scripts/quantum-vs-classical-test.mjs --real-data scripts/data/taiwan-strait-2026 [nTrials]
  *
  * No blockchain, no Hardhat, no API key — pure Node, ESM, offline.
  */
