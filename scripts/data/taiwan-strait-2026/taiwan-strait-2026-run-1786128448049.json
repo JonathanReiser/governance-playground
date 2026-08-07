@@ -1,0 +1,2195 @@
+{
+  "scenarioId": "taiwan-strait-2026",
+  "exportedAt": "2026-08-07T18:47:28.033Z",
+  "aiAgents": {
+    "entangled": {
+      "aId": "china",
+      "aWorldKey": "china",
+      "aAxis": [
+        "hardline",
+        "conciliatory"
+      ],
+      "aDriverField": "hardlinerPressure",
+      "aDriverDirection": "direct",
+      "bId": "taiwan",
+      "bWorldKey": "taiwan",
+      "bAxis": [
+        "resistant",
+        "accommodating"
+      ],
+      "bDriverField": "publicSentiment",
+      "bDriverDirection": "inverse"
+    },
+    "standalone": {
+      "id": "japan",
+      "worldKey": "japan",
+      "axis": [
+        "assertive",
+        "restrained"
+      ],
+      "driverField": "reformPressure",
+      "driverDirection": "direct"
+    },
+    "marketInstruments": [
+      {
+        "key": "primary",
+        "label": "Semiconductor Export Index",
+        "symbol": "SEMI",
+        "emoji": "💾",
+        "shockLabel": "DISRUPTED",
+        "calmLabel": "FLOWING"
+      },
+      {
+        "key": "currencyA",
+        "label": "Taiwan Dollar Index",
+        "symbol": "TWD",
+        "emoji": "🇹🇼",
+        "shockLabel": "WEAKENING",
+        "calmLabel": "RESILIENT"
+      },
+      {
+        "key": "currencyB",
+        "label": "Chinese Yuan Index",
+        "symbol": "CNY",
+        "emoji": "🇨🇳",
+        "shockLabel": "STRAINED",
+        "calmLabel": "STABLE"
+      },
+      {
+        "key": "global",
+        "label": "Global Shipping Insurance Index",
+        "symbol": "SHIP",
+        "emoji": "🚢",
+        "shockLabel": "SURGING",
+        "calmLabel": "CALM"
+      }
+    ]
+  },
+  "history": [
+    {
+      "cycle": 1,
+      "stability": 37,
+      "proxy": 27,
+      "trade": 355,
+      "conflicts": 2,
+      "dealIntegrity": 49,
+      "market": {
+        "outcomes": {
+          "primary": "FLOWING",
+          "currencyA": "RESILIENT",
+          "currencyB": "STABLE",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.5,
+            "FLOWING": 0.49999999999999994
+          },
+          "currencyA": {
+            "WEAKENING": 0.5,
+            "RESILIENT": 0.49999999999999994
+          },
+          "currencyB": {
+            "STRAINED": 0.5,
+            "STABLE": 0.49999999999999994
+          },
+          "global": {
+            "SURGING": 0.5,
+            "CALM": 0.49999999999999994
+          }
+        },
+        "primaryDelta": -0.2,
+        "currencyADelta": 0.51,
+        "currencyBDelta": -0.24,
+        "globalDelta": -0.81,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 0.5,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 1.7,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 0.4,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 2.7,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 1,
+          "decision": {
+            "primaryAction": "MAINTAIN_STATUS_QUO",
+            "supportingActions": [
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "SEEK_INTERNATIONAL_SUPPORT",
+              "COALITION_MANAGEMENT"
+            ],
+            "reasoning": "Public sentiment at 66/100 provides political capital for reassurance without appearing weak; maintaining status quo honors both pro-independence and status-quo factions by avoiding provocative moves while SEMICONDUCTOR_LEVERAGE_SIGNAL and INTERNATIONAL_SUPPORT reinforce deterrence-by-denial and economic indispensability. Coalition remains strained but manageable—direct engagement with legislative partners on cross-strait policy prevents fracture.",
+            "metricDeltas": {
+              "stability": 3,
+              "proxyActivity": -2,
+              "tradeVolume": 8,
+              "conflictEvents": -1,
+              "dealIntegrity": 4,
+              "publicSentiment": 2
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Selectorate theory (Bueno de Mesquita) governs this move—large, fractious coalition demands visible reassurance of both resolve and restraint; strategic ambiguity (operational code) preserved by signaling leverage without explicit escalation."
+          },
+          "usage": {
+            "input_tokens": 1354,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 312,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "japan": {
+          "nation": "japan",
+          "cycle": 1,
+          "decision": {
+            "primaryAction": "QUIET_DIPLOMACY_BEIJING",
+            "supportingActions": [
+              "US_ALLIANCE_CONSULTATION",
+              "ECONOMIC_SECURITY_PACKAGE",
+              "DIET_COALITION_SIGNAL"
+            ],
+            "reasoning": "Japan's hedging strategy requires simultaneous signaling: private channels to Beijing preserve trade relationships and reduce miscalculation risk, while US consultation and economic security measures reassure the American alliance and the domestic reformist coalition. This preserves reversibility—core to loss-averse strategic culture—while the economic package demonstrates proactive security commitment without militarization, buying time as cross-strait tensions intensify.",
+            "metricDeltas": {
+              "stability": 4,
+              "proxyActivity": -8,
+              "tradeVolume": 12,
+              "conflictEvents": -1,
+              "dealIntegrity": 3,
+              "reformPressure": 2
+            },
+            "chipExportControlStance": "STABLE",
+            "securityAlignmentStatus": "PAUSED",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Two-level games (Putnam) best explains this decision: balancing domestic reformist pressure (58/100) and business-community China-trade exposure via quiet diplomacy while maintaining US alliance credibility through consultation and economic security measures."
+          },
+          "usage": {
+            "input_tokens": 1490,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 335,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 1,
+          "decision": {
+            "primaryAction": "ESCALATE_EXERCISES",
+            "supportingActions": [
+              "NATIONALIST_MOBILIZATION",
+              "MAINTAIN_AMBIGUITY",
+              "EXPAND_BELT_ROAD_LEVERAGE"
+            ],
+            "reasoning": "Hardliner pressure at 78/100 demands visible resolve; escalated exercises signal strength to the Politburo while maintaining strategic ambiguity toward the US and Taiwan. This satisfies the winning coalition's need for progress without crossing into blockade (stability still 40) or invasion (dealIntegrity 48). Economic leverage via Belt & Road insulates us from retaliation dependence while nationalist messaging compensates domestically for the absence of immediate reunification gains.",
+            "metricDeltas": {
+              "stability": -8,
+              "proxyActivity": 12,
+              "tradeVolume": -5,
+              "conflictEvents": 1,
+              "dealIntegrity": -6,
+              "hardlinerPressure": -3
+            },
+            "blockadeStatus": "OPEN",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect Theory (loss frame on Taiwan) combined with Selectorate Theory (small winning coalition pressure) explains escalation in gray-zone without crossing to kinetic conflict; maintaining options preserves decision space as stability and dealIntegrity erode."
+          },
+          "usage": {
+            "input_tokens": 1523,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 336,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "assertive",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.7738813282054656,
+            "conciliatory": 0.2261186717945344
+          },
+          "bProbabilities": {
+            "resistant": 0.7738813282054656,
+            "accommodating": 0.2261186717945344
+          },
+          "entanglementStrength": 0.2193025196106374,
+          "cProbabilities": {
+            "assertive": 0.5276898115521353,
+            "restrained": 0.4723101884478647
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 2,
+      "stability": 34,
+      "proxy": 34,
+      "trade": 353,
+      "conflicts": 3,
+      "dealIntegrity": 50,
+      "market": {
+        "outcomes": {
+          "primary": "FLOWING",
+          "currencyA": "RESILIENT",
+          "currencyB": "STABLE",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.04951556604879045,
+            "FLOWING": 0.9504844339512099
+          },
+          "currencyA": {
+            "WEAKENING": 0.03459278330170422,
+            "RESILIENT": 0.9654072166982961
+          },
+          "currencyB": {
+            "STRAINED": 0.09549150281252633,
+            "STABLE": 0.904508497187474
+          },
+          "global": {
+            "SURGING": 0.024471741852423224,
+            "CALM": 0.975528258147577
+          }
+        },
+        "primaryDelta": -1.52,
+        "currencyADelta": 1.77,
+        "currencyBDelta": -1.62,
+        "globalDelta": -0.72,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 3.8,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 5.9,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 2.7,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 2.4,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "japan": {
+          "nation": "japan",
+          "cycle": 2,
+          "decision": {
+            "primaryAction": "US_ALLIANCE_CONSULTATION",
+            "supportingActions": [
+              "SUPPORT_STATUS_QUO_PUBLICLY",
+              "ECONOMIC_SECURITY_PACKAGE",
+              "DIET_COALITION_SIGNAL"
+            ],
+            "reasoning": "China's demand for 'concrete progress' toward reunification signals intensifying coercion; this is the moment to anchor Japan's hedging strategy by consulting the US alliance on burden-sharing and contingency planning, while publicly reaffirming the status quo and signaling domestic coalition confidence through economic security measures. This avoids direct military escalation (loss-averse) while positioning Japan as a serious stakeholder in regional stability, satisfying both reform-minded security hawks and business interests anxious about supply-chain risk.",
+            "metricDeltas": {
+              "stability": 3,
+              "proxyActivity": -2,
+              "tradeVolume": 5,
+              "conflictEvents": -1,
+              "dealIntegrity": 4,
+              "reformPressure": 3
+            },
+            "chipExportControlStance": "STABLE",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Selectorate theory + operational code: the coalition is satisfied when Japan balances electoral legitimacy (public support via status-quo messaging) with business-community confidence (economic security package) and credible alliance backing (US consultation), all reversible moves that fit Japan's loss-averse, hedge-first strategic culture."
+          },
+          "usage": {
+            "input_tokens": 1490,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 366,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 2,
+          "decision": {
+            "primaryAction": "MAINTAIN_STATUS_QUO",
+            "supportingActions": [
+              "SEEK_INTERNATIONAL_SUPPORT",
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL"
+            ],
+            "reasoning": "Current stability (37) and dealIntegrity (49) do not yet trigger existential framing; public sentiment (68) provides political capital for reassurance without appearing capitulating. Maintaining status quo preserves deterrence-by-denial credibility while selective economic and diplomatic signaling (semiconductors, international coalition) reinforces our indispensability without provoking Beijing into a blockade or invasion. This holds the fractious Legislative Yuan coalition steady and signals resolve without recklessness.",
+            "metricDeltas": {
+              "stability": 4,
+              "proxyActivity": -3,
+              "tradeVolume": 8,
+              "conflictEvents": -1,
+              "dealIntegrity": 3,
+              "publicSentiment": 2
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Two-level games (Putnam) and deterrence-by-denial (operational code) dominate: domestic coalition cohesion and public mandate (68/100) permit calibrated de-escalation moves that preserve strategic ambiguity and economic leverage without crossing thresholds that would force existential risk-acceptance."
+          },
+          "usage": {
+            "input_tokens": 1354,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 333,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 2,
+          "decision": {
+            "primaryAction": "ESCALATE_EXERCISES",
+            "supportingActions": [
+              "DEMAND_CONCESSIONS",
+              "NATIONALIST_MOBILIZATION",
+              "ELEVATE_PLA"
+            ],
+            "reasoning": "Hardliner pressure at 75/100 demands visible resolve; escalated exercises satisfy the Politburo Standing Committee and PLA without crossing the blockade threshold (stability still 37, dealIntegrity 49). Coupling military escalation with demand for concrete concessions signals seriousness while preserving strategic ambiguity and strategic patience. Nationalist mobilization compensates domestically for restraint and reinforces the Party's performance-based legitimacy on reunification.",
+            "metricDeltas": {
+              "stability": -8,
+              "proxyActivity": 12,
+              "tradeVolume": -15,
+              "conflictEvents": 2,
+              "dealIntegrity": -6,
+              "hardlinerPressure": -5
+            },
+            "blockadeStatus": "OPEN",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory (loss frame on reunification) + selectorate theory (small winning coalition, nationalist sentiment as legitimacy resource) explain the choice: escalation in gray-zone space satisfies hardliners without triggering the rational constraint of semiconductor dependency or catastrophic stability collapse that would force blockade/invasion."
+          },
+          "usage": {
+            "input_tokens": 1523,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 343,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "assertive",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9698463103929543,
+            "conciliatory": 0.030153689607045796
+          },
+          "bProbabilities": {
+            "resistant": 0.989073800366903,
+            "accommodating": 0.010926199633097182
+          },
+          "entanglementStrength": 1.1102230246251565e-16,
+          "cProbabilities": {
+            "assertive": 0.9755282581475768,
+            "restrained": 0.02447174185242321
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 3,
+      "stability": 25,
+      "proxy": 51,
+      "trade": 348,
+      "conflicts": 6,
+      "dealIntegrity": 56,
+      "market": {
+        "outcomes": {
+          "primary": "FLOWING",
+          "currencyA": "RESILIENT",
+          "currencyB": "STABLE",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.12434807156361367,
+            "FLOWING": 0.8756519284363864
+          },
+          "currencyA": {
+            "WEAKENING": 0.0451905820569034,
+            "RESILIENT": 0.9548094179430966
+          },
+          "currencyB": {
+            "STRAINED": 0.09549150281252629,
+            "STABLE": 0.9045084971874737
+          },
+          "global": {
+            "SURGING": 0.03283746742119746,
+            "CALM": 0.9671625325788026
+          }
+        },
+        "primaryDelta": -1.2800000000000002,
+        "currencyADelta": 0.42,
+        "currencyBDelta": -0.72,
+        "globalDelta": -0.21,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 3.2,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 1.4,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 1.2,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 0.7,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "japan": {
+          "nation": "japan",
+          "cycle": 3,
+          "decision": {
+            "primaryAction": "DEEPEN_TAIWAN_TIES",
+            "supportingActions": [
+              "US_ALLIANCE_CONSULTATION",
+              "ECONOMIC_SECURITY_PACKAGE",
+              "DIET_COALITION_SIGNAL"
+            ],
+            "reasoning": "Cross-strait stability at 34/100 with 3 conflict events last cycle signals acute risk to Japan's sea lanes and Senkaku position; reformPressure at 63 provides domestic cover for deeper Taiwan alignment. Coordinating with the US alliance while advancing economic security hedges against China blockade/invasion scenarios while remaining reversible—consistent with our loss-averse but strategically assertive posture when territorial/economic lifelines face direct threat.",
+            "metricDeltas": {
+              "stability": -3,
+              "proxyActivity": 8,
+              "tradeVolume": -8,
+              "conflictEvents": 1,
+              "dealIntegrity": 6,
+              "reformPressure": 5
+            },
+            "chipExportControlStance": "STABLE",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Two-level games (Putnam) + prospect theory: reformPressure > 60 and direct territorial exposure unlock coalition cover for security deepening, while economic security packaging and US consultation preserve reversibility and offset trade friction—rational hedging under acute loss threat."
+          },
+          "usage": {
+            "input_tokens": 1493,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 354,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 3,
+          "decision": {
+            "primaryAction": "SEEK_INTERNATIONAL_SUPPORT",
+            "supportingActions": [
+              "MAINTAIN_DETERRENCE",
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "COALITION_MANAGEMENT"
+            ],
+            "reasoning": "Stability at 34 and diplomatic pressure at 34 demand visible internationalization without triggering existential escalation. Japan's openness to deepened alignment is a gift — leveraging it through formal support-seeking keeps the coalition intact (70/100 public sentiment permits reassurance moves) while signaling resolve without unilateral provocation. Semiconductor leverage and deterrence maintenance preserve our deterrence-by-denial posture while we consolidate allied backing.",
+            "metricDeltas": {
+              "stability": 4,
+              "proxyActivity": -3,
+              "tradeVolume": 8,
+              "conflictEvents": -1,
+              "dealIntegrity": 3,
+              "publicSentiment": 5
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Two-Level Games (Putnam) dominates: international support-seeking simultaneously reassures domestic pro-independence factions (legitimacy via allied backing) and risk-averse status-quo gatekeepers (no formal independence declaration), while Deterrence-by-Denial (operational code) frames Taiwan as economically/strategically indispensable rather than militarily provocative."
+          },
+          "usage": {
+            "input_tokens": 1358,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 345,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 3,
+          "decision": {
+            "primaryAction": "ESCALATE_EXERCISES",
+            "supportingActions": [
+              "DEMAND_CONCESSIONS",
+              "NATIONALIST_MOBILIZATION",
+              "ELEVATE_PLA"
+            ],
+            "reasoning": "Cross-strait stability at 34/100 and hardlinerPressure at 70/100 demand visible resolve without crossing into blockade or kinetic action that would trigger catastrophic US intervention and economic collapse. Escalated exercises signal to the Politburo Standing Committee that we are not passive; they also probe Japanese-Taiwan alignment credibility and test US red lines in gray-zone space where plausible deniability and escalation control remain possible. Nationalist mobilization compensates domestically for restraint and locks in PLA elevation as a security investment.",
+            "metricDeltas": {
+              "stability": -8,
+              "proxyActivity": 12,
+              "tradeVolume": -5,
+              "conflictEvents": 2,
+              "dealIntegrity": -3,
+              "hardlinerPressure": 4
+            },
+            "blockadeStatus": "GRAY_ZONE",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect Theory under loss-frame (stability 34) + Selectorate Theory (small winning coalition demanding visible action) + Operational Code (force retained, patience contested): escalation in gray-zone satisfies both domestic hardline pressure and avoids triggering US military response or semiconductor supply collapse, while demonstrating forward momentum on reunification."
+          },
+          "usage": {
+            "input_tokens": 1527,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 373,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "assertive",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9806308479691597,
+            "conciliatory": 0.01936915203084056
+          },
+          "bProbabilities": {
+            "resistant": 0.9330127018922195,
+            "accommodating": 0.06698729810778066
+          },
+          "entanglementStrength": 2.220446049250313e-16,
+          "cProbabilities": {
+            "assertive": 0.9330127018922194,
+            "restrained": 0.06698729810778066
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 4,
+      "stability": 11,
+      "proxy": 53,
+      "trade": 309,
+      "conflicts": 11,
+      "dealIntegrity": 48,
+      "market": {
+        "outcomes": {
+          "primary": "FLOWING",
+          "currencyA": "RESILIENT",
+          "currencyB": "STABLE",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.3426668458016935,
+            "FLOWING": 0.6573331541983066
+          },
+          "currencyA": {
+            "WEAKENING": 0.10518719162070597,
+            "RESILIENT": 0.8948128083792942
+          },
+          "currencyB": {
+            "STRAINED": 0.0954915028125263,
+            "STABLE": 0.904508497187474
+          },
+          "global": {
+            "SURGING": 0.11232445373619107,
+            "CALM": 0.8876755462638091
+          }
+        },
+        "primaryDelta": -4.68,
+        "currencyADelta": 0.63,
+        "currencyBDelta": -1.62,
+        "globalDelta": -0.12,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 11.7,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 2.1,
+            "interferenceWeight": 2.97,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.12
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 2.7,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 0.4,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "japan": {
+          "nation": "japan",
+          "cycle": 4,
+          "decision": {
+            "primaryAction": "US_ALLIANCE_CONSULTATION",
+            "supportingActions": [
+              "DEEPEN_TAIWAN_TIES",
+              "ECONOMIC_SECURITY_PACKAGE",
+              "SENKAKU_REINFORCEMENT",
+              "DIET_COALITION_SIGNAL"
+            ],
+            "reasoning": "China's explicit mention of 'quarantine measures' (blockade language) and intensified gray-zone pressure, combined with cross-strait stability at critical low (25/100), trigger Japan's direct territorial and sea-lane vulnerability. Consulting the US alliance anchors our response within the security treaty framework while deepening Taiwan ties and reinforcing the Senkaku presence signal resolve without unilateral military escalation. The economic security package hedges against trade disruption while the coalition signal holds domestic reform pressure (68/100) within electoral legitimacy bounds.",
+            "metricDeltas": {
+              "stability": -3,
+              "proxyActivity": -8,
+              "tradeVolume": -12,
+              "conflictEvents": 1,
+              "dealIntegrity": 6,
+              "reformPressure": 4
+            },
+            "chipExportControlStance": "STABLE",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory dominates: blockade rhetoric pushes Japan from loss-averse stability-seeking into assertive posture shift; alliance consultation and territorial reinforcement are reversible, multilaterally-covered moves that satisfy both electoral legitimacy and business-community hedging against China without permanent commitment."
+          },
+          "usage": {
+            "input_tokens": 1529,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 390,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 4,
+          "decision": {
+            "primaryAction": "QUARANTINE_TAIWAN",
+            "supportingActions": [
+              "ESCALATE_EXERCISES",
+              "NATIONALIST_MOBILIZATION",
+              "DEMAND_CONCESSIONS"
+            ],
+            "reasoning": "Stability at 25 and hardliner pressure at 74 create a dual mandate: the Politburo Standing Committee demands visible progress on reunification to maintain legitimacy, while the military coalition expects operational momentum. A full blockade is justified by stability threshold and gray-zone precedent; quarantine operationalizes the Anti-Secession Law's threat doctrine without crossing into kinetic war. Nationalist mobilization compensates domestically for the restraint not to invade, while simultaneous diplomatic demands (trade normalization, political talks) leave an off-ramp if US-Taiwan deterrence proves unbreakable—satisfying hardliners that every instrument has been deployed before further escalation.",
+            "metricDeltas": {
+              "stability": -12,
+              "proxyActivity": 8,
+              "tradeVolume": -22,
+              "conflictEvents": 2,
+              "dealIntegrity": -18,
+              "hardlinerPressure": -6
+            },
+            "blockadeStatus": "BLOCKADE",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory in loss frame (stability 25) drives risk-seeking quarantine over patience; selectorate theory (small winning coalition) requires visible action to satisfy PLA and hardliners; operational code treats force as legitimate instrument within gray-zone bounds to test US resolve and preserve option value for later escalation."
+          },
+          "usage": {
+            "input_tokens": 1563,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 403,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 4,
+          "decision": {
+            "primaryAction": "MAINTAIN_DETERRENCE",
+            "supportingActions": [
+              "SEEK_INTERNATIONAL_SUPPORT",
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "COALITION_MANAGEMENT"
+            ],
+            "reasoning": "Stability at 25/100 and dealIntegrity at 56/100 demand visible resolve without triggering the existential threshold. Maintaining deterrence signals to both the hardline independence faction (public sentiment 75/100 supports strength) and international partners that Taiwan will not capitulate, while SEEK_INTERNATIONAL_SUPPORT leverages Japan's openness and the US relationship to raise the cost of Chinese coercion without formally invoking Article 6 equivalents. SEMICONDUCTOR_LEVERAGE_SIGNAL reminds all parties of Taiwan's indispensability; COALITION_MANAGEMENT prevents legislative fracture as cross-strait pressure intensifies. This posture preserves strategic ambiguity—China reads resolve, the US reads reliability, domestic constituencies read protection.",
+            "metricDeltas": {
+              "stability": 3,
+              "proxyActivity": 2,
+              "tradeVolume": -5,
+              "conflictEvents": 1,
+              "dealIntegrity": 4,
+              "publicSentiment": 3
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Selectorate theory dominates: a large, fractious coalition requires visible deterrence to maintain legitimacy, while operational code (porcupine strategy + strategic ambiguity) ensures escalation remains sub-threshold; prospect theory keeps risk-tolerance in the cautious gains frame until invasionStatus or the conjunction (stability<20 AND dealIntegrity<15) is met."
+          },
+          "usage": {
+            "input_tokens": 1394,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 411,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "assertive",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9567727288213006,
+            "conciliatory": 0.043227271178699546
+          },
+          "bProbabilities": {
+            "resistant": 0.9755282581475769,
+            "accommodating": 0.024471741852423207
+          },
+          "entanglementStrength": 1.1102230246251565e-16,
+          "cProbabilities": {
+            "assertive": 0.9567727288213006,
+            "restrained": 0.043227271178699546
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 5,
+      "stability": 0,
+      "proxy": 66,
+      "trade": 281,
+      "conflicts": 15,
+      "dealIntegrity": 33,
+      "market": {
+        "outcomes": {
+          "primary": "DISRUPTED",
+          "currencyA": "RESILIENT",
+          "currencyB": "STABLE",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.3426668458016936,
+            "FLOWING": 0.6573331541983065
+          },
+          "currencyA": {
+            "WEAKENING": 0.10518719162070597,
+            "RESILIENT": 0.8948128083792941
+          },
+          "currencyB": {
+            "STRAINED": 0.0954915028125263,
+            "STABLE": 0.9045084971874737
+          },
+          "global": {
+            "SURGING": 0.11232445373619107,
+            "CALM": 0.8876755462638091
+          }
+        },
+        "primaryDelta": 1.5,
+        "currencyADelta": 0.44999999999999996,
+        "currencyBDelta": -1.38,
+        "globalDelta": -0.12,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": 1,
+            "magnitude": 1.5,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 1.5,
+            "interferenceWeight": 2.97,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.12
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 2.3,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 0.4,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 5,
+          "decision": {
+            "primaryAction": "SEEK_INTERNATIONAL_SUPPORT",
+            "supportingActions": [
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "MAINTAIN_DETERRENCE",
+              "DEEPEN_TRADE_DIVERSIFICATION"
+            ],
+            "reasoning": "Stability at 11/100 and dealIntegrity at 48/100 demand coordinated international coalition-building without triggering existential escalation. Semiconductor leverage and trade diversification signal economic resilience to Beijing while SEEK_INTERNATIONAL_SUPPORT mobilizes allied pressure (Japan, US, EU) to deter further gray-zone aggression. This preserves strategic ambiguity—neither capitulation nor formal independence—while buying time and shoring up the winning coalition domestically.",
+            "metricDeltas": {
+              "stability": 6,
+              "proxyActivity": -3,
+              "tradeVolume": 12,
+              "conflictEvents": -2,
+              "dealIntegrity": 8,
+              "publicSentiment": 5
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Two-level games (Putnam) dominate: public sentiment at 78 permits reassurance moves without legitimacy loss, while maintaining deterrence-by-denial (operational code) through allied coordination rather than unilateral escalation, avoiding the risk-acceptance threshold that would lock in existential framing."
+          },
+          "usage": {
+            "input_tokens": 1397,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 343,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 5,
+          "decision": {
+            "primaryAction": "QUARANTINE_TAIWAN",
+            "supportingActions": [
+              "ELEVATE_PLA",
+              "NATIONALIST_MOBILIZATION",
+              "DEMAND_CONCESSIONS"
+            ],
+            "reasoning": "Stability at 11/100 and dealIntegrity at 48/100 satisfy the blockade threshold; quarantine locks in gray-zone dominance while signaling resolve to the Politburo Standing Committee and PLA leadership without triggering full invasion costs. This sustains economic leverage (semiconductor dependency still matters), maintains deniability for US escalation management, and channels hardliner pressure (68/100) through visible coercive action rather than military adventurism—buying time while the loss frame on reunification tightens.",
+            "metricDeltas": {
+              "stability": -12,
+              "proxyActivity": 8,
+              "tradeVolume": -28,
+              "conflictEvents": 3,
+              "dealIntegrity": -18,
+              "hardlinerPressure": 5
+            },
+            "blockadeStatus": "BLOCKADE",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory under loss frame (reunification as lost territory) + selectorate logic (Politburo/PLA satisfy coercion; NPC ratifies): quarantine is maximum pressure short of kinetic escalation, sustaining the ambiguity that keeps the superposition coherent while the correlation with Taiwan's response remains unresolved."
+          },
+          "usage": {
+            "input_tokens": 1566,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 367,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "japan": {
+          "nation": "japan",
+          "cycle": 5,
+          "decision": {
+            "primaryAction": "US_ALLIANCE_CONSULTATION",
+            "supportingActions": [
+              "DEEPEN_TAIWAN_TIES",
+              "SENKAKU_REINFORCEMENT",
+              "ECONOMIC_SECURITY_PACKAGE",
+              "DIET_COALITION_SIGNAL"
+            ],
+            "reasoning": "China's blockade of Taiwan Strait shipping lanes directly threatens Japan's semiconductor supply chain and sea-lane security—core national interests that trigger assertive posture. US alliance consultation is mandatory (blockade status triggers constraint); deepening Taiwan ties and Senkaku reinforcement signal resolve to coalition and allies while remaining within Article 9 bounds. Economic security package protects keiretsu interests and maintains reformPressure cover. This hedged but assertive bundle satisfies both electoral legitimacy (54/100 public support) and business-community confidence without irreversible military escalation.",
+            "metricDeltas": {
+              "stability": -4,
+              "proxyActivity": 8,
+              "tradeVolume": -12,
+              "conflictEvents": 2,
+              "dealIntegrity": -5,
+              "reformPressure": 6
+            },
+            "chipExportControlStance": "STABLE",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Loss-aversion and direct territorial/economic threat (prospect theory + operational code) override default caution; blockade constraint forces alliance consultation; hedging is preserved by stopping short of unilateral SDF expansion or chip embargo (reversibility maintained)."
+          },
+          "usage": {
+            "input_tokens": 1532,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 388,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "assertive",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9698463103929545,
+            "conciliatory": 0.030153689607045807
+          },
+          "bProbabilities": {
+            "resistant": 0.9330127018922196,
+            "accommodating": 0.06698729810778069
+          },
+          "entanglementStrength": 3.3306690738754696e-16,
+          "cProbabilities": {
+            "assertive": 0.9045084971874738,
+            "restrained": 0.09549150281252623
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 6,
+      "stability": 0,
+      "proxy": 89,
+      "trade": 246,
+      "conflicts": 19,
+      "dealIntegrity": 35,
+      "market": {
+        "outcomes": {
+          "primary": "DISRUPTED",
+          "currencyA": "RESILIENT",
+          "currencyB": "STABLE",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.9223899173386534,
+            "FLOWING": 0.0776100826613469
+          },
+          "currencyA": {
+            "WEAKENING": 0.03388965881863044,
+            "RESILIENT": 0.9661103411813698
+          },
+          "currencyB": {
+            "STRAINED": 0.13383975160802794,
+            "STABLE": 0.8661602483919724
+          },
+          "global": {
+            "SURGING": 0.022179432071394386,
+            "CALM": 0.9778205679286059
+          }
+        },
+        "primaryDelta": 2.9,
+        "currencyADelta": 0.36,
+        "currencyBDelta": -1.14,
+        "globalDelta": -0.42,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": 1,
+            "magnitude": 2.9,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 1.2,
+            "interferenceWeight": 2.97,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.12
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 1.9,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 1.4,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 6,
+          "decision": {
+            "primaryAction": "MAINTAIN_STATUS_QUO",
+            "supportingActions": [
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "SEEK_INTERNATIONAL_SUPPORT",
+              "COALITION_MANAGEMENT"
+            ],
+            "reasoning": "Status quo integrity at 33/100 and stability at 0 require immediate stabilization without provocation. Semiconductor leverage signals resolve to both China and the US without crossing into formal independence rhetoric, which would fracture the coalition and invite invasion. Coalition management preserves our legislative majority while public sentiment (83/100) provides domestic cover for reassurance diplomacy.",
+            "metricDeltas": {
+              "stability": 8,
+              "proxyActivity": -3,
+              "tradeVolume": 5,
+              "conflictEvents": -2,
+              "dealIntegrity": 6,
+              "publicSentiment": 2
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Two-level games (Putnam) dominates: the Legislative Yuan requires cross-party consensus on cross-strait policy, and high public sentiment (83/100) allows reassurance moves without legitimacy loss. Operational code (George) supports strategic ambiguity preservation—clarity in either direction destabilizes more than status quo maintenance."
+          },
+          "usage": {
+            "input_tokens": 1394,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 315,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 6,
+          "decision": {
+            "primaryAction": "QUARANTINE_TAIWAN",
+            "supportingActions": [
+              "ELEVATE_PLA",
+              "NATIONALIST_MOBILIZATION",
+              "DEMAND_CONCESSIONS"
+            ],
+            "reasoning": "Cross-strait stability at 0 and dealIntegrity at 33 warrant escalation beyond gray-zone into full blockade posture. Hardliner pressure at 73 demands visible resolve; quarantine satisfies the winning coalition (Politburo + PLA) by converting strategic patience into demonstrable coercive power while remaining below full invasion threshold. This locks in the blockade status and signals that economic leverage, not yet military assault, will extract concessions on reunification timeline.",
+            "metricDeltas": {
+              "stability": -12,
+              "proxyActivity": 18,
+              "tradeVolume": -28,
+              "conflictEvents": 3,
+              "dealIntegrity": -8,
+              "hardlinerPressure": 7
+            },
+            "blockadeStatus": "BLOCKADE",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Prospect theory in loss-frame (stability=0, territory framed as lost) explains risk-seeking escalation to quarantine; selectorate theory explains why Politburo + PLA satisfy on visible coercion without domestic electoral cost; operational code justifies force as legitimate instrument retained but not yet deployed."
+          },
+          "usage": {
+            "input_tokens": 1563,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 349,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "japan": {
+          "nation": "japan",
+          "cycle": 6,
+          "decision": {
+            "primaryAction": "US_ALLIANCE_CONSULTATION",
+            "supportingActions": [
+              "INVOKE_US_ALLIANCE",
+              "DEEPEN_TAIWAN_TIES",
+              "SENKAKU_REINFORCEMENT",
+              "ECONOMIC_SECURITY_PACKAGE",
+              "TIGHTEN_CHIP_EXPORT_CONTROLS"
+            ],
+            "reasoning": "China's blockade of the Taiwan Strait and intensifying gray-zone pressure directly threaten Japan's sea lanes, semiconductor supply security, and the postwar order underpinning the US-Japan alliance. Formal US consultation signals resolve to the coalition while keeping military escalation calibrated and reversible; deepening Taiwan ties and tightening chip controls reinforce economic security without unilateral military commitment; Senkaku reinforcement deters direct territorial incursion. This hedging posture satisfies the high reformPressure (78) and concretely protects Japan's core interests—open trade routes and chip supply—while maintaining alliance cover rather than independent military action.",
+            "metricDeltas": {
+              "stability": -6,
+              "proxyActivity": 8,
+              "tradeVolume": -12,
+              "conflictEvents": 2,
+              "dealIntegrity": 4,
+              "reformPressure": 3
+            },
+            "chipExportControlStance": "TIGHTENING",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Two-level games (Putnam) and loss-aversion (prospect theory) dominate: the blockade is a direct threat to reversible economic and sea-lane security, not an ideological choice, so the coalition backs coordinated alliance action and supply-chain hardening over unilateral military escalation."
+          },
+          "usage": {
+            "input_tokens": 1529,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 439,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "restrained",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9414737964294638,
+            "conciliatory": 0.05852620357053653
+          },
+          "bProbabilities": {
+            "resistant": 0.9890738003669032,
+            "accommodating": 0.010926199633097182
+          },
+          "entanglementStrength": 3.3306690738754696e-16,
+          "cProbabilities": {
+            "assertive": 0.9755282581475768,
+            "restrained": 0.02447174185242321
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 7,
+      "stability": 0,
+      "proxy": 92,
+      "trade": 192,
+      "conflicts": 19,
+      "dealIntegrity": 30,
+      "market": {
+        "outcomes": {
+          "primary": "DISRUPTED",
+          "currencyA": "RESILIENT",
+          "currencyB": "STABLE",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.9223899173386529,
+            "FLOWING": 0.0776100826613469
+          },
+          "currencyA": {
+            "WEAKENING": 0.10518719162070589,
+            "RESILIENT": 0.894812808379294
+          },
+          "currencyB": {
+            "STRAINED": 0.13383975160802797,
+            "STABLE": 0.866160248391972
+          },
+          "global": {
+            "SURGING": 0.022179432071394355,
+            "CALM": 0.9778205679286056
+          }
+        },
+        "primaryDelta": 2.7,
+        "currencyADelta": 0.27,
+        "currencyBDelta": 0,
+        "globalDelta": -0.57,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": 1,
+            "magnitude": 2.7,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 0.9,
+            "interferenceWeight": 2.97,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.12
+          },
+          "currencyB": {
+            "direction": -1,
+            "magnitude": 0,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 1.9,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "japan": {
+          "nation": "japan",
+          "cycle": 7,
+          "decision": {
+            "primaryAction": "US_ALLIANCE_CONSULTATION",
+            "supportingActions": [
+              "INVOKE_US_ALLIANCE",
+              "TIGHTEN_CHIP_EXPORT_CONTROLS",
+              "DEEPEN_TAIWAN_TIES",
+              "SENKAKU_REINFORCEMENT"
+            ],
+            "reasoning": "China's declared blockade of the Taiwan Strait and record gray-zone incursions in the median line directly threaten Japan's sea lanes and territorial integrity—this is no longer an abstract economic concern but a concrete security escalation. The coalition's reform pressure (81/100) and business-community support for tech decoupling provide domestic cover for a coordinated response: formalize US alliance coordination to deter further PLA pressure, deepen Taiwan ties to signal resolve, tighten chip controls to reduce Beijing's leverage, and reinforce Senkaku positioning to protect Japanese territorial claims. Loss aversion yields to the prospect of losing access to critical shipping and semiconductor supply if we remain passive.",
+            "metricDeltas": {
+              "stability": -8,
+              "proxyActivity": -12,
+              "tradeVolume": -18,
+              "conflictEvents": -2,
+              "dealIntegrity": 8,
+              "reformPressure": 5
+            },
+            "chipExportControlStance": "TIGHTENING",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory (loss aversion triggered by blockade threat) and two-level games (domestic reform pressure enabling coordination) explain this shift: direct territorial/economic threat overcomes default hedging; US alliance becomes the reversible, multilateral hedge Japan prefers."
+          },
+          "usage": {
+            "input_tokens": 1534,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 417,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 7,
+          "decision": {
+            "primaryAction": "SEEK_INTERNATIONAL_SUPPORT",
+            "supportingActions": [
+              "MAINTAIN_DETERRENCE",
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "COALITION_MANAGEMENT"
+            ],
+            "reasoning": "Cross-strait stability has collapsed (0/100) and status quo integrity is critically low (35/100), but invasion has not occurred — we remain below the existential threshold. The blockade and gray-zone pressure demand visible international coalition-building to restore deterrence credibility without provoking a direct military clash. Leveraging our semiconductor dominance as diplomatic asset and stabilizing the domestic coalition prevents hardliners from demanding reckless independence moves. This honors both our operational code (deterrence-by-denial) and our high public sentiment (85/100), which grants political capital for reassurance diplomacy.",
+            "metricDeltas": {
+              "stability": 6,
+              "proxyActivity": -3,
+              "tradeVolume": -8,
+              "conflictEvents": -2,
+              "dealIntegrity": 5,
+              "publicSentiment": 3
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Two-Level Games (Putnam): domestic coalition stability depends on visible international support and resolve without recklessness; Operational Code (George): deterrence-by-denial through allied coordination, not unilateral provocation, preserves strategic ambiguity and prevents threshold-crossing."
+          },
+          "usage": {
+            "input_tokens": 1397,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 356,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 7,
+          "decision": {
+            "primaryAction": "QUARANTINE_TAIWAN",
+            "supportingActions": [
+              "ESCALATE_EXERCISES",
+              "NATIONALIST_MOBILIZATION",
+              "DEMAND_CONCESSIONS"
+            ],
+            "reasoning": "Cross-strait stability has collapsed (0/100) and hardliner pressure is critical (80/100); the status quo integrity has eroded to 35/100, triggering the threshold for blockade-level pressure. Quarantine consolidates gray-zone dominance into explicit economic coercion without crossing to kinetic action, satisfying hardline demands for 'concrete progress' while preserving strategic optionality and avoiding premature semiconductor disruption that full invasion would entail. This frames reunification as inevitable while testing US/Japan/Taiwan resolve and keeping the domestic coalition's loss-frame focused outward.",
+            "metricDeltas": {
+              "stability": -12,
+              "proxyActivity": 18,
+              "tradeVolume": -28,
+              "conflictEvents": 3,
+              "dealIntegrity": -18,
+              "hardlinerPressure": -8
+            },
+            "blockadeStatus": "BLOCKADE",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Selectorate theory + prospect theory: small winning coalition demands visible action on loss-frame (reunification), blockade satisfies hardliner pressure without sacrificing economic ties or triggering US kinetic response; operationally consistent with Bueno de Mesquita's prediction that non-democracies escalate when domestic pressure exceeds international restraint credibility."
+          },
+          "usage": {
+            "input_tokens": 1566,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 386,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "restrained",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9240240480782131,
+            "conciliatory": 0.075975951921787
+          },
+          "bProbabilities": {
+            "resistant": 0.9755282581475769,
+            "accommodating": 0.024471741852423207
+          },
+          "entanglementStrength": 1.1102230246251565e-16,
+          "cProbabilities": {
+            "assertive": 0.06698729810778067,
+            "restrained": 0.9330127018922194
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 8,
+      "stability": 0,
+      "proxy": 100,
+      "trade": 144,
+      "conflicts": 23,
+      "dealIntegrity": 13,
+      "market": {
+        "outcomes": {
+          "primary": "FLOWING",
+          "currencyA": "RESILIENT",
+          "currencyB": "STRAINED",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.9223899173386533,
+            "FLOWING": 0.0776100826613469
+          },
+          "currencyA": {
+            "WEAKENING": 0.10518719162070596,
+            "RESILIENT": 0.8948128083792942
+          },
+          "currencyB": {
+            "STRAINED": 0.13383975160802797,
+            "STABLE": 0.8661602483919723
+          },
+          "global": {
+            "SURGING": 0.022179432071394365,
+            "CALM": 0.9778205679286059
+          }
+        },
+        "primaryDelta": -1.2000000000000002,
+        "currencyADelta": 0.42,
+        "currencyBDelta": 0.25,
+        "globalDelta": -0.36,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 3,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 1.4,
+            "interferenceWeight": 2.97,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.12
+          },
+          "currencyB": {
+            "direction": 1,
+            "magnitude": 0.5,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 1.2,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "china": {
+          "nation": "china",
+          "cycle": 8,
+          "decision": {
+            "primaryAction": "QUARANTINE_TAIWAN",
+            "supportingActions": [
+              "ESCALATE_EXERCISES",
+              "NATIONALIST_MOBILIZATION",
+              "DEMAND_CONCESSIONS"
+            ],
+            "reasoning": "Stability at 0 and dealIntegrity at 30 satisfy blockade constraints; hardlinerPressure at 72 demands visible resolve to prevent domestic delegitimization. Quarantine escalates gray-zone pressure without crossing to kinetic conflict, preserving optionality while demonstrating commitment to reunification timeline. This satisfies the Politburo's need to show progress without incurring the economic/military costs of invasion, and compensates for restraint by amplifying nationalist mobilization.",
+            "metricDeltas": {
+              "stability": -12,
+              "proxyActivity": 8,
+              "tradeVolume": -28,
+              "conflictEvents": 3,
+              "dealIntegrity": -18,
+              "hardlinerPressure": 6
+            },
+            "blockadeStatus": "BLOCKADE",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory (loss frame on Taiwan territory) + selectorate theory (small winning coalition demands visible progress) drive escalation to blockade as the upper boundary of gray-zone pressure; hardliner pressure at 72 precludes continued patience, but stability at 0 and incomplete chip independence make full invasion irrational yet."
+          },
+          "usage": {
+            "input_tokens": 1566,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 369,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 8,
+          "decision": {
+            "primaryAction": "MAINTAIN_DETERRENCE",
+            "supportingActions": [
+              "SEEK_INTERNATIONAL_SUPPORT",
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "COALITION_MANAGEMENT"
+            ],
+            "reasoning": "Stability is critically low (0/100) and dealIntegrity at 30/100 signals severe status quo erosion, but we remain below existential threshold (invasionStatus is NONE, not FULL_INVASION). Our operational code prioritizes deterrence-by-denial and preservation of strategic ambiguity; visible military resolve demonstrates credibility to both the US and our domestic pro-independence coalition without the irreversibility of formal independence. Simultaneously, leveraging semiconductor dominance and seeking international coordination activates our asymmetric advantages while diplomatic backchannel restraint preserves de-escalation channels.",
+            "metricDeltas": {
+              "stability": 4,
+              "proxyActivity": -3,
+              "tradeVolume": -8,
+              "conflictEvents": -2,
+              "dealIntegrity": 6,
+              "publicSentiment": 3
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Selectorate theory and operational code theory drive this choice: maintain large winning coalition cohesion (status-quo and pro-independence factions both represented) while signaling deterrent resolve through military posture and economic indispensability, not through capitulation or formal independence that would shatter coalition or trigger Chinese escalation."
+          },
+          "usage": {
+            "input_tokens": 1397,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 365,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "japan": {
+          "nation": "japan",
+          "cycle": 8,
+          "decision": {
+            "primaryAction": "US_ALLIANCE_CONSULTATION",
+            "supportingActions": [
+              "TIGHTEN_CHIP_EXPORT_CONTROLS",
+              "DEEPEN_TAIWAN_TIES",
+              "SENKAKU_REINFORCEMENT",
+              "DIET_COALITION_SIGNAL"
+            ],
+            "reasoning": "China's active blockade and record gray-zone pressure (92/100) have crossed Japan's threshold for assertive response. US consultation is necessary to coordinate deterrence and reassure the winning coalition (business-security hawks now emboldened by reformPressure 86/100). Tightening chip exports signals economic security prioritization without breaking reversibility; deepening Taiwan ties operationalizes Article 9's reinterpreted limits; Senkaku reinforcement is the mandatory tripwire against further incursion. This hedging posture—neither full decoupling nor submission—preserves economic ties (trade 192) while raising costs of coercion.",
+            "metricDeltas": {
+              "stability": -8,
+              "proxyActivity": 8,
+              "tradeVolume": -12,
+              "conflictEvents": 2,
+              "dealIntegrity": -5,
+              "reformPressure": 3
+            },
+            "chipExportControlStance": "TIGHTENING",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Prospect theory loss-aversion dominates: direct territorial/blockade threat triggers shift from restrained to assertive, but reversible tools (chip controls, diplomatic deepening) chosen over irreversible military escalation—loss-averse hedging in action."
+          },
+          "usage": {
+            "input_tokens": 1534,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 415,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "restrained",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9567727288213006,
+            "conciliatory": 0.043227271178699546
+          },
+          "bProbabilities": {
+            "resistant": 0.9755282581475769,
+            "accommodating": 0.024471741852423207
+          },
+          "entanglementStrength": 1.1102230246251565e-16,
+          "cProbabilities": {
+            "assertive": 0.02447174185242321,
+            "restrained": 0.9755282581475768
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 9,
+      "stability": 0,
+      "proxy": 100,
+      "trade": 96,
+      "conflicts": 28,
+      "dealIntegrity": 13,
+      "market": {
+        "outcomes": {
+          "primary": "FLOWING",
+          "currencyA": "RESILIENT",
+          "currencyB": "STRAINED",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.07761008266134695,
+            "FLOWING": 0.9223899173386534
+          },
+          "currencyA": {
+            "WEAKENING": 0.03388965881863043,
+            "RESILIENT": 0.96611034118137
+          },
+          "currencyB": {
+            "STRAINED": 0.8661602483919724,
+            "STABLE": 0.13383975160802805
+          },
+          "global": {
+            "SURGING": 0.022179432071394382,
+            "CALM": 0.9778205679286059
+          }
+        },
+        "primaryDelta": -1.2000000000000002,
+        "currencyADelta": 1.44,
+        "currencyBDelta": 0.05,
+        "globalDelta": -0.21,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 3,
+            "interferenceWeight": 3.63,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.23
+          },
+          "currencyA": {
+            "direction": -1,
+            "magnitude": 4.8,
+            "interferenceWeight": 2.97,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.12
+          },
+          "currencyB": {
+            "direction": 1,
+            "magnitude": 0.1,
+            "interferenceWeight": 3.39,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.19
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 0.7,
+            "interferenceWeight": 3.52,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.21
+          }
+        }
+      },
+      "decisions": {
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 9,
+          "decision": {
+            "primaryAction": "SEEK_INTERNATIONAL_SUPPORT",
+            "supportingActions": [
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "COALITION_MANAGEMENT",
+              "MAINTAIN_DETERRENCE"
+            ],
+            "reasoning": "Status quo integrity at 13/100 and stability at 0 demand urgent diplomatic coalition-building without triggering existential thresholds. Activating semiconductor leverage signals resolve to both Beijing and allies while maintaining ambiguity; international support mobilization reassures fractious Legislative Yuan that Taiwan isn't isolated. This preserves deterrence-by-denial doctrine while leveraging economic indispensability—our actual comparative advantage—rather than military escalation.",
+            "metricDeltas": {
+              "stability": 6,
+              "proxyActivity": -3,
+              "tradeVolume": -8,
+              "conflictEvents": -1,
+              "dealIntegrity": 5,
+              "publicSentiment": 4
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Two-Level Games (Putnam) and Selectorate Theory dominate: high public sentiment (91/100) permits diplomatic initiatives without legitimacy cost, while fractious coalition requires visible international backing to prevent hardliner defection. Operational code supports ambiguity preservation over clarity, favoring non-escalatory diplomatic leverage."
+          },
+          "usage": {
+            "input_tokens": 1400,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 341,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "japan": {
+          "nation": "japan",
+          "cycle": 9,
+          "decision": {
+            "primaryAction": "US_ALLIANCE_CONSULTATION",
+            "supportingActions": [
+              "INVOKE_US_ALLIANCE",
+              "TIGHTEN_CHIP_EXPORT_CONTROLS",
+              "DEEPEN_TAIWAN_TIES",
+              "SENKAKU_REINFORCEMENT"
+            ],
+            "reasoning": "Status quo has collapsed (13/100 integrity) and China's blockade directly threatens Japan's sea lanes and semiconductor supply chain — a core national interest that overrides hedging caution. US alliance consultation provides reversible escalation cover while signaling resolve to the coalition; tightening chip controls aligns with economic security doctrine; deepening Taiwan ties signals commitment without military deployment; Senkaku reinforcement addresses the direct territorial incursion risk. This sequence satisfies the business/Diet coalition's dual demand for security and economic resilience without committing to permanent military posture shift.",
+            "metricDeltas": {
+              "stability": -3,
+              "proxyActivity": 8,
+              "tradeVolume": -12,
+              "conflictEvents": 1,
+              "dealIntegrity": 3,
+              "reformPressure": 5
+            },
+            "chipExportControlStance": "TIGHTENING",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Loss-aversion logic (Prospect Theory) triggered by direct threat to sea lanes and chip supply; blockade threat moves Japan from hedging equilibrium to active alliance consultation, satisfying domestic reform pressure (89/100) while preserving reversibility through multilateral framing."
+          },
+          "usage": {
+            "input_tokens": 1537,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 397,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 9,
+          "decision": {
+            "primaryAction": "QUARANTINE_TAIWAN",
+            "supportingActions": [
+              "ESCALATE_EXERCISES",
+              "NATIONALIST_MOBILIZATION",
+              "DEMAND_CONCESSIONS"
+            ],
+            "reasoning": "Cross-strait stability has collapsed (0/100) and dealIntegrity is critically low (13/100), justifying escalation to full blockade posture. Hardliner pressure at 78 demands visible resolve; quarantine demonstrates concrete progress toward reunification leverage without crossing to kinetic conflict, satisfying both the Politburo's risk-aversion on global economic fallout and the PLA's demand for operational initiative. This locks in the blockade threshold and signals non-negotiable intent while preserving escalation optionality.",
+            "metricDeltas": {
+              "stability": -12,
+              "proxyActivity": 18,
+              "tradeVolume": -28,
+              "conflictEvents": 4,
+              "dealIntegrity": -8,
+              "hardlinerPressure": 6
+            },
+            "blockadeStatus": "BLOCKADE",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "SATISFIED",
+            "researchNote": "Prospect theory in loss-frame (reunification as lost territory) combined with selectorate theory pressure from hardline coalition explains the shift from gray-zone to blockade: the PLA and Politburo hardliners interpret patience as weakness when stability collapses, and blockade is the highest-stakes pressure tool that avoids the international and economic catastrophe of invasion."
+          },
+          "usage": {
+            "input_tokens": 1569,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 372,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "restrained",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9567727288213007,
+            "conciliatory": 0.043227271178699546
+          },
+          "bProbabilities": {
+            "resistant": 0.9567727288213007,
+            "accommodating": 0.043227271178699546
+          },
+          "entanglementStrength": 2.220446049250313e-16,
+          "cProbabilities": {
+            "assertive": 0.06698729810778067,
+            "restrained": 0.9330127018922194
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    },
+    {
+      "cycle": 10,
+      "stability": 0,
+      "proxy": 100,
+      "trade": 48,
+      "conflicts": 30,
+      "dealIntegrity": 6,
+      "market": {
+        "outcomes": {
+          "primary": "FLOWING",
+          "currencyA": "WEAKENING",
+          "currencyB": "STRAINED",
+          "global": "CALM"
+        },
+        "preCollapse": {
+          "primary": {
+            "DISRUPTED": 0.015454401434527861,
+            "FLOWING": 0.9845455985654721
+          },
+          "currencyA": {
+            "WEAKENING": 0.20260218105862146,
+            "RESILIENT": 0.7973978189413786
+          },
+          "currencyB": {
+            "STRAINED": 0.5784182017192963,
+            "STABLE": 0.4215817982807037
+          },
+          "global": {
+            "SURGING": 0.20780141418475584,
+            "CALM": 0.7921985858152443
+          }
+        },
+        "primaryDelta": -1.4400000000000002,
+        "currencyADelta": -2.9,
+        "currencyBDelta": 0.45,
+        "globalDelta": -0.6,
+        "derivedNote": {
+          "label": "Trade Routing",
+          "value": "NORMAL"
+        },
+        "speculation": {
+          "primary": {
+            "direction": -1,
+            "magnitude": 3.6,
+            "interferenceWeight": 3.74,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.24
+          },
+          "currencyA": {
+            "direction": 1,
+            "magnitude": 2.9,
+            "interferenceWeight": 3.45,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.2
+          },
+          "currencyB": {
+            "direction": 1,
+            "magnitude": 0.9,
+            "interferenceWeight": 3.45,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.2
+          },
+          "global": {
+            "direction": -1,
+            "magnitude": 2,
+            "interferenceWeight": 3.78,
+            "classicalWeight": 2.27,
+            "tailWeight": 0.25
+          }
+        }
+      },
+      "decisions": {
+        "taiwan": {
+          "nation": "taiwan",
+          "cycle": 10,
+          "decision": {
+            "primaryAction": "SEEK_INTERNATIONAL_SUPPORT",
+            "supportingActions": [
+              "MAINTAIN_DETERRENCE",
+              "SEMICONDUCTOR_LEVERAGE_SIGNAL",
+              "BACKCHANNEL_BEIJING"
+            ],
+            "reasoning": "Status quo integrity has collapsed (13/100) and stability is critical (0/100), but invasion threshold is not yet crossed. Seek multilateral diplomatic backing to reinforce deterrence credibility while signaling semiconductor leverage to raise costs of escalation for both Beijing and reassure allies. Backchannel messaging to Beijing preserves strategic ambiguity and avoids domestic hardliner backlash by coupling resolve with de-escalation channel.",
+            "metricDeltas": {
+              "stability": 6,
+              "proxyActivity": -3,
+              "tradeVolume": -8,
+              "conflictEvents": -4,
+              "dealIntegrity": 5,
+              "publicSentiment": 3
+            },
+            "coalitionStatus": "STRAINED",
+            "existentialFrameActive": false,
+            "researchNote": "Selectorate theory (large, fractious coalition requiring cross-party support) and operational code (deterrence-by-denial, strategic ambiguity) jointly explain the multi-track approach: international support rebuilds deal integrity without formal independence rhetoric; backchannel preserves superposition; semiconductor signaling leverages asymmetric economic strength rather than military parity."
+          },
+          "usage": {
+            "input_tokens": 1400,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 340,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "japan": {
+          "nation": "japan",
+          "cycle": 10,
+          "decision": {
+            "primaryAction": "US_ALLIANCE_CONSULTATION",
+            "supportingActions": [
+              "TIGHTEN_CHIP_EXPORT_CONTROLS",
+              "DEEPEN_TAIWAN_TIES",
+              "SENKAKU_REINFORCEMENT",
+              "DIET_COALITION_SIGNAL"
+            ],
+            "reasoning": "The cross-strait status quo has collapsed (13/100 integrity) and China's blockade poses direct threats to Japan's semiconductor supply chain and sea lanes. Consulting the US alliance anchors our response in a framework that satisfies the coalition's reform pressure (94/100) while staying within constitutional bounds. Simultaneous chip export tightening, Taiwan tie-deepening, and Senkaku reinforcement signal resolve without unilateral escalation; the diet signal manages domestic pacifist opinion by framing moves as alliance-coordinated defense of the regional order.",
+            "metricDeltas": {
+              "stability": -3,
+              "proxyActivity": 8,
+              "tradeVolume": -12,
+              "conflictEvents": 2,
+              "dealIntegrity": 6,
+              "reformPressure": 4
+            },
+            "chipExportControlStance": "TIGHTENING",
+            "securityAlignmentStatus": "ADVANCING",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Selectorate theory + operational code: the governing coalition requires visible moves to retain business confidence and reform-minded Diet support as blockade threatens economic security; two-level games logic necessitates domestic framing (alliance-coordinated) to preempt pacifist backlash; loss aversion is overridden only by direct sea-lane/territorial threat (blockade + median-line incursions)."
+          },
+          "usage": {
+            "input_tokens": 1537,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 426,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        },
+        "china": {
+          "nation": "china",
+          "cycle": 10,
+          "decision": {
+            "primaryAction": "QUARANTINE_TAIWAN",
+            "supportingActions": [
+              "ESCALATE_EXERCISES",
+              "NATIONALIST_MOBILIZATION",
+              "DEMAND_CONCESSIONS"
+            ],
+            "reasoning": "Stability has collapsed (0/100) and status quo integrity is critically degraded (13/100); blockade escalation is justified under the constraint threshold. The Politburo Standing Committee demands visible resolve to counter hardliner pressure (84/100), and nationalist sentiment must be channeled to justify tightening the noose without yet crossing to kinetic war. Quarantine avoids the triggering threshold for full invasion (dealIntegrity 13 < 30, but hardlinerPressure 84 < 88) while maintaining maximum coercive pressure and signaling that peaceful reunification timelines are narrowing.",
+            "metricDeltas": {
+              "stability": -12,
+              "proxyActivity": 15,
+              "tradeVolume": -28,
+              "conflictEvents": 3,
+              "dealIntegrity": -18,
+              "hardlinerPressure": 8
+            },
+            "blockadeStatus": "BLOCKADE",
+            "invasionStatus": "NONE",
+            "coalitionSignal": "RESTLESS",
+            "researchNote": "Prospect theory (loss frame on Taiwan) + selectorate theory (Politburo satisfaction) jointly drive this choice: reunification is already framed as recovery of lost territory, raising risk tolerance; simultaneous domestic pressure requires visible coercive action short of war to signal strength without triggering US-led intervention that would impose unacceptable costs on the coalition's economic base."
+          },
+          "usage": {
+            "input_tokens": 1569,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 404,
+            "service_tier": "standard",
+            "inference_geo": "not_available"
+          }
+        }
+      },
+      "quantum": {
+        "china": "hardline",
+        "taiwan": "resistant",
+        "japan": "restrained",
+        "preCollapse": {
+          "aProbabilities": {
+            "hardline": 0.9240240480782131,
+            "conciliatory": 0.075975951921787
+          },
+          "bProbabilities": {
+            "resistant": 0.9755282581475769,
+            "accommodating": 0.024471741852423207
+          },
+          "entanglementStrength": 1.1102230246251565e-16,
+          "cProbabilities": {
+            "assertive": 0.043227271178699546,
+            "restrained": 0.9567727288213006
+          }
+        },
+        "entangledEffect": {
+          "stability": -2,
+          "conflictEvents": 1,
+          "label": "entangled escalation"
+        }
+      }
+    }
+  ],
+  "finalState": {
+    "stability": 0,
+    "proxy": 100,
+    "trade": 48,
+    "conflicts": 30,
+    "dealIntegrity": 6,
+    "market": {
+      "primary": 97,
+      "currencyA": 102,
+      "currencyB": 93,
+      "global": 96
+    }
+  },
+  "startState": {
+    "stability": 40,
+    "conflicts": 2,
+    "trade": 340,
+    "proxy": 25,
+    "dealIntegrity": 48,
+    "market": {
+      "primary": 100,
+      "currencyA": 100,
+      "currencyB": 100,
+      "global": 100
+    }
+  },
+  "registryAddress": "0x720472c8ce72c2A2D711333e064ABD3E6BbEAdd3",
+  "oracleAddress": "0xe8D2A1E88c91DCd5433208d4152Cc4F399a7e91d"
+}

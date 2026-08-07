@@ -1,65 +1,65 @@
 {
-  "scenario": "middle-east-2026",
+  "scenario": "taiwan-strait-2026",
   "inputMode": "real-data",
-  "realDataPoolSize": 42,
-  "realDataSourceCount": 7,
-  "nTrials": 100,
+  "realDataPoolSize": 29,
+  "realDataSourceCount": 5,
+  "nTrials": 5000,
   "nCycles": 3,
-  "initialMarginal": 0.72,
-  "meanEntanglementStrength": 0.2258946150677885,
+  "initialMarginal": 0.78,
+  "meanEntanglementStrength": 0.15948709390140162,
   "quantum": {
-    "stat": 16.76777149989838,
-    "p": 0.00004226748921531964,
+    "stat": 1605.37852262569,
+    "p": 0,
     "expected": [
-      39.53,
-      19.47,
-      27.47,
-      13.53
+      2482.3058,
+      1040.6942,
+      1040.6942,
+      436.3058
     ],
     "observed": [
-      49,
-      10,
-      18,
-      23
+      3072,
+      451,
+      451,
+      1026
     ],
-    "total": 100
+    "total": 5000
   },
   "classical": {
-    "stat": 0.13797664659733633,
-    "p": 0.7103009618729845,
+    "stat": 2.144456325662802,
+    "p": 0.1430857959368026,
     "expected": [
-      37.12,
-      26.88,
-      20.88,
-      15.12
+      2019.3276,
+      1514.6724,
+      837.6724,
+      628.3276
     ],
     "observed": [
-      38,
-      26,
-      20,
-      16
+      1996,
+      1538,
+      861,
+      605
     ],
-    "total": 100
+    "total": 5000
   },
   "classicalShuffled": {
-    "stat": 0.16813787305590616,
-    "p": 0.6817721588265284,
+    "stat": 0.603916169931891,
+    "p": 0.4370875900765552,
     "expected": [
-      39.04,
-      21.96,
-      24.96,
-      14.04
+      2005.669,
+      1559.331,
+      807.331,
+      627.669
     ],
     "observed": [
-      40,
-      21,
-      24,
-      15
+      2018,
+      1547,
+      795,
+      640
     ],
-    "total": 100
+    "total": 5000
   },
-  "quantumGap": 0.18940000000000007,
-  "classicalGap": 0.01759999999999999,
-  "classicalShuffledGap": 0.01920000000000001,
-  "caveat": "Bootstrap-resampled from 42 real logged cycles across 7 run file(s) — small-pool result, not yet a robust finding."
+  "quantumGap": 0.23587768000000006,
+  "classicalGap": 0.009331039999999971,
+  "classicalShuffledGap": 0.00493239999999999,
+  "caveat": "Bootstrap-resampled from 29 real logged cycles across 5 run file(s) — small-pool result, not yet a robust finding."
 }
