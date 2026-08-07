@@ -39,26 +39,38 @@
  * p-value on the quantum arm plus a null result on the classical arm is
  * the concrete falsifiable signature this model predicts.
  *
- * SYNTHETIC INPUT DATA — IMPORTANT CAVEAT:
- * This first pass uses per-cycle decision deltas drawn uniformly from the
- * same bounds the production code clamps against (rotationTheta's maxAbs
- * args), NOT real logged Claude decisions. That's a deliberate, cheap
- * first step (no API key needed, runs in seconds) — it validates that the
- * MECHANISM produces the predicted statistical signature at all. It is
- * NOT yet evidence that real geopolitical decision-making shows this
- * pattern. The natural next step is swapping the synthetic sampler below
- * for real decision-delta sequences pulled from logged AIResultsStep
- * "Quantum Measurement Log" / "Agent Decision Log" runs once enough of
- * those exist — the trial loop and statistics below don't need to change,
- * only sampleCycleDeltas().
+ * TWO INPUT MODES:
+ *
+ *   SYNTHETIC (default) — per-cycle decision deltas drawn uniformly from
+ *   the same bounds the production code clamps against (rotationTheta's
+ *   maxAbs args), NOT real logged Claude decisions. Cheap, instant, no API
+ *   key — validates that the MECHANISM produces the predicted statistical
+ *   signature at all. NOT yet evidence real geopolitical decision-making
+ *   shows this pattern.
+ *
+ *   --real-data <file1.json,file2.json,...> — bootstrap-resamples ACTUAL
+ *   per-cycle Claude decisions from one or more runs exported via the
+ *   "⬇ Download Run Data (JSON)" button on AIResultsStep.jsx (Dev Mode
+ *   produces these with zero MetaMask/wallet involvement — see README's
+ *   Dev Mode quickstart). Each synthetic "trial" here draws N_CYCLES real
+ *   logged cycles WITH REPLACEMENT from the pooled set of every cycle
+ *   across every provided file, preserving each cycle's real A/B deltas as
+ *   a joint record (not reshuffled independently) so any genuine shared-
+ *   cause correlation in the real decisions stays intact rather than being
+ *   artificially destroyed. This is a standard bootstrap, not a full
+ *   dataset — with only a handful of logged runs the resampled trials are
+ *   highly repetitive, so treat significance here as a first read, not a
+ *   final finding, until many independent runs have been logged.
  *
  * Usage:
  *   node scripts/quantum-vs-classical-test.mjs [scenarioPath] [nTrials] [nCycles]
  *   node scripts/quantum-vs-classical-test.mjs ../scenarios/middle-east-2026.config.cjs 5000 3
+ *   node scripts/quantum-vs-classical-test.mjs --real-data run1.json,run2.json [nTrials]
  *
  * No blockchain, no Hardhat, no API key — pure Node, ESM, offline.
  */
 
+import { readFile } from "node:fs/promises";
 import {
   entangledPair, applyLocalRotation, measureA, collapseQubit,
   marginalA, marginalB, entanglementStrength, probabilities, rotate,
@@ -68,23 +80,73 @@ import {
 } from "../frontend/src/lib/agents.js";
 
 // ─────────────────────────────────────────────────────────────
-// CONFIG
+// CONFIG / CLI PARSING
 // ─────────────────────────────────────────────────────────────
 
-const scenarioPath = process.argv[2] || "../scenarios/middle-east-2026.config.cjs";
-const N_TRIALS = parseInt(process.argv[3] || "5000", 10);
-const N_CYCLES = parseInt(process.argv[4] || "3", 10);
+const rawArgs = process.argv.slice(2);
+const realDataFlagIdx = rawArgs.findIndex((a) => a === "--real-data");
+const realDataFiles = realDataFlagIdx >= 0 ? rawArgs[realDataFlagIdx + 1].split(",") : null;
+const positional = realDataFlagIdx >= 0
+  ? [...rawArgs.slice(0, realDataFlagIdx), ...rawArgs.slice(realDataFlagIdx + 2)]
+  : rawArgs;
 
-const { default: scenario } = await import(scenarioPath);
+const scenarioPath = (realDataFiles ? null : positional[0]) || "../scenarios/middle-east-2026.config.cjs";
+const N_TRIALS = parseInt((realDataFiles ? positional[0] : positional[1]) || "5000", 10);
+const N_CYCLES = parseInt((realDataFiles ? positional[1] : positional[2]) || "3", 10);
+
+// In real-data mode the scenario is read from the first exported run file,
+// not guessed from a CLI arg — an exported run always knows its own
+// scenarioId (see downloadRunData() in AIResultsStep.jsx).
+let scenario;
+let realDataPool = null; // array of { deltaA, actionA, deltaB, actionB }, one per real logged cycle
+let realDataSourceCount = 0;
+
+if (realDataFiles) {
+  const runs = await Promise.all(
+    realDataFiles.map(async (f) => JSON.parse(await readFile(f, "utf8")))
+  );
+  const scenarioId = runs[0].scenarioId;
+  const mismatched = runs.filter((r) => r.scenarioId !== scenarioId);
+  if (mismatched.length > 0) {
+    throw new Error(`--real-data files must all share one scenarioId; found ${scenarioId} plus ${mismatched.map((r) => r.scenarioId).join(", ")}`);
+  }
+  const scenarioFile = scenarioId === "taiwan-strait-2026"
+    ? "../scenarios/taiwan-strait-2026.config.cjs"
+    : "../scenarios/middle-east-2026.config.cjs";
+  ({ default: scenario } = await import(scenarioFile));
+
+  const { entangled: e } = scenario.aiAgents;
+  realDataPool = [];
+  for (const run of runs) {
+    for (const h of run.history ?? []) {
+      const aDec = h.decisions?.[e.aId]?.decision;
+      const bDec = h.decisions?.[e.bId]?.decision;
+      if (!aDec || !bDec) continue; // skip cycles where an agent call errored
+      realDataPool.push({
+        deltaA: aDec.metricDeltas?.[e.aDriverField] ?? 0,
+        actionA: aDec.primaryAction ?? "HOLD",
+        deltaB: bDec.metricDeltas?.[e.bDriverField] ?? 0,
+        actionB: bDec.primaryAction ?? "HOLD",
+      });
+    }
+  }
+  realDataSourceCount = runs.length;
+  if (realDataPool.length === 0) {
+    throw new Error("--real-data: no usable cycles found across the provided files (missing decisions?)");
+  }
+} else {
+  ({ default: scenario } = await import(scenarioPath));
+}
+
 const { entangled } = scenario.aiAgents;
 const nations = nationsById(scenario);
 
-// Same synthetic action vocabulary regardless of scenario — actionPhase()
-// only cares about the string's hash, not its domain meaning, so this is
-// scenario-agnostic by construction (matches how production code treats it).
+// Synthetic-mode-only action vocabulary — actionPhase() only cares about
+// the string's hash, not its domain meaning, so this is scenario-agnostic
+// by construction (matches how production code treats it).
 const ACTION_IDS = ["ESCALATE", "DE_ESCALATE", "HOLD", "NEGOTIATE", "EXIT_DEAL", "SIGNAL"];
 
-function sampleCycleDeltas(rng) {
+function sampleCycleDeltasSynthetic(rng) {
   // Bounds match rotationTheta's maxAbs args in evolveAndCollapseQuantumState()
   // (15 for side A's driver, 10 for side B's) — see agents.js.
   const deltaA = (rng() * 2 - 1) * 15;
@@ -93,6 +155,12 @@ function sampleCycleDeltas(rng) {
   const actionB = ACTION_IDS[Math.floor(rng() * ACTION_IDS.length)];
   return { deltaA, deltaB, actionA, actionB };
 }
+
+function sampleCycleDeltasReal(rng) {
+  return realDataPool[Math.floor(rng() * realDataPool.length)];
+}
+
+const sampleCycleDeltas = realDataPool ? sampleCycleDeltasReal : sampleCycleDeltasSynthetic;
 
 // ─────────────────────────────────────────────────────────────
 // SHARED INITIAL STATE (identical starting marginals, both arms)
@@ -231,6 +299,14 @@ console.log(`\n${"═".repeat(72)}`);
 console.log(`QUANTUM vs. CLASSICAL MODEL COMPARISON — ${scenario.meta?.id ?? scenarioPath}`);
 console.log(`${"═".repeat(72)}`);
 console.log(`Entangled pair: ${entangled.aId} (${entangled.aAxis.join("/")}) x ${entangled.bId} (${entangled.bAxis.join("/")})`);
+if (realDataPool) {
+  console.log(`Input mode: REAL DATA — bootstrap-resampled from ${realDataPool.length} logged cycles across ${realDataSourceCount} run file(s)`);
+  if (realDataPool.length < 20) {
+    console.log(`  ⚠️  Small pool (${realDataPool.length} real cycles) — trials will be highly repetitive. Log more runs for a sturdier result.`);
+  }
+} else {
+  console.log(`Input mode: SYNTHETIC — uniform random deltas within production-matched bounds (no real decisions used)`);
+}
 console.log(`Trials: ${N_TRIALS}   Cycles/trial: ${N_CYCLES}   Initial marginal (axis[0]): ${(aProb * 100).toFixed(1)}%`);
 console.log(`Mean entanglement strength at collapse: ${(entStrengthSum / N_TRIALS).toFixed(4)}`);
 
@@ -249,8 +325,9 @@ console.log(`  Chi-square(1) = ${classicalStats.stat.toFixed(2)}, p = ${fmtP(cla
 console.log(`\n── VERDICT ──`);
 const quantumSignificant = quantumStats.p < 0.01;
 const classicalNull = classicalStats.p >= 0.01;
+const modeLabel = realDataPool ? `real data (${realDataPool.length} logged cycles, bootstrap-resampled)` : "synthetic inputs";
 if (quantumSignificant && classicalNull) {
-  console.log(`  ✅ Signature confirmed on synthetic inputs: the entangled arm shows a`);
+  console.log(`  ✅ Signature confirmed on ${modeLabel}: the entangled arm shows a`);
   console.log(`     statistically significant joint-outcome correlation (p ${fmtP(quantumStats.p)})`);
   console.log(`     that the classical arm, given IDENTICAL decision inputs, does not`);
   console.log(`     (p ${fmtP(classicalStats.p)}). The mechanism does what the theory predicts.`);
@@ -261,8 +338,14 @@ if (quantumSignificant && classicalNull) {
   console.log(`  ⚠️  Classical arm ALSO shows significant correlation (p ${fmtP(classicalStats.p)}) —`);
   console.log(`     something is leaking shared state between arms; investigate before trusting gap.`);
 }
-console.log(`\n  Reminder: this run used SYNTHETIC decision deltas (see file header). It`);
-console.log(`  demonstrates the mechanism's statistical signature, not yet a real-world finding.`);
+if (realDataPool) {
+  console.log(`\n  Reminder: trials are bootstrap-resampled from only ${realDataPool.length} real logged`);
+  console.log(`  cycles across ${realDataSourceCount} run file(s) — treat this as a first read, not a`);
+  console.log(`  final finding, until many independent real runs have been logged and combined.`);
+} else {
+  console.log(`\n  Reminder: this run used SYNTHETIC decision deltas (see file header). It`);
+  console.log(`  demonstrates the mechanism's statistical signature, not yet a real-world finding.`);
+}
 console.log(`${"═".repeat(72)}\n`);
 
 // Machine-readable output alongside the console report.
@@ -273,6 +356,9 @@ await fs.writeFile(
   JSON.stringify(
     {
       scenario: scenario.meta?.id ?? scenarioPath,
+      inputMode: realDataPool ? "real-data" : "synthetic",
+      realDataPoolSize: realDataPool?.length ?? null,
+      realDataSourceCount: realDataPool ? realDataSourceCount : null,
       nTrials: N_TRIALS,
       nCycles: N_CYCLES,
       initialMarginal: aProb,
@@ -281,7 +367,9 @@ await fs.writeFile(
       classical: classicalStats,
       quantumGap,
       classicalGap,
-      syntheticInputCaveat: "Decision deltas are synthetic (uniform, production-matched bounds), not real logged Claude decisions. See file header.",
+      caveat: realDataPool
+        ? `Bootstrap-resampled from ${realDataPool.length} real logged cycles across ${realDataSourceCount} run file(s) — small-pool result, not yet a robust finding.`
+        : "Decision deltas are synthetic (uniform, production-matched bounds), not real logged Claude decisions. See file header.",
     },
     null,
     2

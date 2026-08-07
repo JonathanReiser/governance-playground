@@ -1,44 +1,47 @@
 {
-  "scenario": "taiwan-strait-2026",
-  "nTrials": 5000,
+  "scenario": "middle-east-2026",
+  "inputMode": "real-data",
+  "realDataPoolSize": 3,
+  "realDataSourceCount": 1,
+  "nTrials": 3000,
   "nCycles": 3,
-  "initialMarginal": 0.78,
-  "meanEntanglementStrength": 0.15032920278415224,
+  "initialMarginal": 0.72,
+  "meanEntanglementStrength": 0.2017332742900783,
   "quantum": {
-    "stat": 304.7558237218358,
-    "p": 0,
+    "stat": 12.378991253687675,
+    "p": 0.0004342775970314072,
     "expected": [
-      2114.3204,
-      1111.6796,
-      1162.6796,
-      611.3204
+      962.7593333333333,
+      679.2406666666667,
+      796.2406666666667,
+      561.7593333333333
     ],
     "observed": [
-      2395,
-      831,
-      882,
-      892
+      1010,
+      632,
+      749,
+      609
     ],
-    "total": 5000
+    "total": 3000
   },
   "classical": {
-    "stat": 0.09709318372099512,
-    "p": 0.7553463506297615,
+    "stat": 0.31558189279730475,
+    "p": 0.5742748771501516,
     "expected": [
-      2166.9528,
-      1075.0472,
-      1175.0472,
-      582.9528
+      923.1553333333334,
+      1435.8446666666666,
+      250.84466666666665,
+      390.1553333333333
     ],
     "observed": [
-      2162,
-      1080,
-      1180,
-      578
+      917,
+      1442,
+      257,
+      384
     ],
-    "total": 5000
+    "total": 3000
   },
-  "quantumGap": 0.11227184000000001,
-  "classicalGap": 0.001981119999999982,
-  "syntheticInputCaveat": "Decision deltas are synthetic (uniform, production-matched bounds), not real logged Claude decisions. See file header."
+  "quantumGap": 0.03149377777777777,
+  "classicalGap": 0.004103555555555548,
+  "caveat": "Bootstrap-resampled from 3 real logged cycles across 1 run file(s) — small-pool result, not yet a robust finding."
 }

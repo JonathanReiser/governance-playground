@@ -30,6 +30,31 @@ function truncate(s, n) {
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
 }
 
+// Client-side only — no server round trip, works identically in Dev Mode
+// or on Sepolia, no wallet involved. Ships `aiAgents` alongside the raw
+// history so an offline consumer (e.g. scripts/quantum-vs-classical-test.mjs
+// --real-data) can find each cycle's entangled-pair driver fields/ids
+// without re-deriving them from the scenario config separately.
+function downloadRunData(results, scenario) {
+  const payload = {
+    scenarioId: scenario.meta.id,
+    exportedAt: new Date().toISOString(),
+    aiAgents: scenario.aiAgents,
+    history: results.history,
+    finalState: results.finalState,
+    startState: results.startState,
+    registryAddress: results.registryAddress,
+    oracleAddress: results.oracleAddress,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${scenario.meta.id}-run-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function AIResultsStep({ results, scenario, onReset }) {
   const { history, finalState, startState, registryAddress, oracleAddress } = results;
   const nationMeta = buildNationMeta(scenario);
@@ -301,6 +326,9 @@ export function AIResultsStep({ results, scenario, onReset }) {
       )}
 
       <div className="step-footer">
+        <button className="btn-secondary" onClick={() => downloadRunData(results, scenario)}>
+          ⬇ Download Run Data (JSON)
+        </button>
         <button className="btn-secondary" onClick={onReset}>
           ← Run Another AI Cycle Set
         </button>
