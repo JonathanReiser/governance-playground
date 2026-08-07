@@ -3,7 +3,7 @@
 ![A peace deal built on 48 points of stability. Two cycles later, 13 remained.](docs/field-report-preview.png)
 
 **A blockchain-based research sandbox for political science.** Load a real-world geopolitical
-scenario, let three Claude-powered nation agents reason through it under quantum-modeled
+scenario, let Claude-powered nation agents reason through it under quantum-modeled
 uncertainty, and watch the result get written — immutably, cycle by cycle — to a blockchain.
 Every finding is citable by block number.
 
@@ -12,6 +12,10 @@ Every finding is citable by block number.
 no wallet needed). Everything in it is independently checkable on
 [Sepolia Etherscan](https://sepolia.etherscan.io/address/0x863c9db5437AfA4F32d02661ba1EA9752dce592E)
 — you don't have to take a live demo's word for it.
+
+**More field reports:**
+- **[Taiwan Strait, 10 cycles →](https://claude.ai/code/artifact/1baaa2d4-060d-44ef-b237-fec7769aabb6)** — China, Taiwan, and Japan; stability collapses to zero by cycle 5 and stays there.
+- **[Middle East, with the US peacekeeper →](https://claude.ai/code/artifact/25f0234e-bd9f-4136-98b0-edcc1e8d3700)** — the first run with a fourth agent at the table, reasoning under Alliance Security Dilemma and Audience Costs theory.
 
 **[Or try it live yourself →](https://governance-playground.vercel.app)** — no install needed.
 Connect via MetaMask (works with Sepolia testnet — get free test ETH from a faucet, see Quickstart
