@@ -48,29 +48,34 @@
  *   signature at all. NOT yet evidence real geopolitical decision-making
  *   shows this pattern.
  *
- *   --real-data <file1.json,file2.json,...> — bootstrap-resamples ACTUAL
- *   per-cycle Claude decisions from one or more runs exported via the
+ *   --real-data <file1.json,file2.json,...|dir,...> — bootstrap-resamples
+ *   ACTUAL per-cycle Claude decisions from one or more runs exported via the
  *   "⬇ Download Run Data (JSON)" button on AIResultsStep.jsx (Dev Mode
  *   produces these with zero MetaMask/wallet involvement — see README's
- *   Dev Mode quickstart). Each synthetic "trial" here draws N_CYCLES real
- *   logged cycles WITH REPLACEMENT from the pooled set of every cycle
- *   across every provided file, preserving each cycle's real A/B deltas as
- *   a joint record (not reshuffled independently) so any genuine shared-
- *   cause correlation in the real decisions stays intact rather than being
- *   artificially destroyed. This is a standard bootstrap, not a full
- *   dataset — with only a handful of logged runs the resampled trials are
- *   highly repetitive, so treat significance here as a first read, not a
- *   final finding, until many independent runs have been logged.
+ *   Dev Mode quickstart). Any entry that's a directory (e.g. scripts/data)
+ *   is expanded to every *.json file directly inside it, so the list only
+ *   needs to grow as you add real files there, not be edited by hand. Each
+ *   synthetic "trial" here draws N_CYCLES real logged cycles WITH
+ *   REPLACEMENT from the pooled set of every cycle across every resolved
+ *   file, preserving each cycle's real A/B deltas as a joint record (not
+ *   reshuffled independently) so any genuine shared-cause correlation in
+ *   the real decisions stays intact rather than being artificially
+ *   destroyed. This is a standard bootstrap, not a full dataset — with only
+ *   a handful of logged runs the resampled trials are highly repetitive, so
+ *   treat significance here as a first read, not a final finding, until
+ *   many independent runs have been logged.
  *
  * Usage:
  *   node scripts/quantum-vs-classical-test.mjs [scenarioPath] [nTrials] [nCycles]
  *   node scripts/quantum-vs-classical-test.mjs ../scenarios/middle-east-2026.config.cjs 5000 3
  *   node scripts/quantum-vs-classical-test.mjs --real-data run1.json,run2.json [nTrials]
+ *   node scripts/quantum-vs-classical-test.mjs --real-data scripts/data [nTrials]
  *
  * No blockchain, no Hardhat, no API key — pure Node, ESM, offline.
  */
 
-import { readFile } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
+import path from "node:path";
 import {
   entangledPair, applyLocalRotation, measureA, collapseQubit,
   marginalA, marginalB, entanglementStrength, probabilities, rotate,
@@ -83,9 +88,29 @@ import {
 // CONFIG / CLI PARSING
 // ─────────────────────────────────────────────────────────────
 
+// Expand any directory entries in a comma-separated --real-data list into
+// every *.json file directly inside it (non-recursive, sorted) — lets you
+// pass a folder like scripts/data instead of listing files by hand as the
+// number of logged runs grows.
+async function expandRealDataPaths(rawPaths) {
+  const expanded = [];
+  for (const p of rawPaths) {
+    const s = await stat(p).catch(() => null);
+    if (s?.isDirectory()) {
+      const entries = (await readdir(p)).filter((f) => f.endsWith(".json")).sort();
+      expanded.push(...entries.map((f) => path.join(p, f)));
+    } else {
+      expanded.push(p);
+    }
+  }
+  return expanded;
+}
+
 const rawArgs = process.argv.slice(2);
 const realDataFlagIdx = rawArgs.findIndex((a) => a === "--real-data");
-const realDataFiles = realDataFlagIdx >= 0 ? rawArgs[realDataFlagIdx + 1].split(",") : null;
+const realDataFiles = realDataFlagIdx >= 0
+  ? await expandRealDataPaths(rawArgs[realDataFlagIdx + 1].split(","))
+  : null;
 const positional = realDataFlagIdx >= 0
   ? [...rawArgs.slice(0, realDataFlagIdx), ...rawArgs.slice(realDataFlagIdx + 2)]
   : rawArgs;
