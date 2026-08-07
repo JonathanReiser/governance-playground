@@ -36,12 +36,14 @@ function buildNationMeta(scenario) {
 // built by buildWorldState() — sourced from the scenario's own aiAgents
 // config, not hardcoded per scenario.
 function buildWorldStateKeyMap(scenario) {
-  const { entangled, standalone } = scenario.aiAgents;
-  return {
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
+  const map = {
     [entangled.aId]: entangled.aWorldKey,
     [entangled.bId]: entangled.bWorldKey,
     [standalone.id]: standalone.worldKey,
   };
+  if (peacekeeper) map[peacekeeper.id] = peacekeeper.worldKey;
+  return map;
 }
 
 function joinWithAnd(items) {
@@ -327,7 +329,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
   const worldStateKey  = buildWorldStateKeyMap(scenario);
   const metricLabels   = buildMetricLabels(scenario);
   const nationIds      = scenario.nations.map(n => n.id);
-  const { entangled, standalone, marketInstruments } = scenario.aiAgents;
+  const { entangled, standalone, peacekeeper, marketInstruments } = scenario.aiAgents;
 
   const [phase,       setPhase]       = useState("idle");    // idle|thinking|review|committing
   const [maxCycles,   setMaxCycles]   = useState(DEFAULT_MAX_CYCLES); // locked in once cycle 1 starts
@@ -518,6 +520,7 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
   const aNation = scenario.nations.find(n => n.id === entangled.aId);
   const bNation = scenario.nations.find(n => n.id === entangled.bId);
   const cNation = scenario.nations.find(n => n.id === standalone.id);
+  const pNation = peacekeeper ? scenario.nations.find(n => n.id === peacekeeper.id) : null;
 
   return (
     <div className="step-panel">
@@ -653,12 +656,23 @@ export function AICycleStep({ signer, scenario, deployment, onResults }) {
             {aNation.name} collapsed to <strong>{quantumEvent[entangled.aId]?.toUpperCase()}</strong>, {bNation.name} to{" "}
             <strong>{quantumEvent[entangled.bId]?.toUpperCase()}</strong>, {cNation.name} to{" "}
             <strong>{quantumEvent[standalone.id]?.toUpperCase()}</strong>
+            {pNation && quantumEvent[peacekeeper.id] && (
+              <>, {pNation.name} to <strong>{quantumEvent[peacekeeper.id]?.toUpperCase()}</strong></>
+            )}
             {" "}(pre-collapse: {aNation.name} {Math.round((quantumEvent.preCollapse.aProbabilities[entangled.aAxis[0]] ?? 0) * 100)}% {entangled.aAxis[0]},
             entanglement strength {quantumEvent.preCollapse.entanglementStrength.toFixed(2)}).
           </p>
           {quantumEvent.entangledEffect && (
             <p className="status-flag status-flag--alert" style={{ display: "inline-block" }}>
               {quantumEvent.entangledEffect.label}: applied on top of the classical deltas this cycle
+            </p>
+          )}
+          {quantumEvent.peacekeeperIntervention?.dampened && (
+            <p className="muted" style={{ fontSize: 11, marginTop: "0.4rem" }}>
+              {pNation.name} actively mediated — the escalation effect above was dampened from
+              {" "}{quantumEvent.peacekeeperIntervention.original.stability} to {quantumEvent.entangledEffect.stability} stability
+              (and {quantumEvent.peacekeeperIntervention.original.conflictEvents} to {quantumEvent.entangledEffect.conflictEvents} conflict events),
+              not fully cancelled.
             </p>
           )}
         </div>

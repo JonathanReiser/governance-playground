@@ -94,7 +94,7 @@ export function driverProbability(nation, driverField, driverDirection) {
 
 export function initQuantumBeliefs(scenario) {
   const nations = nationsById(scenario);
-  const { entangled, standalone } = scenario.aiAgents;
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
 
   // alpha sets BOTH side A's starting marginal (axis[0] probability) and
   // how entangled the pair start out: a near-certain A leaves little room
@@ -111,12 +111,22 @@ export function initQuantumBeliefs(scenario) {
 
   const cProb = driverProbability(nations[standalone.id], standalone.driverField, standalone.driverDirection);
 
-  return {
+  const beliefs = {
     // Joint 2-qubit state, basis [axis0&axis0, axis0&axis1, axis1&axis0, axis1&axis1]
     entangledPair: entangledPair(alpha),
     // Standalone qubit, basis [axis0, axis1]
     standaloneQubit: [{ re: Math.sqrt(cProb), im: 0 }, { re: Math.sqrt(1 - cProb), im: 0 }],
   };
+
+  // Peacekeeper qubit is optional — scenarios without one (e.g. Taiwan
+  // Strait, not built yet) just don't get this key, and every consumer
+  // below already guards on scenario.aiAgents.peacekeeper existing.
+  if (peacekeeper) {
+    const pProb = driverProbability(nations[peacekeeper.id], peacekeeper.driverField, peacekeeper.driverDirection);
+    beliefs.peacekeeperQubit = [{ re: Math.sqrt(pProb), im: 0 }, { re: Math.sqrt(1 - pProb), im: 0 }];
+  }
+
+  return beliefs;
 }
 
 function qubitReadout(qubit, labels) {
@@ -182,7 +192,7 @@ function describeStandaloneQuantumState(qubit, axisLabels) {
 export function buildWorldState(scenario, simState, cycle, agentMemory = {}) {
   const scenarioId = scenario.meta.id;
   const nations = nationsById(scenario);
-  const { entangled, standalone } = scenario.aiAgents;
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
 
   const quantum = agentMemory.quantum || initQuantumBeliefs(scenario);
   const markets = agentMemory.markets || initMarketBeliefs(scenario);
@@ -232,6 +242,18 @@ export function buildWorldState(scenario, simState, cycle, agentMemory = {}) {
     quantumNarrative:     describeStandaloneQuantumState(quantum.standaloneQubit, standalone.axis),
   };
 
+  let pState = null;
+  if (peacekeeper && quantum.peacekeeperQubit) {
+    const pNation = nations[peacekeeper.id];
+    pState = {
+      treasury:           pNation.economy.treasury,
+      militaryPower:       pNation.military.power,
+      publicSentiment:     agentMemory[peacekeeper.worldKey]?.publicSentiment ?? pNation.population.sentiment,
+      quantumBeliefState:  qubitReadout(quantum.peacekeeperQubit, peacekeeper.axis),
+      quantumNarrative:    describeStandaloneQuantumState(quantum.peacekeeperQubit, peacekeeper.axis),
+    };
+  }
+
   if (scenarioId === "middle-east-2026") {
     aState.proxyCapacity         = aNation.military.proxyCapacity;
     aState.hardlinerPressure     = agentMemory[entangled.aWorldKey]?.hardlinerPressure ?? aNation.governance.hardlinerPressure;
@@ -243,7 +265,15 @@ export function buildWorldState(scenario, simState, cycle, agentMemory = {}) {
     cState.oilProductionStance  = agentMemory[standalone.worldKey]?.oilProductionStance ?? "STABLE";
     cState.normalizationStatus  = agentMemory[standalone.worldKey]?.normalizationStatus ?? "STALLED";
 
-    return { ...common, [entangled.aWorldKey]: aState, [entangled.bWorldKey]: bState, [standalone.worldKey]: cState };
+    const result = { ...common, [entangled.aWorldKey]: aState, [entangled.bWorldKey]: bState, [standalone.worldKey]: cState };
+
+    if (pState && peacekeeper) {
+      pState.sanctionsReliefPending = aNation.economy.sanctionsReliefPending;
+      pState.congressionalRatification = agentMemory[peacekeeper.worldKey]?.congressionalRatification ?? "PENDING";
+      result[peacekeeper.worldKey] = pState;
+    }
+
+    return result;
   }
 
   if (scenarioId === "taiwan-strait-2026") {
@@ -294,13 +324,15 @@ export function rotationTheta(delta, maxAbs, direction) {
 }
 
 export function evolveAndCollapseQuantumState(scenario, quantum, decisions, rng = Math.random) {
-  const { entangled, standalone } = scenario.aiAgents;
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
   let joint  = quantum.entangledPair;
   let qubitC = quantum.standaloneQubit;
+  let qubitP = quantum.peacekeeperQubit; // may be undefined if this scenario has no peacekeeper
 
   const aD = decisions[entangled.aId]?.decision;
   const bD = decisions[entangled.bId]?.decision;
   const cD = decisions[standalone.id]?.decision;
+  const pD = peacekeeper ? decisions[peacekeeper.id]?.decision : null;
 
   if (aD) {
     const delta = aD.metricDeltas?.[entangled.aDriverField] ?? 0;
@@ -317,6 +349,17 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, rng 
     const theta = rotationTheta(delta, 10, standalone.driverDirection);
     qubitC = rotate(qubitC, theta, actionPhase(cD.primaryAction));
   }
+  // Peacekeeper rotates last, after the three regional actors — a real
+  // ordering choice (matches the existing A→B→C convention of resolving
+  // in a fixed sequence, not incidental): the US's own posture this cycle
+  // is folded in only after seeing how far the local rotations already
+  // pushed the state, same non-commutative-order principle as the rest of
+  // this engine, just extended one qubit further.
+  if (pD && qubitP) {
+    const delta = pD.metricDeltas?.[peacekeeper.driverField] ?? 0;
+    const theta = rotationTheta(delta, 10, peacekeeper.driverDirection);
+    qubitP = rotate(qubitP, theta, actionPhase(pD.primaryAction));
+  }
 
   // Diagnostics captured BEFORE collapse — this is the last look at the
   // genuine superposition, useful for the research record even though
@@ -326,12 +369,14 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, rng 
     bProbabilities:       probReadout(marginalB(joint), entangled.bAxis),
     entanglementStrength: entanglementStrength(joint),
     cProbabilities:       qubitReadout(qubitC, standalone.axis),
+    ...(peacekeeper && qubitP ? { pProbabilities: qubitReadout(qubitP, peacekeeper.axis) } : {}),
   };
 
   const aMeasurement = measureA(joint, rng);
   const aOutcome = entangled.aAxis[aMeasurement.outcomeIndex];
   const bCollapse = collapseQubit(aMeasurement.conditionedB, entangled.bAxis, rng);
   const cCollapse = collapseQubit(qubitC, standalone.axis, rng);
+  const pCollapse = (peacekeeper && qubitP) ? collapseQubit(qubitP, peacekeeper.axis, rng) : null;
 
   // Rebuild a clean one-hot joint state from both collapsed outcomes.
   const oneHot = [0, 0, 0, 0];
@@ -345,14 +390,43 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, rng 
     entangledEffect = { stability: +2, dealIntegrity: +1, label: "entangled de-escalation" };
   }
 
+  // The peacekeeper mechanic: this is deliberately NOT "US collapses to
+  // activelyMediate -> good things happen" as a flat bonus. It only ever
+  // does anything when there's an entangled escalation to push back
+  // against, and it dampens rather than cancels it — a mediator reduces
+  // the severity of a crisis it didn't cause, it doesn't erase it. If the
+  // pair is de-escalating on their own, or the US has collapsed to
+  // disengage, this is a no-op and the raw entangledEffect above stands
+  // exactly as it already did before this feature existed.
+  let peacekeeperIntervention = null;
+  if (
+    peacekeeper && pCollapse &&
+    pCollapse.outcomeIndex === 0 && // axis[0] = "activelyMediate" by this scenario's convention
+    entangledEffect?.label === "entangled escalation"
+  ) {
+    const original = { ...entangledEffect };
+    entangledEffect = {
+      stability:      Math.round(entangledEffect.stability      * 0.5),
+      conflictEvents: Math.round(entangledEffect.conflictEvents * 0.5),
+      label: "entangled escalation (dampened by active US mediation)",
+    };
+    peacekeeperIntervention = { dampened: true, original };
+  }
+
   return {
-    newQuantum: { entangledPair: collapsedJoint, standaloneQubit: cCollapse.collapsedState },
+    newQuantum: {
+      entangledPair: collapsedJoint,
+      standaloneQubit: cCollapse.collapsedState,
+      ...(peacekeeper && pCollapse ? { peacekeeperQubit: pCollapse.collapsedState } : {}),
+    },
     event: {
       [entangled.aId]: aOutcome,
       [entangled.bId]: bCollapse.outcome,
       [standalone.id]: cCollapse.outcome,
+      ...(peacekeeper && pCollapse ? { [peacekeeper.id]: pCollapse.outcome } : {}),
       preCollapse,
       entangledEffect,
+      peacekeeperIntervention,
     },
   };
 }
@@ -457,6 +531,17 @@ export function applyDecisions(scenario, simState, decisions, agentMemory = {}, 
       if (deltas.reformPressure != null) {
         const current = mem.japan.reformPressure ?? 58;
         mem.japan.reformPressure = clamp(current + deltas.reformPressure, 0, 100);
+      }
+    }
+
+    // Peacekeeper (Middle East only, for now) — same pattern as the rest.
+    if (nation === "us") {
+      mem.us = mem.us || {};
+      if (d.congressionalRatification) mem.us.congressionalRatification = d.congressionalRatification;
+      if (d.coalitionSignal)           mem.us.coalitionSignal           = d.coalitionSignal;
+      if (deltas.publicSentiment != null) {
+        const current = mem.us.publicSentiment ?? 48;
+        mem.us.publicSentiment = clamp(current + deltas.publicSentiment, 0, 100);
       }
     }
   }

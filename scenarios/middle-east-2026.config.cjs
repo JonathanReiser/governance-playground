@@ -257,6 +257,55 @@ const MIDDLE_EAST_2026 = {
       },
     },
 
+
+    // ── UNITED STATES (external guarantor, not a deal party) ──
+    // Standalone qubit like Saudi Arabia, but with a distinct mechanical
+    // role: see aiAgents.peacekeeper below and evolveAndCollapseQuantumState()
+    // in agents.js — when this qubit collapses to activelyMediate while the
+    // Iran/Israel entangled pair is heading toward mutual escalation, it
+    // dampens that specific effect rather than adding a generic bonus.
+    {
+      id: "us",
+      name: "United States",
+      flag: "🇺🇸",
+      color: "#3b82f6",
+
+      governance: {
+        type: "PRESIDENTIAL_REPUBLIC",
+        description:
+          "Executive brokered the deal; Congress has not ratified sanctions " +
+          "relief. Domestic political investment in the deal succeeding is " +
+          "real but not unconditional — an election-cycle asset, not a " +
+          "permanent commitment.",
+        source: "Congressional Research Service 2026",
+
+        // Starting lean toward active mediation: having just brokered and
+        // publicly staked credibility on this deal, backing away has a real
+        // political cost (audience costs — Fearon 1994), so the prior favors
+        // engagement, not disengagement, but it's a lean, not a lock.
+        diplomaticCapital: 65,
+        source_capital: "Reflects post-brokering audience-cost exposure, not polling data",
+      },
+
+      economy: {
+        treasury: 27700, // US GDP ~$27.7T (2026), for narrative scale only —
+        source: "BEA 2026",
+        sanctioned: false,
+      },
+
+      military: {
+        power: 2100, // SIPRI top-line US military expenditure scale, narrative only
+        source: "SIPRI 2026 — ~$920B military expenditure (CENTCOM posture, not full global power projection)",
+        range: [1900, 2300],
+      },
+
+      population: {
+        size: "LARGE",
+        sentiment: 48, // domestic appetite for continued Middle East involvement — genuinely split
+        source: "Pew Research 2026 (US foreign policy attitudes)",
+      },
+    },
+
   ],
 
 
@@ -537,6 +586,17 @@ const MIDDLE_EAST_2026 = {
     },
     standalone: {
       id: "saudi_arabia", worldKey: "saudiArabia", axis: ["bold", "cautious"], driverField: "reformPressure", driverDirection: "direct",
+    },
+    // A second standalone qubit, deliberately not generalized into
+    // `standalone` becoming an array — this one has a distinct mechanical
+    // role (damping the entangled pair's escalation effect, see
+    // evolveAndCollapseQuantumState() in agents.js), not just "another
+    // nation that hedges independently". Optional: scenarios without a
+    // peacekeeper (e.g. Taiwan Strait, not built yet) simply omit this key
+    // and every consumer treats it as absent, not an error.
+    peacekeeper: {
+      id: "us", worldKey: "us", axis: ["activelyMediate", "disengage"],
+      driverField: "diplomaticCapital", driverDirection: "direct",
     },
     marketInstruments: [
       { key: "primary",   label: "Oil Index",   symbol: "OIL",  emoji: "🛢",  shockLabel: "SPIKING",   calmLabel: "STABLE" },

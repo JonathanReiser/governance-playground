@@ -62,6 +62,20 @@ export const NATION_ACTIONS = {
         reformPressure: [-8, 10],
       },
     },
+    us: {
+      categories: {
+        DIPLOMATIC: ["BROKER_TALKS", "PUBLIC_ENDORSEMENT", "QUIET_PRESSURE", "DISENGAGE"],
+        ECONOMIC: ["EXPEDITE_SANCTIONS_RELIEF", "DELAY_SANCTIONS_RELIEF", "THREATEN_AID_CUT"],
+        MILITARY: ["DEPLOY_CARRIER_GROUP", "REDUCE_REGIONAL_PRESENCE", "SECURITY_GUARANTEE_SIGNAL"],
+        DOMESTIC: ["CONGRESSIONAL_LOBBYING", "PUBLIC_STATEMENT"],
+      },
+      metricBounds: {
+        stability: [-5, 10],
+        dealIntegrity: [-15, 15],
+        tradeVolume: [-10, 20],
+        publicSentiment: [-8, 8],
+      },
+    },
   },
 };
 
