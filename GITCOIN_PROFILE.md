@@ -55,7 +55,7 @@ researcher — can edit the record afterward.
   one dyad's specific math.
 - Live on Sepolia testnet, verified on Etherscan, and hosted as a working public demo.
 
-**Verify it yourself, no wallet required:** [a real, already-committed 2-cycle run](https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313)
+**Verify it yourself, no wallet required:** [a real, already-committed 5-cycle run, all four nations including the US peacekeeper](https://claude.ai/code/artifact/25f0234e-bd9f-4136-98b0-edcc1e8d3700)
 — actual Claude reasoning, actual on-chain transactions — is independently checkable on
 [Sepolia Etherscan](https://sepolia.etherscan.io/address/0x863c9db5437AfA4F32d02661ba1EA9752dce592E).
 
@@ -68,9 +68,8 @@ mainnet migration path.
 
 - **Live demo:** https://governance-playground.vercel.app
 - **Code:** https://github.com/JonathanReiser/governance-playground
-- **Real verified run (no wallet needed):** https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313
+- **Real verified run, with the US peacekeeper (no wallet needed):** https://claude.ai/code/artifact/25f0234e-bd9f-4136-98b0-edcc1e8d3700
 - **Taiwan Strait field report (10 cycles):** https://claude.ai/code/artifact/1baaa2d4-060d-44ef-b237-fec7769aabb6
-- **Middle East field report, with the US peacekeeper:** https://claude.ai/code/artifact/25f0234e-bd9f-4136-98b0-edcc1e8d3700
 - **On-chain contract:** https://sepolia.etherscan.io/address/0x863c9db5437AfA4F32d02661ba1EA9752dce592E
 
 ## Team

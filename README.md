@@ -1,21 +1,20 @@
 # Governance Playground
 
-![A peace deal built on 48 points of stability. Two cycles later, 13 remained.](docs/field-report-preview.png)
+![Regional stability nearly halved in five cycles. The peace deal's own integrity barely moved.](docs/field-report-preview.png)
 
 **A blockchain-based research sandbox for political science.** Load a real-world geopolitical
 scenario, let Claude-powered nation agents reason through it under quantum-modeled
 uncertainty, and watch the result get written — immutably, cycle by cycle — to a blockchain.
 Every finding is citable by block number.
 
-**[Read a real, already-verified run →](https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313)**
-(a 2-cycle simulation: Iran exits a peace deal — real Claude reasoning, real on-chain transactions,
-no wallet needed). Everything in it is independently checkable on
+**[Read a real, already-verified run →](https://claude.ai/code/artifact/25f0234e-bd9f-4136-98b0-edcc1e8d3700)**
+(a 5-cycle simulation, all four nations including the US peacekeeper — real Claude reasoning, real
+on-chain transactions, no wallet needed). Everything in it is independently checkable on
 [Sepolia Etherscan](https://sepolia.etherscan.io/address/0x863c9db5437AfA4F32d02661ba1EA9752dce592E)
 — you don't have to take a live demo's word for it.
 
 **More field reports:**
 - **[Taiwan Strait, 10 cycles →](https://claude.ai/code/artifact/1baaa2d4-060d-44ef-b237-fec7769aabb6)** — China, Taiwan, and Japan; stability collapses to zero by cycle 5 and stays there.
-- **[Middle East, with the US peacekeeper →](https://claude.ai/code/artifact/25f0234e-bd9f-4136-98b0-edcc1e8d3700)** — the first run with a fourth agent at the table, reasoning under Alliance Security Dilemma and Audience Costs theory.
 
 **[Or try it live yourself →](https://governance-playground.vercel.app)** — no install needed.
 Connect via MetaMask (works with Sepolia testnet — get free test ETH from a faucet, see Quickstart
@@ -129,8 +128,8 @@ not anything wrong with this app or its contracts. If you hit this:
   it can silently block MetaMask's alert-provider API.
 - Reload the extension itself (`chrome://extensions` → MetaMask → reload icon) or lock/unlock it
   (account icon → Lock, then unlock) to reset its internal state.
-- As a fallback, **[read a real, already-verified run instead](https://claude.ai/code/artifact/8a42c4dc-a4fe-4e3b-8645-3022bada0313)**
-  — a live 2-cycle simulation with real on-chain tx hashes, no wallet required.
+- As a fallback, **[read a real, already-verified run instead](https://claude.ai/code/artifact/25f0234e-bd9f-4136-98b0-edcc1e8d3700)**
+  — a live 5-cycle simulation with real on-chain tx hashes, no wallet required.
 
 ## Project structure
 
