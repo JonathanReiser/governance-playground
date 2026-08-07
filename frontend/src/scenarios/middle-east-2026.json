@@ -195,6 +195,13 @@
         "type": "FEDERAL_REPUBLIC",
         "description": "Executive brokered the deal; Congress has not ratified sanctions relief. Domestic political investment in the deal succeeding is real but not unconditional — an election-cycle asset, not a permanent commitment.",
         "source": "Congressional Research Service 2026",
+        "proposalThreshold": 1000,
+        "quorum": 25,
+        "votingMechanism": "ONE_TOKEN_ONE_VOTE",
+        "coalitionRequired": false,
+        "vetoCouncil": false,
+        "guardianVeto": false,
+        "royalVeto": false,
         "diplomaticCapital": 65,
         "source_capital": "Reflects post-brokering audience-cost exposure, not polling data"
       },

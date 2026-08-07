@@ -287,6 +287,18 @@ const MIDDLE_EAST_2026 = {
           "permanent commitment.",
         source: "Congressional Research Service 2026",
 
+        // Genuinely representative federal system, unlike China's use of the
+        // same enum slot (see taiwan-strait-2026.config.cjs) -- broad
+        // participation via elected representatives, not a small council, so
+        // these numbers reflect that even though the enum label is shared.
+        proposalThreshold: 1000,   // moderate — representative, not direct-democracy-low
+        quorum: 25,                // large federal republic — lower effective quorum than a small parliament
+        votingMechanism: "ONE_TOKEN_ONE_VOTE",
+        coalitionRequired: false,  // executive branch action, not a parliamentary coalition
+        vetoCouncil: false,
+        guardianVeto: false,
+        royalVeto: false,
+
         // Starting lean toward active mediation: having just brokered and
         // publicly staked credibility on this deal, backing away has a real
         // political cost (audience costs — Fearon 1994), so the prior favors
