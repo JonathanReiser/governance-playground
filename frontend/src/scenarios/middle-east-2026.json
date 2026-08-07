@@ -185,6 +185,37 @@
         "sentiment": 62,
         "source": "Arab Barometer Wave 7 / YouGov Middle East 2026"
       }
+    },
+    {
+      "id": "us",
+      "name": "United States",
+      "flag": "🇺🇸",
+      "color": "#3b82f6",
+      "governance": {
+        "type": "FEDERAL_REPUBLIC",
+        "description": "Executive brokered the deal; Congress has not ratified sanctions relief. Domestic political investment in the deal succeeding is real but not unconditional — an election-cycle asset, not a permanent commitment.",
+        "source": "Congressional Research Service 2026",
+        "diplomaticCapital": 65,
+        "source_capital": "Reflects post-brokering audience-cost exposure, not polling data"
+      },
+      "economy": {
+        "treasury": 27700,
+        "source": "BEA 2026",
+        "sanctioned": false
+      },
+      "military": {
+        "power": 2100,
+        "source": "SIPRI 2026 — ~$920B military expenditure (CENTCOM posture, not full global power projection)",
+        "range": [
+          1900,
+          2300
+        ]
+      },
+      "population": {
+        "size": "LARGE",
+        "sentiment": 48,
+        "source": "Pew Research 2026 (US foreign policy attitudes)"
+      }
     }
   ],
   "relationships": [
@@ -573,6 +604,16 @@
         "cautious"
       ],
       "driverField": "reformPressure",
+      "driverDirection": "direct"
+    },
+    "peacekeeper": {
+      "id": "us",
+      "worldKey": "us",
+      "axis": [
+        "activelyMediate",
+        "disengage"
+      ],
+      "driverField": "diplomaticCapital",
       "driverDirection": "direct"
     },
     "marketInstruments": [

@@ -271,7 +271,15 @@ const MIDDLE_EAST_2026 = {
       color: "#3b82f6",
 
       governance: {
-        type: "PRESIDENTIAL_REPUBLIC",
+        // FEDERAL_REPUBLIC is the least-wrong fit in the on-chain
+        // GovernanceType enum (PARLIAMENTARY_DEMOCRACY/THEOCRATIC_REPUBLIC/
+        // ABSOLUTE_MONARCHY/FEDERAL_REPUBLIC/MILITARY_JUNTA) -- same "no
+        // clean slot, map to the closest real thing" precedent already
+        // used for China in the Taiwan Strait scenario. "PRESIDENTIAL_REPUBLIC"
+        // isn't in that enum at all; contracts.js falls back to 0
+        // (PARLIAMENTARY_DEMOCRACY, wrong) and scripts/deploy.js has no
+        // fallback and would throw undefined into the contract call.
+        type: "FEDERAL_REPUBLIC",
         description:
           "Executive brokered the deal; Congress has not ratified sanctions " +
           "relief. Domestic political investment in the deal succeeding is " +
