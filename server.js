@@ -353,6 +353,13 @@ a standing threat to the deal's credibility.
   - If < 35: costly engagement (carrier deployments, public arm-twisting of Israel) becomes harder
     to sustain domestically.
   - If > 65: you have real domestic capital to spend on active mediation.
+- diplomaticCapital (your accumulated credibility as an active guarantor — distinct from domestic
+  polling; this is what the region reads your posture off of): {{us.diplomaticCapital}} / 100
+  - Sustained engagement that actually holds the deal together (BROKER_TALKS, CONGRESSIONAL_LOBBYING,
+    QUIET_PRESSURE) should typically raise it, since visible follow-through builds credibility.
+  - DISENGAGE or REDUCE_REGIONAL_PRESENCE should lower it — per audience costs (Fearon 1994),
+    stepping back after publicly brokering this deal costs more than it would have cost a neutral
+    party who never staked a claim.
 
 ### Risk Tolerance (Prospect Theory — Kahneman/Levy)
 - You are evaluating from a GAINS frame on the deal itself — you already claimed credit for
@@ -399,7 +406,8 @@ Respond with a JSON object only. No prose outside the JSON.
     "stability": <integer -5 to +10>,
     "dealIntegrity": <integer -15 to +15>,
     "tradeVolume": <integer -10 to +20>,
-    "publicSentiment": <integer -8 to +8>
+    "publicSentiment": <integer -8 to +8>,
+    "diplomaticCapital": <integer -10 to +6>
   },
   "congressionalRatification": "<PENDING | RATIFIED | BLOCKED>",
   "coalitionSignal": "<SATISFIED | RESTLESS | CRISIS>",

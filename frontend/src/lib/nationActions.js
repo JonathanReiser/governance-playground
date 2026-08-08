@@ -74,6 +74,7 @@ export const NATION_ACTIONS = {
         dealIntegrity: [-15, 15],
         tradeVolume: [-10, 20],
         publicSentiment: [-8, 8],
+        diplomaticCapital: [-10, 6],
       },
     },
   },

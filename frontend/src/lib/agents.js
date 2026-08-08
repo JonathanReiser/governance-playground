@@ -270,6 +270,15 @@ export function buildWorldState(scenario, simState, cycle, agentMemory = {}) {
     if (pState && peacekeeper) {
       pState.sanctionsReliefPending = aNation.economy.sanctionsReliefPending;
       pState.congressionalRatification = agentMemory[peacekeeper.worldKey]?.congressionalRatification ?? "PENDING";
+      // diplomaticCapital is the peacekeeper's quantum driver field — must be
+      // tracked as a running value (like hardlinerPressure/reformPressure
+      // below), not just a static config number, or the qubit only ever
+      // rotates on cycle 1 and then sits frozen for the rest of the run.
+      // Confirmed the hard way (2026-08-07): ran a real 5-cycle Middle East
+      // AI Agent Cycle with the US, and pProbabilities.activelyMediate was
+      // locked at exactly 0 from cycle 2 onward — traced to metricDeltas
+      // never containing "diplomaticCapital" anywhere the US could set it.
+      pState.diplomaticCapital = agentMemory[peacekeeper.worldKey]?.diplomaticCapital ?? nations[peacekeeper.id].governance.diplomaticCapital;
       result[peacekeeper.worldKey] = pState;
     }
 
@@ -542,6 +551,14 @@ export function applyDecisions(scenario, simState, decisions, agentMemory = {}, 
       if (deltas.publicSentiment != null) {
         const current = mem.us.publicSentiment ?? 48;
         mem.us.publicSentiment = clamp(current + deltas.publicSentiment, 0, 100);
+      }
+      // Drives the peacekeeper's quantum belief-state rotation (see
+      // evolveAndCollapseQuantumState() above, which reads
+      // metricDeltas.diplomaticCapital directly off this cycle's decision).
+      // Without this the qubit never rotates past its first random collapse.
+      if (deltas.diplomaticCapital != null) {
+        const current = mem.us.diplomaticCapital ?? 65;
+        mem.us.diplomaticCapital = clamp(current + deltas.diplomaticCapital, 0, 100);
       }
     }
   }
