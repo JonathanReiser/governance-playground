@@ -896,6 +896,54 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
 
 // ─────────────────────────────────────────────────────────────
+// NO-WALLET DEMO PATH
+//
+// Lets a visitor with no MetaMask, no Sepolia ETH, and no local Hardhat
+// node get a real on-chain deployment anyway — server holds a dedicated,
+// low-privilege demo key (DEMO_PRIVATE_KEY, separate from the deployer
+// key behind the "real" citable Sepolia deployment) and signs on the
+// visitor's behalf. See server/demoDeploy.js for why this is safe to
+// expose publicly: it only ever runs one fixed sequence per known
+// scenario id, never client-supplied bytecode/calldata.
+// ─────────────────────────────────────────────────────────────
+
+const { getDemoStatus, deployDemoScenario } = require("./server/demoDeploy");
+
+// Each deploy is ~15-20 transactions — a low per-IP cap still allows
+// several real demo runs/hour while bounding how fast the funded demo
+// wallet can be drained by one abusive IP.
+const demoDeployLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Demo deploy rate limit reached (5/hour). Try again later, or connect your own wallet for unlimited use." },
+});
+
+app.get("/api/demo/status", async (_req, res) => {
+  try {
+    res.json(await getDemoStatus());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/demo/deploy", demoDeployLimiter, async (req, res) => {
+  const { scenarioId } = req.body || {};
+  if (!scenarioId) {
+    return res.status(400).json({ error: "scenarioId required" });
+  }
+  try {
+    const result = await deployDemoScenario(scenarioId);
+    res.json(result);
+  } catch (err) {
+    console.error("[demo/deploy] error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ─────────────────────────────────────────────────────────────
 // START
 // ─────────────────────────────────────────────────────────────
 
