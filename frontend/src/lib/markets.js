@@ -25,9 +25,15 @@
  * happen to correlate.
  *
  * The political layer (Layer 1) propagates INTO this one each cycle as
- * unitary rotations; it does not propagate back (one-directional, for
- * now — see quantum_extension memory for what Layer 2 -> Layer 1
- * feedback would look like).
+ * unitary rotations. The reverse path — this cycle's collapsed economic
+ * field and speculation roster propagating back onto next cycle's
+ * political qubits — is implemented for middle-east-2026 in agents.js
+ * (see retrogradeMiddleEast()/applyEconomicFeedback() there); it reads
+ * the PRIOR cycle's already-collapsed event, so causality stays
+ * one-directional within any single cycle even though the two layers now
+ * inform each other across cycles. Taiwan Strait has no retrograde
+ * propagator registered yet — same "absent = no-op" precedent as the
+ * optional peacekeeper qubit.
  *
  * LAYER 3 — SPECULATION
  * Once the economic field's DIRECTION collapses (shock vs calm — the
