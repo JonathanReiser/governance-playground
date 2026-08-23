@@ -16,6 +16,13 @@ on-chain transactions, no wallet needed). Everything in it is independently chec
 **More field reports:**
 - **[Taiwan Strait, 10 cycles →](https://claude.ai/code/artifact/1baaa2d4-060d-44ef-b237-fec7769aabb6)** — China, Taiwan, and Japan; stability collapses to zero by cycle 5 and stays there.
 
+**Related project — [civic-lottery-demo](https://github.com/JonathanReiser/civic-lottery-demo):**
+the same real-entropy pattern built here for the instinct layer (`quantumRng.js`), applied to a
+different problem — provably-fair civic lottery selection (jury pools, housing/visa lotteries)
+using pre-commitment + real quantum entropy + a publicly verifiable record. Includes
+**[an interactive version](https://claude.ai/code/artifact/f565d166-9b88-4789-ac88-e54daed32a11)**
+where you can try to rig the lottery yourself and watch the verification catch you.
+
 **[Or try it live yourself →](https://governance-playground.vercel.app)** — no install needed.
 Connect via MetaMask (works with Sepolia testnet — get free test ETH from a faucet, see Quickstart
 below). Note: MetaMask itself occasionally has extension bugs unrelated to this app — see
@@ -68,6 +75,20 @@ Retrograde feedback (2/3 → 1)  Middle East only, for now: next cycle, last cyc
                                pressure, a gas-price surge nudges the US peacekeeper toward
                                disengagement — amplified by Layer 3's tail risk. One cycle in
                                arrears, so causality within a single cycle stays one-directional.
+        │
+        ▼
+Instinct layer (upstream of   The pre-deliberative guardian/royal veto — NationDAO.sol's one
+Layer 1, not part of it)      "single actor, gut call" mechanism, distinct from castVote()'s
+                               tallied plurality. Tier 1 (`instinct.js`): a real quantum-circuit
+                               simulation (RY/CX gates), sampled with real entropy from the ANU
+                               Quantum RNG (a physical laser vacuum-fluctuation measurement, PRNG
+                               fallback if unreachable, always labeled). Tier 2 (`python-bridge/`,
+                               opt-in toggle in the AI Agent Cycle UI): the SAME circuit, run for
+                               real on IBM quantum hardware — genuinely collapsed, not simulated-
+                               then-sampled. Verified live: real backend (`ibm_marrakesh`), real
+                               job ids, both Iran's and Saudi Arabia's readings independently
+                               confirmed correct. Human-reviewable only — does not call
+                               `guardianVeto()`/`royalVeto()` on-chain, does not feed simState.
 ```
 
 Smart contracts in Solidity (Hardhat), frontend in React, the agent layer talks to Claude via a
@@ -85,6 +106,8 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Quantum extension — economic field + speculation (Layer 2/3) | ✅ Done, verified live |
 | Retrograde feedback, Layer 2/3 → Layer 1 (Middle East only) | ✅ Done |
 | AI/Quantum-mode results view | ✅ Done, verified live |
+| Instinct layer, Tier 1 (real ANU QRNG entropy) | ✅ Done, wired into the review UI, verified live |
+| Instinct layer, Tier 2 (real IBM quantum hardware) | ✅ Done — opt-in toggle, verified live end-to-end on real hardware (`ibm_marrakesh`), see `python-bridge/README.md` |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
 | More scenarios (Palestine, Taiwan Strait, Russia-Ukraine, …) | ⬜ Planned |
@@ -119,13 +142,29 @@ npm run dev
 
 Walk through: **Connect → Scenario → Deploy → choose "AI Agent Cycle" → Run → Results.**
 
+**Optional — Tier 2, real IBM quantum hardware for instinct readings:** a 4th terminal, only
+needed if you want the "Use real IBM quantum hardware" toggle on the AI Agent Cycle screen to
+reach real hardware instead of falling back to a local reading:
+
+```bash
+cd python-bridge
+python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
+IBM_QUANTUM_TOKEN=your-token-from-quantum.ibm.com ./venv/bin/python3 app.py
+```
+
+Never paste a real token into a chat session — set it directly in your own shell/`.env`. See
+`python-bridge/README.md` for the full setup, current verified-live status, and what "real" means
+here (an actual physical qubit measurement, not `instinct.js`'s own simulated-circuit-plus-real-
+entropy-sample — see that file's own "ON GENUINE INDETERMINACY" note for the precise distinction).
+
 ### Running the tests
 
-Two separate suites, both running in CI on every push/PR to `main`:
+Three separate suites, all running in CI on every push/PR to `main`:
 
 ```bash
 npm test                   # 83-test Solidity/Chai suite — contracts/ (.github/workflows/contracts-tests.yml)
 cd frontend && npm test    # vitest — the quantum-engine plumbing (agents.js/markets.js) (.github/workflows/frontend-tests.yml)
+cd python-bridge && ./venv/bin/python3 -m pytest tests/ -v   # instinct_qpu.py — no token needed; the 2 real-hardware tests skip cleanly without one
 ```
 
 ### Troubleshooting: MetaMask stuck on "Review alert"
