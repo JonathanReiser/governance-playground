@@ -332,11 +332,106 @@ export function rotationTheta(delta, maxAbs, direction) {
   return deltaPushesAxis0 ? -magnitude : magnitude;
 }
 
-export function evolveAndCollapseQuantumState(scenario, quantum, decisions, rng = Math.random) {
-  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
+
+// ─────────────────────────────────────────────────────────────
+// LAYER 2/3 -> LAYER 1 RETROGRADE FEEDBACK (mechanistic, per-scenario)
+//
+// Markets (Layer 2) and speculation (Layer 3) have, until now, only ever
+// been downstream of the political layer — see markets.js's file header.
+// This closes the loop for the one cycle boundary where causality is
+// actually clean: the PRIOR cycle's already-collapsed market event (an
+// immutable fact by the time this cycle starts) is applied as unitary
+// rotations to the political qubits, BEFORE this cycle's own decisions are
+// folded in below. That ordering matters — feeding back a market result
+// that hasn't resolved yet within the same cycle would be a causality
+// loop, not a feedback loop.
+//
+// Middle East only for now (Taiwan Strait has no propagator here — same
+// "absent = no-op, not an error" precedent already used for the optional
+// peacekeeper qubit). Each mechanism below is a specific, motivated
+// econ-to-politics story, not a generic "markets moved, therefore
+// politics moves" formula — matching this file's existing standard for
+// L1->L2 propagation in markets.js:
+//
+//   - Rial WEAKENING -> Iran's qubit hardens (economic hardship strengthens
+//     the domestic hardliner argument — the same causal story already
+//     encoded by the hardlinerPressure driver, just triggered by markets
+//     instead of this cycle's LLM decision).
+//   - Riyal ROBUST (the windfall branch) -> Saudi's qubit eases toward
+//     "cautious" (an oil windfall reduces the domestic urgency Vision 2030
+//     reform is meant to answer).
+//   - Gas SURGING -> the US peacekeeper qubit drifts toward "disengage"
+//     (pump-price pain is a real audience cost against continued
+//     diplomatic investment in the deal).
+//
+// Layer 3 (not just Layer 2's collapsed direction) genuinely participates:
+// each rotation's magnitude is amplified by that instrument's speculative
+// tailWeight (see markets.js's resolvePriceMove) — a fat-tailed, panic-
+// driven move rattles domestic politics harder than a routine drift of the
+// same average size, which is the actual falsifiable content of routing
+// this through Layer 3 rather than reading Layer 2's direction directly.
+function retrogradeMiddleEast(quantum, marketEvent, cycle) {
   let joint  = quantum.entangledPair;
   let qubitC = quantum.standaloneQubit;
-  let qubitP = quantum.peacekeeperQubit; // may be undefined if this scenario has no peacekeeper
+  let qubitP = quantum.peacekeeperQubit;
+  const applied = [];
+
+  const outcomes     = marketEvent.outcomes || {};
+  const speculation  = marketEvent.speculation || {};
+  const ampFactor = (move) => 1 + (move?.tailWeight ?? 0); // 1x (calm) to ~2x (fat-tailed panic)
+
+  if (outcomes.currencyA === "WEAKENING") {
+    const amp = ampFactor(speculation.currencyA);
+    const theta = -(Math.PI / 16) * amp; // toward axis[0] ("hardline")
+    joint = applyLocalRotation(joint, "A", theta, actionPhase(`retro-rial:${cycle}`));
+    applied.push({ driver: "rial_weakening", target: "iran", theta, amplifiedBy: amp });
+  }
+
+  if (outcomes.currencyB === "ROBUST") {
+    const amp = ampFactor(speculation.currencyB);
+    const theta = (Math.PI / 20) * amp; // toward axis[1] ("cautious")
+    qubitC = rotate(qubitC, theta, actionPhase(`retro-riyal:${cycle}`));
+    applied.push({ driver: "riyal_windfall", target: "saudi_arabia", theta, amplifiedBy: amp });
+  }
+
+  if (qubitP && outcomes.global === "SURGING") {
+    const amp = ampFactor(speculation.global);
+    const theta = (Math.PI / 20) * amp; // toward axis[1] ("disengage")
+    qubitP = rotate(qubitP, theta, actionPhase(`retro-gas:${cycle}`));
+    applied.push({ driver: "gas_surge", target: "us", theta, amplifiedBy: amp });
+  }
+
+  return { entangledPair: joint, standaloneQubit: qubitC, peacekeeperQubit: qubitP, applied };
+}
+
+const RETROGRADE_PROPAGATORS = {
+  "middle-east-2026": retrogradeMiddleEast,
+};
+
+// marketEvent: the PRIOR cycle's evolveAndCollapseMarkets() event (i.e.
+// agentMemory.markets.lastEvent as it stands BEFORE this cycle's own
+// markets evolution runs), or null/undefined on cycle 1 before any market
+// has ever resolved. Scenario without a registered propagator, or no prior
+// event yet: no-op, quantum passes through unchanged.
+function applyEconomicFeedback(scenario, quantum, marketEvent, cycle) {
+  const propagate = RETROGRADE_PROPAGATORS[scenario.meta.id];
+  if (!propagate || !marketEvent) {
+    return {
+      entangledPair: quantum.entangledPair,
+      standaloneQubit: quantum.standaloneQubit,
+      peacekeeperQubit: quantum.peacekeeperQubit,
+      applied: [],
+    };
+  }
+  return propagate(quantum, marketEvent, cycle);
+}
+
+export function evolveAndCollapseQuantumState(scenario, quantum, decisions, marketEvent = null, cycle = 0, rng = Math.random) {
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
+  const feedback = applyEconomicFeedback(scenario, quantum, marketEvent, cycle);
+  let joint  = feedback.entangledPair;
+  let qubitC = feedback.standaloneQubit;
+  let qubitP = feedback.peacekeeperQubit; // may be undefined if this scenario has no peacekeeper
 
   const aD = decisions[entangled.aId]?.decision;
   const bD = decisions[entangled.bId]?.decision;
@@ -436,6 +531,12 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, rng 
       preCollapse,
       entangledEffect,
       peacekeeperIntervention,
+      // Layer 2/3 -> Layer 1 retrograde feedback actually applied THIS
+      // cycle (sourced from last cycle's market event) — null when there
+      // was nothing to feed back (cycle 1, or no propagator registered
+      // for this scenario). Part of the citable research record, same as
+      // entangledEffect/peacekeeperIntervention above.
+      retrogradeFeedback: feedback.applied.length ? feedback.applied : null,
     },
   };
 }
@@ -608,10 +709,17 @@ export function applyDecisions(scenario, simState, decisions, agentMemory = {}, 
   // alignment on axis[0] or axis[1], apply the small additional
   // entanglement effect on top of the classical deltas above. Fully
   // generic — driven by scenario.aiAgents, not by nation id.
+  //
+  // Before folding in this cycle's own decisions, evolveAndCollapseQuantumState
+  // first applies LAST cycle's already-collapsed market event (Layer 2/3)
+  // back onto the political qubits (see retrogradeMiddleEast() above) —
+  // captured here, before mem.markets gets overwritten by this cycle's own
+  // markets evolution below.
   if (!mem.quantum) {
     throw new Error("agentMemory.quantum missing — call initQuantumBeliefs(scenario) when seeding agentMemory");
   }
-  const { newQuantum, event } = evolveAndCollapseQuantumState(scenario, mem.quantum, decisions);
+  const priorMarketEvent = mem.markets?.lastEvent ?? null;
+  const { newQuantum, event } = evolveAndCollapseQuantumState(scenario, mem.quantum, decisions, priorMarketEvent, cycle);
   mem.quantum = newQuantum;
   mem.quantum.lastEvent = event;
 
@@ -624,8 +732,11 @@ export function applyDecisions(scenario, simState, decisions, agentMemory = {}, 
   // Layer 2/3: the economic field evolves from this cycle's geopolitical
   // collapse + classical decisions, then collapses itself; the synthetic
   // trader roster's interference then resolves each instrument's price
-  // move (see markets.js). One-directional for now — markets read the
-  // political layer, not vice versa. Dispatched by scenarioId since each
+  // move (see markets.js). Markets still only ever read THIS cycle's
+  // political layer, not vice versa — the retrograde path above is the
+  // other half of the loop, and it always reads one cycle in arrears (last
+  // cycle's collapse informing this cycle's politics), never this cycle's
+  // own not-yet-resolved market event. Dispatched by scenarioId since each
   // scenario's instrument set and propagation rules are genuinely
   // different economic content, not a relabeling of the same numbers —
   // see markets.js.
