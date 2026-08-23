@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
+import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs, proposeInstinctReadings } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 import { nationActionMenu } from "../lib/nationActions";
 
@@ -136,7 +136,33 @@ function QuantumBeliefBar({ belief }) {
   );
 }
 
-function NationCard({ nationId, result, quantumBeliefState, nationMeta, metricLabels }) {
+// Pre-deliberative guardian/royal veto instinct — see lib/instinct.js.
+// Distinct visual treatment from QuantumBeliefBar on purpose (amber, not
+// indigo): this is upstream of the reasoned belief state above it, not
+// another view onto the same thing. entropySource distinguishes a real
+// ANU QRNG-sourced reading from the honestly-labeled PRNG fallback —
+// never shown as if it were the real thing when it isn't.
+function InstinctBar({ reading }) {
+  if (!reading) return null;
+  const allowPct = Math.round(reading.probabilities.ALLOW * 100);
+  const isReal = reading.entropySource === "anu-qrng";
+  return (
+    <div className="quantum-belief instinct-belief">
+      <div className="quantum-belief-header">
+        <span>{reading.vetoType === "guardian" ? "🕯 guardian instinct" : "👑 royal instinct"}</span>
+        <span className="quantum-belief-labels">VETO {100 - allowPct}% · ALLOW {allowPct}%</span>
+      </div>
+      <div className="quantum-belief-track">
+        <div className="quantum-belief-fill instinct-belief-fill" style={{ width: `${allowPct}%` }} />
+      </div>
+      <div className={`instinct-entropy ${isReal ? "instinct-entropy--real" : "instinct-entropy--fallback"}`}>
+        {isReal ? "⚛ real quantum entropy (ANU QRNG)" : `≈ PRNG fallback — ${reading.entropyDetail ?? "reason not recorded"}`}
+      </div>
+    </div>
+  );
+}
+
+function NationCard({ nationId, result, quantumBeliefState, instinctReading, nationMeta, metricLabels }) {
   const meta = nationMeta[nationId];
   const d    = result?.decision;
 
@@ -169,6 +195,7 @@ function NationCard({ nationId, result, quantumBeliefState, nationMeta, metricLa
       </div>
 
       <QuantumBeliefBar belief={quantumBeliefState} />
+      <InstinctBar reading={instinctReading} />
 
       <div className="nation-action">
         <span className="action-primary">{d.primaryAction}</span>
@@ -342,6 +369,7 @@ export function AICycleStep({ scenario, deployment, onResults }) {
   const [thinking,    setThinking]    = useState({});        // per-nation loading state
   const [error,       setError]       = useState("");
   const [worldSnapshot,   setWorldSnapshot]   = useState(null); // last worldState built, for quantum readouts
+  const [instinctReadings, setInstinctReadings] = useState({}); // { [nationId]: reading } — veto-capable nations only, see lib/instinct.js
   const [quantumEvent,    setQuantumEvent]    = useState(null); // Layer 1 collapse outcome from the last commit
   const [marketEvent,     setMarketEvent]     = useState(null); // Layer 2/3 collapse outcome from the last commit
   const [humanControlled, setHumanControlled] = useState({});   // { [nationId]: boolean } — "take this nation's turn myself" toggle
@@ -406,6 +434,17 @@ export function AICycleStep({ scenario, deployment, onResults }) {
     const aiNationIds = nationIds.filter(id => !humanControlled[id]);
     const agents = aiNationIds.map(id => new NationAgent(id));
 
+    // Instinct readings (guardian/royal veto — see lib/instinct.js) run
+    // concurrently with the agents' own reasoning, not after it: this is
+    // upstream, pre-deliberative pressure, not a reaction to what the AI
+    // agents decide this cycle. Sourced from a real network call (ANU
+    // QRNG by default, see quantumRng.js) — failure is handled inside
+    // proposeInstinctReadings/quantumRandomFloat themselves (falls back
+    // to Math.random, honestly labeled), so this can't block or fail the
+    // cycle; .catch() here is belt-and-suspenders against something
+    // unexpected still throwing (e.g. a malformed scenario config).
+    const instinctPromise = proposeInstinctReadings(scenario, worldState, agentMemory.quantum).catch(() => ({}));
+
     await Promise.allSettled(
       agents.map((agent, i) =>
         agent.decide(worldState, scenario.meta.id).then(r => {
@@ -417,6 +456,8 @@ export function AICycleStep({ scenario, deployment, onResults }) {
         })
       )
     );
+
+    setInstinctReadings(await instinctPromise);
 
     const agg = aggregateDeltas(results);
     // Proposed = current + aggregated deltas
@@ -497,6 +538,7 @@ export function AICycleStep({ scenario, deployment, onResults }) {
     setAgentMemory(newAgentMemory);
     setDecisions(null);
     setProposed(null);
+    setInstinctReadings({});
 
     if (cycle >= maxCycles) {
       onResults({
@@ -612,6 +654,7 @@ export function AICycleStep({ scenario, deployment, onResults }) {
                   nationId={id}
                   result={result}
                   quantumBeliefState={worldSnapshot?.[worldStateKey[id]]?.quantumBeliefState}
+                  instinctReading={instinctReadings[id]}
                   nationMeta={nationMeta}
                   metricLabels={metricLabels}
                 />

@@ -528,6 +528,22 @@ body {
   height: 100%; background: var(--accent2);
 }
 
+/* Instinct layer (lib/instinct.js) — deliberately amber, not indigo like
+   .quantum-belief above: this is the pre-deliberative guardian/royal veto
+   pressure, upstream of the reasoned belief state, not another view onto
+   the same thing. */
+.instinct-belief {
+  background: rgba(217,119,6,0.07); border-color: rgba(217,119,6,0.3);
+  margin-top: 0.35rem;
+}
+.instinct-belief .quantum-belief-header span:first-child { color: #d97706; }
+.instinct-belief-fill { background: #d97706; }
+.instinct-entropy {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.15rem;
+}
+.instinct-entropy--real     { color: #d97706; font-weight: 700; }
+.instinct-entropy--fallback { color: var(--muted); }
+
 .quantum-event-banner {
   border: 1px solid rgba(99,102,241,0.35); border-radius: 10px;
   padding: 0.85rem 1rem; background: rgba(99,102,241,0.06);
