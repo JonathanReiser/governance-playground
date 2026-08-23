@@ -44,6 +44,9 @@ is checked. This isn't that. Three constraints keep it honest:
   not a fixed scalar, until the moment of on-chain commit. Iran and Israel's postures are
   genuinely *entangled* — a structural encoding of the security dilemma — using real complex-
   amplitude math (unitary rotations, Born-rule measurement, interference), not a metaphor layer.
+  The actual measurement, at every live commit, is sourced from real quantum entropy (ANU QRNG)
+  rather than a PRNG — the same real-entropy pattern the instinct layer already proved out,
+  now covering the flagship mechanism itself, not just its side-instinct veto.
 - **Nothing can be edited after the fact.** Every cycle's outcome is written to a smart contract.
   The researcher can review and edit the *proposed* outcome before committing — but once
   committed, it's on-chain, timestamped, and permanent. Parameters are always public before the
@@ -53,7 +56,8 @@ is checked. This isn't that. Three constraints keep it honest:
 
 ```
 Political layer (Layer 1)     Nation agents (Claude) reason each cycle; Iran/Israel entangled,
-                               Saudi Arabia standalone. Collapses at commit (Born-rule measurement).
+                               Saudi Arabia standalone. Collapses at commit (Born-rule measurement,
+                               real-entropy-sourced — see Status below).
         │
         ▼
 Economic field (Layer 2)      Oil / Iranian rial / Saudi riyal / US gas price as one 4-qubit
@@ -108,6 +112,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 | AI/Quantum-mode results view | ✅ Done, verified live |
 | Instinct layer, Tier 1 (real ANU QRNG entropy) | ✅ Done, wired into the review UI, verified live |
 | Instinct layer, Tier 2 (real IBM quantum hardware) | ✅ Done — opt-in toggle, verified live end-to-end on real hardware (`ibm_marrakesh`), see `python-bridge/README.md` |
+| Political layer (Layer 1) + economic field (Layer 2/3), real entropy | ✅ Done — the actual flagship collapse (not just the instinct veto's) now sources from real ANU QRNG at every live commit, verified live. `scripts/quantum-vs-classical-test.mjs`'s shared default is untouched on purpose (still `Math.random`, thousands of trials per validation run) |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
 | More scenarios (Palestine, Taiwan Strait, Russia-Ukraine, …) | ⬜ Planned |
