@@ -324,7 +324,7 @@ function MetricEditor({ metrics, metricLabels, onChange }) {
 // Main component
 // ─────────────────────────────────────────────
 
-export function AICycleStep({ signer, scenario, deployment, onResults }) {
+export function AICycleStep({ scenario, deployment, onResults }) {
   const nationMeta     = buildNationMeta(scenario);
   const worldStateKey  = buildWorldStateKeyMap(scenario);
   const metricLabels   = buildMetricLabels(scenario);

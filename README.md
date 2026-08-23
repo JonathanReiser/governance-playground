@@ -72,7 +72,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 
 | Piece | Status |
 |---|---|
-| Smart contracts + test suite (83/83) | ✅ Done |
+| Smart contracts + test suite (83/83) | ✅ Done, runs in CI (`.github/workflows/contracts-tests.yml`) |
 | Classic (fixed-rule) experiments, 4 pre-built scenarios | ✅ Done |
 | AI agent layer (Claude-driven nation decisions) | ✅ Done, verified live |
 | Quantum extension — entangled political layer | ✅ Done, verified live |
@@ -111,6 +111,15 @@ npm run dev
 ```
 
 Walk through: **Connect → Scenario → Deploy → choose "AI Agent Cycle" → Run → Results.**
+
+### Running the tests
+
+```bash
+npm test   # the 83-test Solidity/Chai suite — contracts/
+```
+
+Runs automatically on every push/PR to `main` via
+`.github/workflows/contracts-tests.yml`.
 
 ### Troubleshooting: MetaMask stuck on "Review alert"
 
