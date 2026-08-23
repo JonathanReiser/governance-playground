@@ -17,6 +17,14 @@ import {
   collapseQubit, probabilities, rotate,
 } from "./quantum.js";
 import { initMarketBeliefs, marketReadout, evolveAndCollapseMarkets } from "./markets.js";
+// instinct.js is dynamically imported inside proposeInstinctReadings() below,
+// not statically here — it pulls in the quantum-circuit package (and its
+// mathjs dependency), which nearly doubled this app's main bundle
+// (1.2MB -> 2.3MB minified) when this was a top-level import, since agents.js
+// is core plumbing every page loads regardless of whether the current
+// scenario even has a veto-capable nation. A dynamic import lets Vite split
+// it into its own chunk, fetched only when proposeInstinctReadings() actually
+// runs (and skipped entirely when vetoCapableNations() is empty).
 
 export { initMarketBeliefs, marketReadout } from "./markets.js";
 
@@ -298,6 +306,116 @@ export function buildWorldState(scenario, simState, cycle, agentMemory = {}) {
   }
 
   throw new Error(`buildWorldState: unsupported scenario "${scenarioId}" — add a branch here and matching system prompts in server.js`);
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// INSTINCT LAYER — bridges this file's own quantum roles to
+// instinct.js's proposeVetoInstinct(). See instinct.js's module doc for
+// what this reading is and is not. This file's only job here is
+// resolving WHICH pressure field and WHICH entangled partner (if any)
+// belong to a given veto-capable nation — generically, from the exact
+// same aiAgents role assignments buildWorldState() above already reads,
+// not a second hardcoded mapping.
+// ─────────────────────────────────────────────────────────────
+
+// Nations whose Solidity governance config actually has a veto lever
+// (guardianVeto or royalVeto) — the only nations an instinct reading
+// means anything for. Purely a config read, no quantum state needed.
+export function vetoCapableNations(scenario) {
+  return scenario.nations.filter(n => n.governance?.guardianVeto || n.governance?.royalVeto);
+}
+
+// Resolve {pressureField, pressureValue, entangledWith} for one
+// veto-capable nation from scenario.aiAgents' entangled/standalone/
+// peacekeeper roles — the same roles, the same live worldState keys,
+// buildWorldState() already uses. pressureValue is read live off
+// worldState (this cycle's tracked running value, same as
+// aState.hardlinerPressure/cState.reformPressure above), falling back to
+// the scenario config's starting value on cycle 1 before anything's been
+// tracked yet. A veto-capable nation that isn't assigned any of these
+// four roles has nothing to build a reading from — returns null, not a
+// guess. (Not yet exercised for the B-side/peacekeeper branches by any
+// real scenario — Israel, Taiwan, and the US peacekeeper all currently
+// have guardianVeto: false, royalVeto: false — but wired the same
+// generic way as the other two roles rather than special-cased away,
+// consistent with this file's existing standard.)
+export function resolveInstinctInputs(scenario, worldState, quantum, nationId) {
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
+  const nations = nationsById(scenario);
+  const liveValue = (worldKey, field) => worldState[worldKey]?.[field] ?? nations[nationId].governance?.[field] ?? 50;
+
+  if (nationId === entangled.aId) {
+    return {
+      pressureField: entangled.aDriverField,
+      pressureValue: liveValue(entangled.aWorldKey, entangled.aDriverField),
+      entangledWith: {
+        nationId: entangled.bId,
+        name: nations[entangled.bId].name,
+        axis0Probability: marginalB(quantum.entangledPair)[0],
+      },
+    };
+  }
+  if (nationId === entangled.bId) {
+    return {
+      pressureField: entangled.bDriverField,
+      pressureValue: liveValue(entangled.bWorldKey, entangled.bDriverField),
+      entangledWith: {
+        nationId: entangled.aId,
+        name: nations[entangled.aId].name,
+        axis0Probability: marginalA(quantum.entangledPair)[0],
+      },
+    };
+  }
+  if (nationId === standalone.id) {
+    return {
+      pressureField: standalone.driverField,
+      pressureValue: liveValue(standalone.worldKey, standalone.driverField),
+      entangledWith: null,
+    };
+  }
+  if (peacekeeper && nationId === peacekeeper.id) {
+    return {
+      pressureField: peacekeeper.driverField,
+      pressureValue: liveValue(peacekeeper.worldKey, peacekeeper.driverField),
+      entangledWith: null,
+    };
+  }
+  return null;
+}
+
+// One proposed instinct reading per veto-capable nation this scenario
+// has, keyed by nationId. Does NOT call guardianVeto()/royalVeto() (see
+// instinct.js) and does NOT feed back into simState/decisions anywhere —
+// purely an additional human-reviewable readout, same review-before-
+// on-chain boundary as everything else in this pipeline. A nation
+// resolveInstinctInputs can't place is skipped, not defaulted.
+//
+// rng: optional, forwarded to proposeVetoInstinct() for each nation —
+// omit it to get the real default (quantumRandomFloat, ANU QRNG with
+// PRNG fallback); pass one to force a specific entropy source (tests,
+// or a future "prefer speed over real entropy" mode).
+export async function proposeInstinctReadings(scenario, worldState, quantum, rng) {
+  const capable = vetoCapableNations(scenario);
+  if (capable.length === 0) return {}; // no veto-capable nation — skip the instinct.js chunk fetch entirely
+
+  const { proposeVetoInstinct } = await import("./instinct.js");
+
+  const readings = await Promise.all(
+    capable.map(async (nation) => {
+      const inputs = resolveInstinctInputs(scenario, worldState, quantum, nation.id);
+      if (!inputs) return null;
+      const reading = await proposeVetoInstinct({
+        nation: { id: nation.id, name: nation.name },
+        pressureField: inputs.pressureField,
+        pressureValue: inputs.pressureValue,
+        ...(rng ? { rng } : {}),
+        entangledWith: inputs.entangledWith,
+      });
+      return [nation.id, { ...reading, vetoType: nation.governance.guardianVeto ? "guardian" : "royal" }];
+    })
+  );
+  return Object.fromEntries(readings.filter(Boolean));
 }
 
 
