@@ -11,10 +11,15 @@
  *   POST /api/agent/decide         { nation, worldState, scenarioId } → agent decision
  *   GET  /api/news                 ?scenarioId=...&...worldState      → mock headlines for current cycle
  *   POST /api/instinct/qpu-reading { pressure, entangledReadout? }    → proxies to python-bridge/app.py
- *                                     (Tier 2 — instinct.js's circuit on real IBM hardware, or a local
- *                                     Aer simulator fallback; see python-bridge/README.md for setup and
- *                                     current status — structurally complete, not yet live-verified
- *                                     against real hardware).
+ *                                     (Tier 2 for the instinct veto — side-channel, human-reviewable
+ *                                     only, never feeds simState. Real IBM hardware, verified live —
+ *                                     see python-bridge/README.md.)
+ *   POST /api/layer1/qpu-collapse  { joint: [4x {re,im}] }            → proxies to python-bridge/app.py
+ *                                     (Tier 2 for the actual entangled political collapse — HIGHER
+ *                                     STAKES: this DOES feed the committed on-chain outcome when the
+ *                                     frontend's Tier 2 toggle is on. Real IBM hardware, verified live,
+ *                                     bit-ordering confirmed with a dedicated regression test — see
+ *                                     python-bridge/layer1_qpu.py.)
  */
 
 const express   = require("express");
@@ -940,6 +945,43 @@ app.post("/api/instinct/qpu-reading", qpuReadingLimiter, async (req, res) => {
   } catch (err) {
     const reason = err.name === "AbortError" ? "python-bridge timed out after 30s" : `python-bridge unreachable: ${err.message}`;
     console.error("[instinct/qpu-reading]", reason);
+    res.status(502).json({ error: reason, hint: "is python-bridge/app.py running? see python-bridge/README.md" });
+  } finally {
+    clearTimeout(timeout);
+  }
+});
+
+
+// Higher stakes than /api/instinct/qpu-reading above: this feeds the
+// actual committed political collapse (agents.js's
+// evolveAndCollapseQuantumStateViaQPU) when the frontend's Tier 2 toggle
+// is on, not a side-channel display. Same proxy shape otherwise —
+// python-bridge unreachable is a clean 502, never a crash.
+app.post("/api/layer1/qpu-collapse", qpuReadingLimiter, async (req, res) => {
+  const { joint } = req.body;
+
+  if (!Array.isArray(joint) || joint.length !== 4) {
+    return res.status(400).json({ error: "joint must be an array of exactly 4 {re, im} amplitudes" });
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+
+  try {
+    const response = await fetch(`${PYTHON_BRIDGE_URL}/layer1-collapse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ joint }),
+      signal: controller.signal,
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      return res.status(response.status).json(body);
+    }
+    res.json(body);
+  } catch (err) {
+    const reason = err.name === "AbortError" ? "python-bridge timed out after 30s" : `python-bridge unreachable: ${err.message}`;
+    console.error("[layer1/qpu-collapse]", reason);
     res.status(502).json({ error: reason, hint: "is python-bridge/app.py running? see python-bridge/README.md" });
   } finally {
     clearTimeout(timeout);

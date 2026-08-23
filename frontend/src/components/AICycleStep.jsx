@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs, proposeInstinctReadings, proposeInstinctReadingsViaQPU, createRealEntropyPool } from "../lib/agents";
+import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs, proposeInstinctReadings, proposeInstinctReadingsViaQPU, createRealEntropyPool, evolveAndCollapseQuantumStateViaQPU } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 import { nationActionMenu } from "../lib/nationActions";
 
@@ -407,7 +407,8 @@ export function AICycleStep({ scenario, deployment, onResults }) {
   const [entropySources,  setEntropySources]  = useState(null); // which real-vs-fallback entropy sourced the last commit's Layer 1/2/3 collapse — see createRealEntropyPool
   const [humanControlled, setHumanControlled] = useState({});   // { [nationId]: boolean } — "take this nation's turn myself" toggle
   const [humanDrafts,     setHumanDrafts]     = useState({});   // { [nationId]: { primaryAction, reasoning, metricDeltas } }
-  const [useRealHardware, setUseRealHardware] = useState(false); // Tier 2 opt-in — see lib/agents.js's proposeInstinctReadingsViaQPU. Default OFF: ~10-15s per reading, spends real IBM Quantum quota once a token is configured server-side.
+  const [useRealHardware, setUseRealHardware] = useState(false); // Tier 2 opt-in (instinct veto) — see lib/agents.js's proposeInstinctReadingsViaQPU. Default OFF: ~10-15s per reading, spends real IBM Quantum quota once a token is configured server-side. Side-channel only — never feeds simState.
+  const [useRealHardwareForLayer1, setUseRealHardwareForLayer1] = useState(false); // Tier 2 opt-in (the ACTUAL political collapse) — see lib/agents.js's evolveAndCollapseQuantumStateViaQPU. HIGHER STAKES than the instinct toggle above: this DOES feed the committed on-chain outcome. Default OFF.
 
   function updateHumanDraft(nationId, draft) {
     setHumanDrafts(prev => ({ ...prev, [nationId]: draft }));
@@ -539,7 +540,18 @@ export function AICycleStep({ scenario, deployment, onResults }) {
     // call site rather than the shared default every other caller
     // (including the offline statistical validation script) still uses.
     const { rng: realRng, sourcesUsed } = await createRealEntropyPool();
-    const { newSimState, newAgentMemory } = applyDecisions(scenario, simState, decisions, agentMemory, cycle, realRng);
+
+    // Tier 2 for Layer 1 (opt-in, higher stakes than the instinct
+    // toggle — see useRealHardwareForLayer1's own declaration): if on,
+    // the ACTUAL political collapse is prepared and measured on real IBM
+    // hardware instead of classically sampled, computed here BEFORE
+    // applyDecisions() (which stays synchronous) the same
+    // resolve-before-the-sync-chain pattern as the entropy pool above.
+    const politicalCollapse = useRealHardwareForLayer1
+      ? await evolveAndCollapseQuantumStateViaQPU(scenario, agentMemory.quantum, decisions, agentMemory.markets?.lastEvent ?? null, cycle)
+      : null;
+
+    const { newSimState, newAgentMemory } = applyDecisions(scenario, simState, decisions, agentMemory, cycle, realRng, politicalCollapse);
     setEntropySources(sourcesUsed);
     const quantum = newAgentMemory.quantum.lastEvent;
     const market  = newAgentMemory.markets.lastEvent;
@@ -770,6 +782,22 @@ export function AICycleStep({ scenario, deployment, onResults }) {
               not fully cancelled.
             </p>
           )}
+          {quantumEvent.collapseSource && quantumEvent.collapseSource !== "classical" && (
+            <p
+              className={quantumEvent.collapseSource === "qpu-real-hardware" ? "status-flag status-flag--alert" : "muted"}
+              style={{ fontSize: 11, marginTop: "0.4rem", display: quantumEvent.collapseSource === "qpu-real-hardware" ? "inline-block" : "block" }}
+            >
+              {quantumEvent.collapseSource === "qpu-real-hardware" && (
+                <>⚛ THIS COLLAPSE WAS A REAL PHYSICAL MEASUREMENT — backend {quantumEvent.backend}, job {quantumEvent.jobId}</>
+              )}
+              {quantumEvent.collapseSource === "qpu-fallback-simulator" && (
+                <>Tier 2 was requested but IBM hardware was unreachable — this collapse used a local simulator fallback ({quantumEvent.qpuDetail ?? "reason not recorded"}), not the classical procedure either.</>
+              )}
+              {quantumEvent.collapseSource === "classical-fallback" && (
+                <>Tier 2 was requested but the QPU endpoint failed ({quantumEvent.qpuError ?? "reason not recorded"}) — fell back to the same classical procedure this project always used before Tier 2 existed.</>
+              )}
+            </p>
+          )}
           {entropySources && (
             <p className="muted" style={{ fontSize: 11, marginTop: "0.4rem" }}>
               This collapse (political + economic) drew {entropySources.filter(s => s === "anu-qrng").length} of{" "}
@@ -826,6 +854,37 @@ export function AICycleStep({ scenario, deployment, onResults }) {
               ? "⚛ each veto-capable nation's reading will be a real measurement on a real QPU (~10-15s, real quota) — falls back to a local reading if unreachable"
               : "off by default — real hardware readings are slower and spend real IBM Quantum quota"}
           </span>
+        </div>
+      )}
+
+      {/* Tier 2 for Layer 1 — see lib/agents.js's
+          evolveAndCollapseQuantumStateViaQPU. HIGHER STAKES than the
+          instinct toggle above: that one is a side-channel display that
+          never touches simState; THIS one, when on, replaces the actual
+          political collapse that feeds the committed on-chain stability/
+          conflict deltas. Real IBM hardware noise here changes the
+          citable research record, not just a display — labeled
+          accordingly (alert styling, explicit "this is what commits"
+          language), not presented as an equally-casual toggle. Default OFF. */}
+      {phase === "idle" && (
+        <div className="section" style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.25rem" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: 13 }}>
+            <input
+              type="checkbox"
+              checked={useRealHardwareForLayer1}
+              onChange={e => setUseRealHardwareForLayer1(e.target.checked)}
+            />
+            Use real IBM quantum hardware for the political collapse itself
+          </label>
+          {useRealHardwareForLayer1 ? (
+            <span className="status-flag status-flag--alert">
+              ⚛ this cycle's entangled collapse will be a real physical measurement — feeds the committed on-chain outcome, not just a display
+            </span>
+          ) : (
+            <span className="muted" style={{ fontSize: 11 }}>
+              off by default — real hardware noise here changes the actual research record, not a side reading
+            </span>
+          )}
         </div>
       )}
 

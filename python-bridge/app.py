@@ -12,6 +12,7 @@ import os
 from flask import Flask, jsonify, request
 
 from instinct_qpu import read_instinct
+from layer1_qpu import collapse_entangled_pair
 
 app = Flask(__name__)
 
@@ -28,6 +29,30 @@ def qpu_reading():
         return jsonify({"error": "entangledReadout, if provided, must be a number (0-1)"}), 400
 
     reading = read_instinct(pressure, entangled_readout)
+    return jsonify(reading)
+
+
+@app.post("/layer1-collapse")
+def layer1_collapse():
+    # Higher stakes than /qpu-reading: this feeds the actual committed
+    # political collapse when the frontend's Tier 2 toggle is on, not a
+    # side-channel display — see layer1_qpu.py's module docstring.
+    body = request.get_json(silent=True) or {}
+    joint = body.get("joint")
+
+    if not isinstance(joint, list) or len(joint) != 4:
+        return jsonify({"error": "joint must be an array of exactly 4 {re, im} amplitudes"}), 400
+    for amp in joint:
+        if not isinstance(amp, dict) or "re" not in amp or "im" not in amp:
+            return jsonify({"error": "each joint amplitude must be an object with re and im"}), 400
+
+    try:
+        reading = collapse_entangled_pair(joint)
+    except ValueError as err:
+        # e.g. not normalized — a real validation failure, not a hardware
+        # issue, so this is a 400, not falling back to a simulator.
+        return jsonify({"error": str(err)}), 400
+
     return jsonify(reading)
 
 

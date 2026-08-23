@@ -46,7 +46,12 @@ is checked. This isn't that. Three constraints keep it honest:
   amplitude math (unitary rotations, Born-rule measurement, interference), not a metaphor layer.
   The actual measurement, at every live commit, is sourced from real quantum entropy (ANU QRNG)
   rather than a PRNG — the same real-entropy pattern the instinct layer already proved out,
-  now covering the flagship mechanism itself, not just its side-instinct veto.
+  now covering the flagship mechanism itself, not just its side-instinct veto. There's an opt-in
+  toggle to go further still: instead of sampling a classically-simulated probability with real
+  entropy, the entangled Iran/Israel pair's exact joint quantum state is prepared and *physically
+  measured on real IBM quantum hardware* — the collapse that decides the committed political
+  outcome is a genuine hardware measurement, not a simulation at all. Verified live: real backend
+  (`ibm_fez`), real job id, the entangled-escalation logic firing correctly off that real reading.
 - **Nothing can be edited after the fact.** Every cycle's outcome is written to a smart contract.
   The researcher can review and edit the *proposed* outcome before committing — but once
   committed, it's on-chain, timestamped, and permanent. Parameters are always public before the
@@ -56,8 +61,14 @@ is checked. This isn't that. Three constraints keep it honest:
 
 ```
 Political layer (Layer 1)     Nation agents (Claude) reason each cycle; Iran/Israel entangled,
-                               Saudi Arabia standalone. Collapses at commit (Born-rule measurement,
-                               real-entropy-sourced — see Status below).
+                               Saudi Arabia standalone. Collapses at commit — Tier 1 (default):
+                               Born-rule measurement, real-entropy-sourced (ANU QRNG). Tier 2
+                               (opt-in toggle, alert-styled — this feeds the committed outcome):
+                               the entangled pair's exact joint state prepared and measured on
+                               real IBM quantum hardware, `python-bridge/layer1_qpu.py`; the
+                               standalone (Saudi) and peacekeeper (US) qubits stay on Tier 1.
+                               Verified live: real backend (`ibm_fez`), real job id, entangled-
+                               escalation firing correctly off the real measurement.
         │
         ▼
 Economic field (Layer 2)      Oil / Iranian rial / Saudi riyal / US gas price as one 4-qubit
@@ -112,7 +123,8 @@ complex-amplitude implementation — no framework, no shortcuts.
 | AI/Quantum-mode results view | ✅ Done, verified live |
 | Instinct layer, Tier 1 (real ANU QRNG entropy) | ✅ Done, wired into the review UI, verified live |
 | Instinct layer, Tier 2 (real IBM quantum hardware) | ✅ Done — opt-in toggle, verified live end-to-end on real hardware (`ibm_marrakesh`), see `python-bridge/README.md` |
-| Political layer (Layer 1) + economic field (Layer 2/3), real entropy | ✅ Done — the actual flagship collapse (not just the instinct veto's) now sources from real ANU QRNG at every live commit, verified live. `scripts/quantum-vs-classical-test.mjs`'s shared default is untouched on purpose (still `Math.random`, thousands of trials per validation run) |
+| Political layer (Layer 1) + economic field (Layer 2/3), real entropy (Tier 1) | ✅ Done — the actual flagship collapse (not just the instinct veto's) now sources from real ANU QRNG at every live commit, verified live. `scripts/quantum-vs-classical-test.mjs`'s shared default is untouched on purpose (still `Math.random`, thousands of trials per validation run) |
+| Political layer (Layer 1), real IBM quantum hardware (Tier 2) | ✅ Done — opt-in toggle, scoped to the entangled Iran/Israel pair only (standalone/peacekeeper stay Tier 1). Verified live end-to-end: real backend (`ibm_fez`), real job id, feeds the actual committed on-chain outcome, not a side display |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
 | More scenarios (Palestine, Taiwan Strait, Russia-Ukraine, …) | ⬜ Planned |
@@ -147,9 +159,10 @@ npm run dev
 
 Walk through: **Connect → Scenario → Deploy → choose "AI Agent Cycle" → Run → Results.**
 
-**Optional — Tier 2, real IBM quantum hardware for instinct readings:** a 4th terminal, only
-needed if you want the "Use real IBM quantum hardware" toggle on the AI Agent Cycle screen to
-reach real hardware instead of falling back to a local reading:
+**Optional — Tier 2, real IBM quantum hardware:** a 4th terminal, only needed if you want either
+of the two "Use real IBM quantum hardware" toggles on the AI Agent Cycle screen (instinct readings,
+and — alert-styled, since it feeds the committed on-chain outcome — the political collapse itself)
+to reach real hardware instead of falling back to a local reading:
 
 ```bash
 cd python-bridge
@@ -169,7 +182,7 @@ Three separate suites, all running in CI on every push/PR to `main`:
 ```bash
 npm test                   # 83-test Solidity/Chai suite — contracts/ (.github/workflows/contracts-tests.yml)
 cd frontend && npm test    # vitest — the quantum-engine plumbing (agents.js/markets.js) (.github/workflows/frontend-tests.yml)
-cd python-bridge && ./venv/bin/python3 -m pytest tests/ -v   # instinct_qpu.py — no token needed; the 2 real-hardware tests skip cleanly without one
+cd python-bridge && ./venv/bin/python3 -m pytest tests/ -v   # instinct_qpu.py + layer1_qpu.py — no token needed; the 3 real-hardware tests skip cleanly without one
 ```
 
 ### Troubleshooting: MetaMask stuck on "Review alert"
