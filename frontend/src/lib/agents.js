@@ -678,7 +678,15 @@ function applyEconomicFeedback(scenario, quantum, marketEvent, cycle) {
   return propagate(quantum, marketEvent, cycle);
 }
 
-export function evolveAndCollapseQuantumState(scenario, quantum, decisions, marketEvent = null, cycle = 0, rng = Math.random) {
+// Pure unitary evolution — no rng, no collapse, no side effects. Shared
+// by every collapse strategy below (classical Math.random, classical
+// real-entropy, and Tier 2's real-hardware state preparation) so the
+// actual evolution logic (retrograde feedback, per-nation order-
+// dependent rotations) exists exactly once and can never drift between
+// them. Split out of what was a single evolveAndCollapseQuantumState()
+// when Tier 2 needed to intercept the joint state AFTER evolution but
+// BEFORE any collapse strategy touches it.
+function evolveQuantumState(scenario, quantum, decisions, marketEvent, cycle) {
   const { entangled, standalone, peacekeeper } = scenario.aiAgents;
   const feedback = applyEconomicFeedback(scenario, quantum, marketEvent, cycle);
   let joint  = feedback.entangledPair;
@@ -728,21 +736,37 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, mark
     ...(peacekeeper && qubitP ? { pProbabilities: qubitReadout(qubitP, peacekeeper.axis) } : {}),
   };
 
-  const aMeasurement = measureA(joint, rng);
-  const aOutcome = entangled.aAxis[aMeasurement.outcomeIndex];
-  const bCollapse = collapseQubit(aMeasurement.conditionedB, entangled.bAxis, rng);
-  const cCollapse = collapseQubit(qubitC, standalone.axis, rng);
-  const pCollapse = (peacekeeper && qubitP) ? collapseQubit(qubitP, peacekeeper.axis, rng) : null;
+  return {
+    joint, qubitC, qubitP, preCollapse,
+    retrogradeFeedback: feedback.applied.length ? feedback.applied : null,
+  };
+}
+
+// Shared "package the outcome" step — takes whichever collapse strategy
+// already decided (aOutcomeIndex, bOutcomeIndex, cCollapse, pCollapse)
+// and builds the same {newQuantum, event} shape every caller returns.
+// `extra` carries collapse-strategy-specific provenance (e.g. Tier 2's
+// collapseSource/backend/jobId) into the event record — every strategy
+// must say honestly which one it was, never silently uniform.
+function packageCollapseResult(scenario, evolved, aOutcomeIndex, bOutcomeIndex, cCollapse, pCollapse, extra = {}) {
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
+  const aOutcome = entangled.aAxis[aOutcomeIndex];
+  const bOutcome = entangled.bAxis[bOutcomeIndex];
 
   // Rebuild a clean one-hot joint state from both collapsed outcomes.
+  // Index = aOutcomeIndex*2 + bOutcomeIndex — this exact weighting (A the
+  // more-significant bit) is the convention layer1_qpu.py's state-prep
+  // circuit is built against too (qubit 1 = A, qubit 0 = B); changing it
+  // here without changing it there would silently swap which side's
+  // outcome Tier 2 reports.
   const oneHot = [0, 0, 0, 0];
-  oneHot[aMeasurement.outcomeIndex * 2 + bCollapse.outcomeIndex] = 1;
+  oneHot[aOutcomeIndex * 2 + bOutcomeIndex] = 1;
   const collapsedJoint = oneHot.map(v => (v ? { re: 1, im: 0 } : { re: 0, im: 0 }));
 
   let entangledEffect = null;
-  if (aMeasurement.outcomeIndex === 0 && bCollapse.outcomeIndex === 0) {
+  if (aOutcomeIndex === 0 && bOutcomeIndex === 0) {
     entangledEffect = { stability: -2, conflictEvents: +1, label: "entangled escalation" };
-  } else if (aMeasurement.outcomeIndex === 1 && bCollapse.outcomeIndex === 1) {
+  } else if (aOutcomeIndex === 1 && bOutcomeIndex === 1) {
     entangledEffect = { stability: +2, dealIntegrity: +1, label: "entangled de-escalation" };
   }
 
@@ -777,10 +801,10 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, mark
     },
     event: {
       [entangled.aId]: aOutcome,
-      [entangled.bId]: bCollapse.outcome,
+      [entangled.bId]: bOutcome,
       [standalone.id]: cCollapse.outcome,
       ...(peacekeeper && pCollapse ? { [peacekeeper.id]: pCollapse.outcome } : {}),
-      preCollapse,
+      preCollapse: evolved.preCollapse,
       entangledEffect,
       peacekeeperIntervention,
       // Layer 2/3 -> Layer 1 retrograde feedback actually applied THIS
@@ -788,9 +812,89 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, mark
       // was nothing to feed back (cycle 1, or no propagator registered
       // for this scenario). Part of the citable research record, same as
       // entangledEffect/peacekeeperIntervention above.
-      retrogradeFeedback: feedback.applied.length ? feedback.applied : null,
+      retrogradeFeedback: evolved.retrogradeFeedback,
+      ...extra,
     },
   };
+}
+
+// The classical collapse strategy — same behavior as this project has
+// always had (real-entropy-sourced since the previous PR, still opt-in
+// via rng), now expressed as evolve (shared) + classical measureA/
+// collapseQubit + package (shared). collapseSource: "classical" makes
+// every event record say which strategy produced it, matching Tier 2's
+// own honesty requirement below rather than leaving it implicit.
+export function evolveAndCollapseQuantumState(scenario, quantum, decisions, marketEvent = null, cycle = 0, rng = Math.random) {
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
+  const evolved = evolveQuantumState(scenario, quantum, decisions, marketEvent, cycle);
+
+  const aMeasurement = measureA(evolved.joint, rng);
+  const bCollapse = collapseQubit(aMeasurement.conditionedB, entangled.bAxis, rng);
+  const cCollapse = collapseQubit(evolved.qubitC, standalone.axis, rng);
+  const pCollapse = (peacekeeper && evolved.qubitP) ? collapseQubit(evolved.qubitP, peacekeeper.axis, rng) : null;
+
+  return packageCollapseResult(scenario, evolved, aMeasurement.outcomeIndex, bCollapse.outcomeIndex, cCollapse, pCollapse, {
+    collapseSource: "classical",
+  });
+}
+
+// Tier 2 for Layer 1 — the actual entangled pair (A/B), not the whole
+// register. Standalone (C) and peacekeeper (P) qubits stay classical
+// here on purpose: a single unentangled qubit's collapse doesn't carry
+// an entanglement claim to make more physically real, Tier 1's real-
+// entropy sampling (see createRealEntropyPool) already is the honest,
+// real version of that. What's actually new here is the joint A/B state
+// — the one place this project claims genuine quantum entanglement —
+// getting prepared and measured on a real IBM QPU instead of being
+// classically sampled via measureA()+collapseQubit(). See python-bridge/
+// layer1_qpu.py for the state-prep circuit and its own status.
+//
+// STAKES ARE HIGHER THAN instinct.js's Tier 2: that one is a side-
+// channel display, never fed into simState. THIS collapse IS what
+// evolveAndCollapseQuantumState would have produced instead — it feeds
+// entangledEffect, which feeds the on-chain committed stability/conflict
+// deltas. On any failure it falls back to the SAME classical procedure
+// evolveAndCollapseQuantumState uses (not a degraded stand-in), and every
+// event carries collapseSource so the citable record says plainly which
+// one actually happened this cycle — never uniform, never silent.
+export async function evolveAndCollapseQuantumStateViaQPU(scenario, quantum, decisions, marketEvent = null, cycle = 0, fetchImpl = fetch) {
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
+  const evolved = evolveQuantumState(scenario, quantum, decisions, marketEvent, cycle);
+
+  const cCollapse = collapseQubit(evolved.qubitC, standalone.axis, Math.random);
+  const pCollapse = (peacekeeper && evolved.qubitP) ? collapseQubit(evolved.qubitP, peacekeeper.axis, Math.random) : null;
+
+  let aOutcomeIndex, bOutcomeIndex, extra;
+  try {
+    const res = await fetchImpl("/api/layer1/qpu-collapse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ joint: evolved.joint }),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || res.statusText);
+    aOutcomeIndex = body.a_outcome;
+    bOutcomeIndex = body.b_outcome;
+    extra = {
+      collapseSource: body.simulator ? "qpu-fallback-simulator" : "qpu-real-hardware",
+      backend: body.backend,
+      jobId: body.job_id,
+      ...(body.detail ? { qpuDetail: body.detail } : {}),
+    };
+  } catch (err) {
+    // Real hardware genuinely unreachable — fall back to the identical
+    // classical procedure evolveAndCollapseQuantumState uses, not a
+    // weaker stand-in, since this collapse feeds the actual committed
+    // outcome. collapseSource says plainly this cycle didn't get the
+    // real-hardware treatment it asked for.
+    const aMeasurement = measureA(evolved.joint, Math.random);
+    const bCollapse = collapseQubit(aMeasurement.conditionedB, entangled.bAxis, Math.random);
+    aOutcomeIndex = aMeasurement.outcomeIndex;
+    bOutcomeIndex = bCollapse.outcomeIndex;
+    extra = { collapseSource: "classical-fallback", qpuError: err.message };
+  }
+
+  return packageCollapseResult(scenario, evolved, aOutcomeIndex, bOutcomeIndex, cCollapse, pCollapse, extra);
 }
 
 
@@ -817,9 +921,19 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, mark
 // catastrophically slow and spam ANU's public API. Pass a real rng (see
 // createRealEntropyPool below) only at the one call site that actually
 // wants it — the live interactive commit a human is watching happen.
+//
+// precomputedPoliticalCollapse: optional. Left null, the political
+// collapse happens internally via evolveAndCollapseQuantumState (the
+// classical strategy), exactly as before this param existed. Pass the
+// {newQuantum, event} result of evolveAndCollapseQuantumStateViaQPU
+// (Tier 2, real IBM hardware) to use that instead — computed by the
+// caller BEFORE calling this function, since that path is async (a real
+// network call) and applyDecisions itself stays synchronous, same
+// resolve-before-the-sync-chain-runs pattern createRealEntropyPool
+// already uses for Tier 1.
 // ─────────────────────────────────────────────────────────────
 
-export function applyDecisions(scenario, simState, decisions, agentMemory = {}, cycle = 0, rng = undefined) {
+export function applyDecisions(scenario, simState, decisions, agentMemory = {}, cycle = 0, rng = undefined, precomputedPoliticalCollapse = null) {
   const s = { ...simState };
   const mem = structuredClone(agentMemory);
   const scenarioId = scenario.meta.id;
@@ -980,7 +1094,8 @@ export function applyDecisions(scenario, simState, decisions, agentMemory = {}, 
     throw new Error("agentMemory.quantum missing — call initQuantumBeliefs(scenario) when seeding agentMemory");
   }
   const priorMarketEvent = mem.markets?.lastEvent ?? null;
-  const { newQuantum, event } = evolveAndCollapseQuantumState(scenario, mem.quantum, decisions, priorMarketEvent, cycle, rng);
+  const { newQuantum, event } = precomputedPoliticalCollapse
+    ?? evolveAndCollapseQuantumState(scenario, mem.quantum, decisions, priorMarketEvent, cycle, rng);
   mem.quantum = newQuantum;
   mem.quantum.lastEvent = event;
 
