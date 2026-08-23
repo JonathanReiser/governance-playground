@@ -57,6 +57,25 @@ is checked. This isn't that. Three constraints keep it honest:
   committed, it's on-chain, timestamped, and permanent. Parameters are always public before the
   experiment runs.
 
+## What this isn't claiming
+
+Real quantum hardware measuring the collapse is a claim about the *mechanism*: the researcher's
+draw is a genuine physical measurement, not dressed-up pseudo-randomness. It is not a claim that
+modeling Iran and Israel's postures as entangled makes the simulation predict their actual
+real-world relationship any better than a classical, independent model would. That's a different,
+harder empirical question — and for this exact dyad, it's already been asked directly with real
+data, elsewhere in this same research thread: [quantum-geopolitics-research](https://github.com/JonathanReiser/quantum-geopolitics-research)
+tested entanglement against real UN General Assembly voting records (1946–2020) across 10 real
+enduring rivalries, Iran-Israel among them. A real correlation showed up (p=1.5×10⁻¹⁷⁰), but it was
+fully explained by ordinary bloc-alignment voting — Iran and Israel's sign matched their bloc
+exactly, same as all 9 other dyads — not a dyad-specific entangled relationship. Combined with a
+null result on real speed-dating data and an invalid-by-design test on real conflict data, that's
+three fair, independently-designed tests against real data, zero surviving entanglement. Order/
+sequential effects, by contrast, have replicated in every domain they've been tested in, including
+this project's own quantum-vs-classical statistical validation (`scripts/quantum-vs-classical-test.mjs`).
+So: the mechanism here is real and physically verified. Whether it's the *right* mechanism for
+predicting Iran and Israel specifically remains an open, and so far unsupportive, question.
+
 ## Architecture
 
 ```
