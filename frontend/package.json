@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "ethers": "^6.16.0",
+    "quantum-circuit": "^0.9.250",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "recharts": "^3.8.1"
