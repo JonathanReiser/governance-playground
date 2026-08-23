@@ -31,13 +31,20 @@ simulator — honestly labeled (`simulator: true`, `detail` explains why),
 never silently presented as real hardware. Same discipline as
 quantumRng.js's ANU fallback.
 
-NOT LIVE-TESTED AGAINST REAL IBM HARDWARE as of writing — no valid token
-was available in this environment (see the project's own security notes:
-API keys are never handled directly, set by the user in their own
-environment only). The local-simulator path below IS fully tested — see
-tests/test_instinct_qpu.py. Treat the real-hardware branch as
-structurally reviewed, not verified live, until run once with a real
-token — flag this honestly rather than implying otherwise.
+VERIFIED LIVE, 2026-08-23, against real IBM hardware (backend
+`ibm_marrakesh`) — not just structurally reviewed. First run caught a
+real bug before it shipped: the `channel="ibm_quantum"` this module was
+originally written against has been fully removed by IBM (migrated to
+Cloud IAM-based auth); the correct current value is
+`"ibm_quantum_platform"` (confirmed against the installed
+qiskit-ibm-runtime's own default). Fixed, then reran: a standalone
+reading (pressure=82, entangledReadout=0.7) returned a real job id
+(`da5j2s6aa69c739ku7a0`) and outcome; both deterministic extremes
+(pressure=0 -> ALLOW, pressure=100 -> VETO) came back correct on real
+hardware with no visible readout error on those particular shots. See
+tests/test_instinct_qpu.py's TestRealHardwareLive for the regression
+tests this landed as (skipped automatically without a token, so CI stays
+token-free; exercised for real whenever run locally with one).
 """
 
 import math
@@ -110,7 +117,13 @@ def _run_on_real_hardware(circuit: QuantumCircuit, token: str) -> dict:
     # tests actually exercise.
     from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2
 
-    service = QiskitRuntimeService(channel="ibm_quantum", token=token)
+    # "ibm_quantum" was the channel name at the time this module's docstring
+    # was written and is now REMOVED entirely (confirmed live, 2026-08-23,
+    # against qiskit-ibm-runtime 0.49.0 — the exact error was: "'channel'
+    # can only be 'ibm_cloud', or 'ibm_quantum_platform"). IBM migrated to
+    # Cloud IAM-based auth; "ibm_quantum_platform" is the current default
+    # (qiskit_ibm_runtime.accounts.management._DEFAULT_CHANNEL_TYPE).
+    service = QiskitRuntimeService(channel="ibm_quantum_platform", token=token)
     backend = service.least_busy(simulator=False, operational=True)
     transpiled = transpile(circuit, backend)
 

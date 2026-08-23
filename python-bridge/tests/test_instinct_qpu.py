@@ -1,15 +1,21 @@
 """
-Tests for instinct_qpu.py. Everything here exercises the local Aer
-simulator path only — no IBM_QUANTUM_TOKEN, no network call, no real
-hardware. That's a deliberate scope limit, not an oversight: the
-real-hardware branch (_run_on_real_hardware) is structurally reviewed but
-genuinely untested, since no valid token was available while building
-this (see instinct_qpu.py's own module docstring). Run this file once a
-real token exists and it's worth adding a live (skippable, marked
-slow/network) test for that branch specifically.
+Tests for instinct_qpu.py. Everything except TestRealHardwareLive below
+exercises the local Aer simulator path only — no IBM_QUANTUM_TOKEN, no
+network call, no real hardware; that's what runs in CI (see
+.github/workflows/python-bridge-tests.yml, deliberately no token secret
+configured there).
+
+TestRealHardwareLive is the one class that actually reaches IBM — skipped
+automatically when no IBM_QUANTUM_TOKEN is set (i.e. always skipped in
+CI), but exercised for real whenever this file is run locally with a
+token present. First run, 2026-08-23, against real hardware
+(ibm_marrakesh): pressure=0 -> ALLOW, pressure=100 -> VETO, both correct
+on a single shot with no visible readout error — confirmed live, not
+assumed from the circuit math alone.
 """
 
 import math
+import os
 
 import pytest
 from qiskit_aer import AerSimulator
@@ -124,4 +130,42 @@ class TestReadInstinct:
         allow_reading = read_instinct(pressure=0)
         assert allow_reading["outcome"] == "ALLOW"
         veto_reading = read_instinct(pressure=100)
+        assert veto_reading["outcome"] == "VETO"
+
+
+@pytest.mark.skipif(
+    not os.environ.get("IBM_QUANTUM_TOKEN"),
+    reason="no IBM_QUANTUM_TOKEN in this environment — set one locally to exercise the real-hardware path",
+)
+class TestRealHardwareLive:
+    """
+    Only these tests touch real IBM hardware, and only when a token is
+    actually present. Costs real quota and real wall-clock time (each
+    call is a genuine queued job, ~10-15s as of 2026-08-23 on
+    ibm_marrakesh) — kept to the minimum that actually proves the
+    end-to-end path works, not a full statistical sweep.
+    """
+
+    def test_a_real_reading_actually_reaches_hardware_not_the_fallback(self):
+        reading = read_instinct(pressure=82, entangled_readout=0.7)
+        assert reading["simulator"] is False
+        assert reading["job_id"] is not None
+        assert reading["backend"] != "aer_simulator"
+        assert reading["outcome"] in ("VETO", "ALLOW")
+
+    def test_extreme_pressures_on_real_hardware(self):
+        # Real hardware has real gate/readout noise — these could in
+        # principle come back "wrong" on an unlucky shot even though the
+        # ideal circuit is deterministic at these two points. First
+        # confirmed run (2026-08-23, ibm_marrakesh): both correct, no
+        # visible error. If this ever fails, that's real hardware noise
+        # showing up, not necessarily a bug — worth a second look before
+        # assuming the code broke, same honesty quantum-orch-or's own
+        # README already models for a different circuit.
+        allow_reading = read_instinct(pressure=0)
+        assert allow_reading["simulator"] is False
+        assert allow_reading["outcome"] == "ALLOW"
+
+        veto_reading = read_instinct(pressure=100)
+        assert veto_reading["simulator"] is False
         assert veto_reading["outcome"] == "VETO"

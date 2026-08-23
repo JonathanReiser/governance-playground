@@ -9,19 +9,24 @@ entanglement itself is physically real, not just correctly simulated.
 
 ## Status
 
-**Structurally complete, not live-verified.** The local-simulator path
-(`AerSimulator`) is fully tested — 11/11 pytest passing, including a test
-that makes a REAL network call to IBM with a deliberately invalid token
-and confirms the fallback degrades gracefully rather than crashing. The
-real-hardware path (`_run_on_real_hardware` in `instinct_qpu.py`) is
-written against the current `qiskit-ibm-runtime` API but has never
-actually run against real IBM hardware — no valid `IBM_QUANTUM_TOKEN` was
-available while building this (see the project's standing rule: API keys
-are set by the user in their own environment, never handled directly).
+**Verified live against real IBM hardware, 2026-08-23** — backend
+`ibm_marrakesh`, real job ids, not just structurally reviewed. The
+first live run caught a real bug: `channel="ibm_quantum"` (what this
+module was originally written against) has been fully removed by IBM —
+migrated to Cloud IAM-based auth, current default is
+`"ibm_quantum_platform"`. Fixed, then confirmed: a standalone entangled
+reading returned a real job id and outcome, and both deterministic
+extremes (pressure=0 → ALLOW, pressure=100 → VETO) came back correct on
+real hardware with no visible readout error on those shots. See
+`instinct_qpu.py`'s module docstring and `tests/test_instinct_qpu.py`'s
+`TestRealHardwareLive` for the full detail and the regression tests this
+landed as.
 
-**Before trusting the real-hardware path, run it once for real** with a
-valid token and confirm the response shape matches what's documented
-below — flag it here if anything about the Runtime API has drifted.
+13/13 pytest passing locally with a token set (11 simulator-path tests +
+2 real-hardware tests); 11/13 in CI, where the 2 real-hardware tests
+skip cleanly (no `IBM_QUANTUM_TOKEN` secret configured there, on
+purpose — same reasoning as every other credentialed test in this
+project).
 
 ## Setup
 
