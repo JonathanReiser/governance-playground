@@ -45,23 +45,62 @@ describe("pressureToTheta", () => {
 });
 
 describe("readInstinct", () => {
-  it("is deterministic given an injected rng, not Math.random", () => {
+  it("is deterministic given an injected rng, not Math.random", async () => {
     const belowThreshold = buildInstinctCircuit({ pressure: 30 }); // P(ALLOW) = 0.7
-    const reading = readInstinct(belowThreshold, ["VETO", "ALLOW"], () => 0.5);
+    const reading = await readInstinct(belowThreshold, ["VETO", "ALLOW"], () => 0.5);
     expect(reading.outcome).toBe("ALLOW"); // rng() = 0.5 < 0.7
 
     const aboveThreshold = buildInstinctCircuit({ pressure: 30 });
-    const reading2 = readInstinct(aboveThreshold, ["VETO", "ALLOW"], () => 0.9);
+    const reading2 = await readInstinct(aboveThreshold, ["VETO", "ALLOW"], () => 0.9);
     expect(reading2.outcome).toBe("VETO"); // rng() = 0.9 >= 0.7
   });
 
-  it("never touches the library's own Math.random-backed measure — same rng, same outcome, every call", () => {
+  it("never touches the library's own Math.random-backed measure — same rng, same outcome, every call", async () => {
     const outcomes = new Set();
     for (let i = 0; i < 20; i++) {
       const c = buildInstinctCircuit({ pressure: 50 });
-      outcomes.add(readInstinct(c, ["VETO", "ALLOW"], () => 0.3).outcome);
+      const reading = await readInstinct(c, ["VETO", "ALLOW"], () => 0.3);
+      outcomes.add(reading.outcome);
     }
     expect(outcomes.size).toBe(1); // a fixed rng must always land the same side
+  });
+
+  it("accepts a plain-number sync rng (the pre-existing test contract) and labels it 'injected'", async () => {
+    const c = buildInstinctCircuit({ pressure: 50 });
+    const reading = await readInstinct(c, ["VETO", "ALLOW"], () => 0.5);
+    expect(reading.entropySource).toBe("injected");
+    expect(reading.entropyDetail).toBeUndefined();
+  });
+
+  it("accepts an async {value, source, detail}-shaped rng (quantumRandomFloat's contract) and carries provenance through", async () => {
+    const c = buildInstinctCircuit({ pressure: 30 }); // P(ALLOW) = 0.7
+    const reading = await readInstinct(c, ["VETO", "ALLOW"], async () => ({ value: 0.5, source: "anu-qrng" }));
+    expect(reading.outcome).toBe("ALLOW"); // 0.5 < 0.7
+    expect(reading.entropySource).toBe("anu-qrng");
+    expect(reading.entropyDetail).toBeUndefined();
+  });
+
+  it("surfaces a fallback rng's detail message on the reading, not just its source label", async () => {
+    const c = buildInstinctCircuit({ pressure: 50 });
+    const reading = await readInstinct(c, ["VETO", "ALLOW"], async () => ({
+      value: 0.9,
+      source: "math-random-fallback",
+      detail: "ANU QRNG HTTP 503",
+    }));
+    expect(reading.entropySource).toBe("math-random-fallback");
+    expect(reading.entropyDetail).toBe("ANU QRNG HTTP 503");
+  });
+
+  it("defaults to quantumRandomFloat when no rng is passed at all, and still produces a valid reading", async () => {
+    // No network mock here on purpose: quantumRandomFloat's own fallback
+    // path (see quantumRng.test.js) guarantees this resolves even fully
+    // offline — this test only asserts readInstinct's default wiring
+    // actually reaches it and produces a well-formed result, not which
+    // entropy source wins in this environment.
+    const c = buildInstinctCircuit({ pressure: 50 });
+    const reading = await readInstinct(c);
+    expect(["VETO", "ALLOW"]).toContain(reading.outcome);
+    expect(["anu-qrng", "math-random-fallback"]).toContain(reading.entropySource);
   });
 });
 
@@ -97,8 +136,8 @@ describe("entanglement", () => {
 });
 
 describe("proposeVetoInstinct", () => {
-  it("returns a full, human-reviewable reading without calling any on-chain veto function", () => {
-    const result = proposeVetoInstinct({
+  it("returns a full, human-reviewable reading without calling any on-chain veto function", async () => {
+    const result = await proposeVetoInstinct({
       nation: { id: "iran", name: "Iran" },
       pressureField: "hardlinerPressure",
       pressureValue: 82,
@@ -115,8 +154,8 @@ describe("proposeVetoInstinct", () => {
     expect(typeof result.circuitDiagram).toBe("string");
   });
 
-  it("omits any entangled-partner reference for a standalone nation", () => {
-    const result = proposeVetoInstinct({
+  it("omits any entangled-partner reference for a standalone nation", async () => {
+    const result = await proposeVetoInstinct({
       nation: { id: "saudi_arabia", name: "Saudi Arabia" },
       pressureField: "reformPressure",
       pressureValue: 55,
@@ -125,5 +164,24 @@ describe("proposeVetoInstinct", () => {
 
     expect(result.entangledWithNationId).toBeNull();
     expect(result.note).toContain("standalone");
+  });
+
+  it("labels the note honestly by entropy source — real QRNG vs. PRNG fallback read differently", async () => {
+    const real = await proposeVetoInstinct({
+      nation: { id: "iran", name: "Iran" },
+      pressureField: "hardlinerPressure",
+      pressureValue: 82,
+      rng: async () => ({ value: 0.1, source: "anu-qrng" }),
+    });
+    expect(real.note).toContain("real quantum process");
+
+    const fallback = await proposeVetoInstinct({
+      nation: { id: "iran", name: "Iran" },
+      pressureField: "hardlinerPressure",
+      pressureValue: 82,
+      rng: async () => ({ value: 0.1, source: "math-random-fallback", detail: "offline" }),
+    });
+    expect(fallback.note).toContain("PRNG fallback");
+    expect(fallback.note).toContain("offline");
   });
 });

@@ -81,12 +81,26 @@
  * library's measure functions. It reads circuit.probability(wire) — a real,
  * deterministic Born-rule number the simulator computes honestly — and
  * takes the actual sample itself through an injectable rng, the same
- * pattern quantum.js's collapseQubit() already uses. That's the one seam
- * where a real entropy source (a hardware QRNG API, or a live QPU backend —
- * this project's sibling quantum-orch-or repo already talks to IBM hardware
- * for exactly this reason) can be swapped in later. Until that swap
- * happens, this is quantum-circuit math shaping a still-classical sample:
- * call it "quantum-modeled," not "genuine indeterminacy."
+ * pattern quantum.js's collapseQubit() already uses.
+ *
+ * TIER 1, DONE (2026-08-23): that seam is now filled by default.
+ * readInstinct()/proposeVetoInstinct() default their rng to
+ * quantumRandomFloat() (quantumRng.js) — a real sample from the ANU
+ * Quantum Random Numbers Server, a physical experiment (laser
+ * vacuum-fluctuation measurement), not a relabeled PRNG. It falls back to
+ * Math.random() on any failure (offline, rate-limited, slow) and every
+ * reading carries which one actually happened (`entropySource`,
+ * `entropyDetail`) — never silently wears a label it didn't earn.
+ *
+ * BE PRECISE ABOUT WHAT TIER 1 DOES NOT BUY: the RY/CX circuit math above
+ * — including the entangling CX gate — is still exact classical
+ * simulation. Only the final sample against that simulated distribution is
+ * now physically sourced. The entanglement itself becoming physically
+ * real (running this exact circuit on an actual QPU) is Tier 2, and is
+ * NOT done here — see quantum-orch-or's already-working
+ * QiskitRuntimeService connection for where that would plug in. Until
+ * Tier 2 lands, keep saying "quantum-modeled, real-entropy-sampled" — not
+ * "genuine indeterminacy" outright — for what this module produces.
  *
  * ─────────────────────────────────────────────────────────────
  * SCOPE OF THIS DRAFT
@@ -100,6 +114,7 @@
  */
 
 import QuantumCircuit from "quantum-circuit";
+import { quantumRandomFloat } from "./quantumRng.js";
 
 const clampUnit = (p) => Math.min(1, Math.max(0, p));
 
@@ -153,21 +168,27 @@ export function buildInstinctCircuit({ pressure, entangledReadout = null }) {
 /**
  * Run the circuit and take one honest reading of wire 0 — see the
  * "GENUINE INDETERMINACY" note above for why this doesn't call the
- * library's own measure()/measureAll(). rng defaults to Math.random (same
- * default quantum.js's collapseQubit()/measureA() use), so by default this
- * is pseudo-randomness shaped by real quantum-circuit math, not physical
- * indeterminacy — pass a different rng to change that honestly rather than
- * relabeling it.
+ * library's own measure()/measureAll(). Async because the default rng
+ * (quantumRandomFloat) is a real network call; rng may return either a
+ * plain number (the old synchronous contract every existing test still
+ * uses, `() => 0.5`) or `{value, source, detail}` (quantumRandomFloat's
+ * shape) — either is awaited, so a sync fn works unchanged. Pass a
+ * different rng to change the entropy source honestly rather than
+ * relabeling what this one produces.
  */
-export function readInstinct(circuit, labels = ["VETO", "ALLOW"], rng = Math.random) {
+export async function readInstinct(circuit, labels = ["VETO", "ALLOW"], rng = quantumRandomFloat) {
   circuit.run();
   const pAllow = circuit.probability(0); // P(wire 0 = |1>), computed pre-collapse
-  const outcomeIndex = rng() < pAllow ? 1 : 0;
+  const sample = await rng();
+  const { value, source = "injected", detail } = typeof sample === "number" ? { value: sample } : sample;
+  const outcomeIndex = value < pAllow ? 1 : 0;
   return {
     outcome: labels[outcomeIndex],
     outcomeIndex,
     probabilities: { [labels[0]]: 1 - pAllow, [labels[1]]: pAllow },
     circuitDiagram: circuit.exportSVG(false),
+    entropySource: source,
+    ...(detail ? { entropyDetail: detail } : {}),
   };
 }
 
@@ -177,7 +198,13 @@ function describeInstinct(nationName, pressureField, pressureValue, entangledWit
   const tail = entangledWith
     ? `, entangled with ${entangledWith}'s live posture — this is not an independent fact about ${nationName} alone.`
     : ", read standalone — no entangled partner for this nation in this scenario.";
-  return base + tail;
+  const entropy =
+    reading.entropySource === "anu-qrng"
+      ? " Collapse sampled from a real quantum process (ANU QRNG)."
+      : reading.entropySource === "math-random-fallback"
+        ? ` Collapse sampled from a classical PRNG fallback (${reading.entropyDetail ?? "reason not recorded"}), not real entropy this reading.`
+        : "";
+  return base + tail + entropy;
 }
 
 /**
@@ -193,13 +220,15 @@ function describeInstinct(nationName, pressureField, pressureValue, entangledWit
  * @param entangledWith       { name, axis0Probability } of the entangled
  *                            partner nation, or null for a standalone nation.
  * @param rng                 injectable entropy source — see readInstinct().
+ *                            Defaults to quantumRandomFloat (real ANU QRNG
+ *                            entropy, PRNG fallback on failure).
  */
-export function proposeVetoInstinct({ nation, pressureField, pressureValue, entangledWith = null, rng = Math.random }) {
+export async function proposeVetoInstinct({ nation, pressureField, pressureValue, entangledWith = null, rng = quantumRandomFloat }) {
   const circuit = buildInstinctCircuit({
     pressure: pressureValue,
     entangledReadout: entangledWith?.axis0Probability ?? null,
   });
-  const reading = readInstinct(circuit, ["VETO", "ALLOW"], rng);
+  const reading = await readInstinct(circuit, ["VETO", "ALLOW"], rng);
   return {
     nationId: nation.id,
     driverField: pressureField,
