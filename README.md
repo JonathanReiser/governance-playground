@@ -78,7 +78,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 
 | Piece | Status |
 |---|---|
-| Smart contracts + test suite (83/83) | ✅ Done |
+| Smart contracts + test suite (83/83) | ✅ Done, runs in CI (`.github/workflows/contracts-tests.yml`) |
 | Classic (fixed-rule) experiments, 4 pre-built scenarios | ✅ Done |
 | AI agent layer (Claude-driven nation decisions) | ✅ Done, verified live |
 | Quantum extension — entangled political layer | ✅ Done, verified live |
@@ -121,16 +121,12 @@ Walk through: **Connect → Scenario → Deploy → choose "AI Agent Cycle" → 
 
 ### Running the tests
 
-Two separate suites:
+Two separate suites, both running in CI on every push/PR to `main`:
 
 ```bash
-npx hardhat test          # 83-test Solidity/Chai suite — contracts/
-cd frontend && npm test    # vitest — the quantum-engine plumbing (agents.js/markets.js)
+npm test                   # 83-test Solidity/Chai suite — contracts/ (.github/workflows/contracts-tests.yml)
+cd frontend && npm test    # vitest — the quantum-engine plumbing (agents.js/markets.js) (.github/workflows/frontend-tests.yml)
 ```
-
-Neither runs in CI yet except the frontend suite (`.github/workflows/frontend-tests.yml`,
-added alongside the Layer 2/3 → Layer 1 retrograde feedback tests) — the Hardhat suite is
-still local-only.
 
 ### Troubleshooting: MetaMask stuck on "Review alert"
 

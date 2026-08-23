@@ -4,7 +4,7 @@ import { deployScenario, EventStatus } from "../lib/contracts";
 
 const CYCLES = 10;
 
-export function ExperimentStep({ signer, scenario, deployment, onResults }) {
+export function ExperimentStep({ signer, scenario, onResults }) {
   const [selected, setSelected]   = useState(null);
   const [phase,    setPhase]      = useState("idle"); // idle | baseline | experiment | done
   const [baseLog,  setBaseLog]    = useState([]);
