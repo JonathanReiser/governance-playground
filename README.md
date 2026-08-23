@@ -51,8 +51,7 @@ Political layer (Layer 1)     Nation agents (Claude) reason each cycle; Iran/Isr
         ▼
 Economic field (Layer 2)      Oil / Iranian rial / Saudi riyal / US gas price as one 4-qubit
                                entangled register — a real oil shock stresses Iran's currency
-                               while filling Saudi coffers, and vice versa. One-directional for
-                               now (political → economic).
+                               while filling Saudi coffers, and vice versa.
         │
         ▼
 Speculation (Layer 3)         Six synthetic trader archetypes react to the collapsed fundamental;
@@ -62,6 +61,13 @@ Speculation (Layer 3)         Six synthetic trader archetypes react to the colla
         ▼
 On-chain record                WorldRegistry + MetricsOracle (Solidity). Every cycle's metrics,
                                every decision, every quantum collapse — permanent, citable.
+
+Retrograde feedback (2/3 → 1)  Middle East only, for now: next cycle, last cycle's collapsed
+                               economic/speculative outcome rotates the political qubits back —
+                               a weakening rial hardens Iran, a riyal windfall eases Saudi reform
+                               pressure, a gas-price surge nudges the US peacekeeper toward
+                               disengagement — amplified by Layer 3's tail risk. One cycle in
+                               arrears, so causality within a single cycle stays one-directional.
 ```
 
 Smart contracts in Solidity (Hardhat), frontend in React, the agent layer talks to Claude via a
@@ -77,6 +83,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 | AI agent layer (Claude-driven nation decisions) | ✅ Done, verified live |
 | Quantum extension — entangled political layer | ✅ Done, verified live |
 | Quantum extension — economic field + speculation (Layer 2/3) | ✅ Done, verified live |
+| Retrograde feedback, Layer 2/3 → Layer 1 (Middle East only) | ✅ Done |
 | AI/Quantum-mode results view | ✅ Done, verified live |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
@@ -114,12 +121,12 @@ Walk through: **Connect → Scenario → Deploy → choose "AI Agent Cycle" → 
 
 ### Running the tests
 
-```bash
-npm test   # the 83-test Solidity/Chai suite — contracts/
-```
+Two separate suites, both running in CI on every push/PR to `main`:
 
-Runs automatically on every push/PR to `main` via
-`.github/workflows/contracts-tests.yml`.
+```bash
+npm test                   # 83-test Solidity/Chai suite — contracts/ (.github/workflows/contracts-tests.yml)
+cd frontend && npm test    # vitest — the quantum-engine plumbing (agents.js/markets.js) (.github/workflows/frontend-tests.yml)
+```
 
 ### Troubleshooting: MetaMask stuck on "Review alert"
 
