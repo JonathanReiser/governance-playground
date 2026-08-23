@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs, proposeInstinctReadings } from "../lib/agents";
+import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs, proposeInstinctReadings, proposeInstinctReadingsViaQPU } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 import { nationActionMenu } from "../lib/nationActions";
 
@@ -158,6 +158,36 @@ function InstinctBar({ reading }) {
       <div className={`instinct-entropy ${isReal ? "instinct-entropy--real" : "instinct-entropy--fallback"}`}>
         {isReal ? "⚛ real quantum entropy (ANU QRNG)" : `≈ PRNG fallback — ${reading.entropyDetail ?? "reason not recorded"}`}
       </div>
+      {reading.tier === "tier1-fallback" && (
+        <div className="instinct-entropy instinct-entropy--fallback">
+          ⚠ real IBM hardware was requested but unreachable — {reading.qpuError}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Tier 2 — a real (or, on failure, honestly-labeled fallback) IBM
+// hardware measurement, see lib/agents.js's proposeInstinctReadingsViaQPU.
+// Deliberately NOT a probability bar like InstinctBar: a QPU reading has
+// already collapsed by the time it comes back (python-bridge always
+// includes a measurement gate) — there's no pre-collapse odds to preview,
+// so showing one would misrepresent an already-resolved real measurement
+// as a live-updating forecast.
+function QpuInstinctBadge({ reading }) {
+  if (!reading || reading.tier !== "qpu") return null;
+  const isReal = !reading.simulator;
+  return (
+    <div className="quantum-belief instinct-belief qpu-belief">
+      <div className="quantum-belief-header">
+        <span>{reading.vetoType === "guardian" ? "🕯 guardian instinct" : "👑 royal instinct"} · measured</span>
+        <span className="quantum-belief-labels">{reading.outcome}</span>
+      </div>
+      <div className={`instinct-entropy ${isReal ? "instinct-entropy--real" : "instinct-entropy--fallback"}`}>
+        {isReal
+          ? `⚛ real IBM quantum hardware — ${reading.backend}, job ${reading.jobId}`
+          : `≈ local simulator fallback — ${reading.detail ?? "reason not recorded"}`}
+      </div>
     </div>
   );
 }
@@ -195,7 +225,9 @@ function NationCard({ nationId, result, quantumBeliefState, instinctReading, nat
       </div>
 
       <QuantumBeliefBar belief={quantumBeliefState} />
-      <InstinctBar reading={instinctReading} />
+      {instinctReading?.tier === "qpu"
+        ? <QpuInstinctBadge reading={instinctReading} />
+        : <InstinctBar reading={instinctReading} />}
 
       <div className="nation-action">
         <span className="action-primary">{d.primaryAction}</span>
@@ -374,6 +406,7 @@ export function AICycleStep({ scenario, deployment, onResults }) {
   const [marketEvent,     setMarketEvent]     = useState(null); // Layer 2/3 collapse outcome from the last commit
   const [humanControlled, setHumanControlled] = useState({});   // { [nationId]: boolean } — "take this nation's turn myself" toggle
   const [humanDrafts,     setHumanDrafts]     = useState({});   // { [nationId]: { primaryAction, reasoning, metricDeltas } }
+  const [useRealHardware, setUseRealHardware] = useState(false); // Tier 2 opt-in — see lib/agents.js's proposeInstinctReadingsViaQPU. Default OFF: ~10-15s per reading, spends real IBM Quantum quota once a token is configured server-side.
 
   function updateHumanDraft(nationId, draft) {
     setHumanDrafts(prev => ({ ...prev, [nationId]: draft }));
@@ -437,13 +470,21 @@ export function AICycleStep({ scenario, deployment, onResults }) {
     // Instinct readings (guardian/royal veto — see lib/instinct.js) run
     // concurrently with the agents' own reasoning, not after it: this is
     // upstream, pre-deliberative pressure, not a reaction to what the AI
-    // agents decide this cycle. Sourced from a real network call (ANU
-    // QRNG by default, see quantumRng.js) — failure is handled inside
-    // proposeInstinctReadings/quantumRandomFloat themselves (falls back
-    // to Math.random, honestly labeled), so this can't block or fail the
-    // cycle; .catch() here is belt-and-suspenders against something
-    // unexpected still throwing (e.g. a malformed scenario config).
-    const instinctPromise = proposeInstinctReadings(scenario, worldState, agentMemory.quantum).catch(() => ({}));
+    // agents decide this cycle. Tier 1 (default) sources from a real
+    // network call (ANU QRNG, see quantumRng.js) — failure is handled
+    // inside proposeInstinctReadings/quantumRandomFloat themselves (falls
+    // back to Math.random, honestly labeled). Tier 2 (opt-in toggle, see
+    // useRealHardware) instead posts to real IBM quantum hardware via
+    // python-bridge — slower (~10-15s/reading) and spends real quota, so
+    // it's never the default; on failure it falls back to a Tier 1
+    // reading itself (see proposeInstinctReadingsViaQPU), so either path
+    // always resolves. .catch() here is belt-and-suspenders against
+    // something unexpected still throwing (e.g. a malformed scenario
+    // config), not the primary failure handling for either tier.
+    const instinctPromise = (useRealHardware
+      ? proposeInstinctReadingsViaQPU(scenario, worldState, agentMemory.quantum)
+      : proposeInstinctReadings(scenario, worldState, agentMemory.quantum)
+    ).catch(() => ({}));
 
     await Promise.allSettled(
       agents.map((agent, i) =>
@@ -470,7 +511,7 @@ export function AICycleStep({ scenario, deployment, onResults }) {
     setDecisions(results);
     setProposed(proposedMetrics);
     setPhase("review");
-  }, [scenario, simState, cycle, agentMemory, humanControlled, humanDrafts]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scenario, simState, cycle, agentMemory, humanControlled, humanDrafts, useRealHardware]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   // ── Step 2: researcher edits proposed values ──────────────
@@ -740,6 +781,31 @@ export function AICycleStep({ scenario, deployment, onResults }) {
             {" "}(tail weight {marketEvent.speculation.primary.tailWeight} — how much of the move came from
             the fat-tailed component rather than an ordinary one).
           </p>
+        </div>
+      )}
+
+      {/* Tier 2 opt-in — see lib/agents.js's proposeInstinctReadingsViaQPU.
+          Only shown when this scenario actually has a veto-capable nation
+          (otherwise there'd be nothing for it to affect). Default OFF:
+          each reading is a real IBM Quantum job, ~10-15s and real quota
+          once a token is configured server-side — a deliberate choice,
+          not an oversight, unlike Tier 1's near-instant, effectively-free
+          ANU QRNG reads. */}
+      {phase === "idle" && scenario.nations.some(n => n.governance?.guardianVeto || n.governance?.royalVeto) && (
+        <div className="section" style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.25rem" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: 13 }}>
+            <input
+              type="checkbox"
+              checked={useRealHardware}
+              onChange={e => setUseRealHardware(e.target.checked)}
+            />
+            Use real IBM quantum hardware for instinct readings
+          </label>
+          <span className="muted" style={{ fontSize: 11 }}>
+            {useRealHardware
+              ? "⚛ each veto-capable nation's reading will be a real measurement on a real QPU (~10-15s, real quota) — falls back to a local reading if unreachable"
+              : "off by default — real hardware readings are slower and spend real IBM Quantum quota"}
+          </span>
         </div>
       )}
 

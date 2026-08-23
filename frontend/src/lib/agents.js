@@ -418,6 +418,84 @@ export async function proposeInstinctReadings(scenario, worldState, quantum, rng
   return Object.fromEntries(readings.filter(Boolean));
 }
 
+function qpuNote(nationName, body, entangledWithName) {
+  const source = body.simulator
+    ? `a local simulator fallback (${body.detail ?? "reason not recorded"})`
+    : `real IBM quantum hardware (${body.backend}, job ${body.job_id})`;
+  const tail = entangledWithName ? `, entangled with ${entangledWithName}'s live posture` : ", read standalone";
+  return `${nationName}'s instinct measured ${body.outcome}${tail} — via ${source}.`;
+}
+
+// Tier 2 — the same veto-capable-nation resolution as
+// proposeInstinctReadings() above, but posts to /api/instinct/qpu-reading
+// (server.js's proxy to python-bridge/app.py — see that project's own
+// README for current verified-live status) instead of running
+// instinct.js's circuit locally. python-bridge runs the SAME circuit on
+// real IBM hardware when a token is configured server-side, or its own
+// local Aer simulator fallback otherwise.
+//
+// A QPU reading has no "pre-collapse probability" to preview — a
+// measurement gate is always included server-side, so what comes back is
+// an already-resolved single real outcome, not odds. AICycleStep.jsx
+// renders these (tier: "qpu") through QpuInstinctBadge, not
+// InstinctBar's probability bar, for exactly this reason.
+//
+// Opt-in only — AICycleStep.jsx gates this behind an explicit toggle,
+// default OFF: each real reading takes ~10-15s and spends real IBM
+// Quantum quota once a token is configured, unlike Tier 1's near-instant
+// readings. On any failure (endpoint unreachable, python-bridge down,
+// non-2xx response), falls back to a Tier 1 local reading — tagged
+// tier: "tier1-fallback" with the actual qpuError recorded — rather than
+// leaving a nation with no reading at all.
+export async function proposeInstinctReadingsViaQPU(scenario, worldState, quantum, fetchImpl = fetch) {
+  const capable = vetoCapableNations(scenario);
+  if (capable.length === 0) return {};
+
+  const readings = await Promise.all(
+    capable.map(async (nation) => {
+      const inputs = resolveInstinctInputs(scenario, worldState, quantum, nation.id);
+      if (!inputs) return null;
+      const vetoType = nation.governance.guardianVeto ? "guardian" : "royal";
+
+      try {
+        const res = await fetchImpl("/api/instinct/qpu-reading", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pressure: inputs.pressureValue,
+            entangledReadout: inputs.entangledWith?.axis0Probability ?? undefined,
+          }),
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.error || res.statusText);
+
+        return [nation.id, {
+          nationId: nation.id,
+          vetoType,
+          tier: "qpu",
+          outcome: body.outcome,
+          outcomeIndex: body.outcome_bit,
+          backend: body.backend,
+          jobId: body.job_id,
+          simulator: body.simulator,
+          detail: body.detail,
+          note: qpuNote(nation.name, body, inputs.entangledWith?.name),
+        }];
+      } catch (err) {
+        const { proposeVetoInstinct } = await import("./instinct.js");
+        const fallback = await proposeVetoInstinct({
+          nation: { id: nation.id, name: nation.name },
+          pressureField: inputs.pressureField,
+          pressureValue: inputs.pressureValue,
+          entangledWith: inputs.entangledWith,
+        });
+        return [nation.id, { ...fallback, vetoType, tier: "tier1-fallback", qpuError: err.message }];
+      }
+    })
+  );
+  return Object.fromEntries(readings.filter(Boolean));
+}
+
 
 // ─────────────────────────────────────────────────────────────
 // QUANTUM EVOLUTION + COLLAPSE (runs once per commit)
