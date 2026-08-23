@@ -26,6 +26,43 @@
  * upstream of, not a relabeled copy of it.
  *
  * ─────────────────────────────────────────────────────────────
+ * WHAT KIND OF CLAIM THIS IS
+ *
+ * This module demonstrates a thesis, not a tested claim about
+ * geopolitical cognition — the same line "THE WEB" (the book this design
+ * is drawn from) draws for itself in its own Chapter One, about the
+ * immune system's quantum-mechanically-adjacent tolerance of Demodex
+ * mites: "I'm not claiming [this] is directly a quantum computation —
+ * the honest answer is nobody has traced that particular chain of
+ * custody all the way down. What I'm pointing at is smaller: the
+ * substrate underneath your instincts was never the tidy, binary,
+ * either/or machine that classical logic trained us to expect." Iran's
+ * guardian council is no more literally a quantum computer than a human
+ * immune system is — the point in both cases is that something real and
+ * physically indeterminate (there, enzyme tunneling / photosynthetic
+ * coherence; here, an actual ANU QRNG laser vacuum-fluctuation
+ * measurement, once Tier 1 landed) sits underneath something that looks
+ * discrete from the outside, and the discreteness is the illusion, not
+ * the substrate. That's why sourcing genuine entropy mattered enough to
+ * build (see "ON GENUINE INDETERMINACY" below) — not to make this module
+ * more scientifically defensible, but to make it the actual, literal
+ * thing rather than a metaphor standing in for it, same standard the
+ * chapter holds itself to.
+ *
+ * The empirical question — does real human/institutional cognition
+ * actually show this structure — is a genuinely different question, and
+ * this project's sibling repos (quantum-dating-research,
+ * quantum-geopolitics-research) are where that gets tested, honestly,
+ * against real data, with real disconfirming results alongside the
+ * confirming ones. Two attempts to give this specific module that kind
+ * of empirical backing were made and explicitly set aside (2026-08-23,
+ * see quantum-dating-research/FINDINGS.md) — not because the idea is
+ * wrong, but because neither attempt actually tested it, and dressing
+ * either up as validation would have been the overclaim this note exists
+ * to prevent. Hold this module to the chapter's standard, not to
+ * quantum-dating-research's.
+ *
+ * ─────────────────────────────────────────────────────────────
  * THE CIRCUIT
  *
  * One instinct qubit per veto-capable nation. |0> = VETO, |1> = ALLOW.
