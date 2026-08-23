@@ -17,6 +17,7 @@ import {
   collapseQubit, probabilities, rotate,
 } from "./quantum.js";
 import { initMarketBeliefs, marketReadout, evolveAndCollapseMarkets } from "./markets.js";
+import { quantumRandomFloat } from "./quantumRng.js";
 // instinct.js is dynamically imported inside proposeInstinctReadings() below,
 // not statically here — it pulls in the quantum-circuit package (and its
 // mathjs dependency), which nearly doubled this app's main bundle
@@ -496,6 +497,61 @@ export async function proposeInstinctReadingsViaQPU(scenario, worldState, quantu
   return Object.fromEntries(readings.filter(Boolean));
 }
 
+// ─────────────────────────────────────────────────────────────
+// REAL ENTROPY FOR THE MAIN QUANTUM COLLAPSE (Layer 1/2/3)
+//
+// evolveAndCollapseQuantumState()/evolveAndCollapseMarkets() (and the
+// quantum.js primitives underneath — collapseQubit/measureA/measureQubit)
+// all default their rng to Math.random, UNCHANGED — that default matters
+// and stays as-is. scripts/quantum-vs-classical-test.mjs calls this same
+// machinery thousands of times per validation run; forcing real network
+// entropy into that shared default would make those runs catastrophically
+// slow and would spam ANU's public API well past reasonable use. This
+// real-entropy path is opt-in, explicit, and meant for exactly one place:
+// AICycleStep.jsx's commitCycle(), the live interactive commit a human is
+// actually watching happen — same "real entropy where a human is present
+// to see it, not in a hot statistical loop" boundary instinct.js's Tier 1
+// already draws.
+//
+// collapseQubit/measureA/measureQubit call rng() synchronously, inline,
+// mid-computation — they can't await a real network call without making
+// quantum.js's core primitives async, which would slow the validation
+// script too even when it injects its own fast rng, for zero benefit
+// there. Instead: pre-fetch a small pool of real entropy values (parallel
+// real network round-trips via quantumRandomFloat) BEFORE the synchronous
+// collapse chain runs, then hand out a plain synchronous rng that pops
+// from that pool.
+//
+// The actual draw count, VERIFIED against a real live run rather than
+// assumed (an earlier version of this comment claimed "at most 8" —
+// wrong, caught by an actual live run pulling only 1/20 real values and
+// exhausting a pool of 10): Layer 1's political collapse draws 4
+// (measureA + up to 3x collapseQubit, Middle East's peacekeeper included;
+// Taiwan Strait has no peacekeeper, so 3). Layer 2/3's market collapse
+// draws 4 (measureQubit x4, one per instrument) PLUS 12 more —
+// resolvePriceMove() in markets.js samples each instrument's price-move
+// magnitude from a Gaussian/Cauchy mixture (gaussianRandom: 2 draws,
+// cauchyRandom: 1 draw = 3 per instrument x 4 instruments), easy to miss
+// by reading evolveAndCollapseMarkets() alone since that sampling is
+// nested inside resolvePriceMove(), not visible at the top level. Total:
+// 20 for Middle East, 19 for Taiwan Strait. Default pool size below has
+// real headroom above that, not a guess.
+export async function createRealEntropyPool(size = 24, drawFn = quantumRandomFloat) {
+  const draws = await Promise.all(Array.from({ length: size }, () => drawFn()));
+  let i = 0;
+  const sourcesUsed = [];
+  const rng = () => {
+    if (i < draws.length) {
+      const { value, source } = draws[i++];
+      sourcesUsed.push(source);
+      return value;
+    }
+    sourcesUsed.push("math-random-fallback-pool-exhausted");
+    return Math.random();
+  };
+  return { rng, sourcesUsed };
+}
+
 
 // ─────────────────────────────────────────────────────────────
 // QUANTUM EVOLUTION + COLLAPSE (runs once per commit)
@@ -752,9 +808,18 @@ export function evolveAndCollapseQuantumState(scenario, quantum, decisions, mark
 // shared schema onto genuinely different domain content.
 //
 // Returns { newSimState, newAgentMemory }.
+//
+// rng: optional. Left undefined, this is byte-for-byte the same as
+// before — every collapse call below falls through to quantum.js's own
+// Math.random default, which matters: scripts/quantum-vs-classical-test.mjs
+// calls this same function thousands of times per run, and forcing real
+// network entropy into that shared default would make validation runs
+// catastrophically slow and spam ANU's public API. Pass a real rng (see
+// createRealEntropyPool below) only at the one call site that actually
+// wants it — the live interactive commit a human is watching happen.
 // ─────────────────────────────────────────────────────────────
 
-export function applyDecisions(scenario, simState, decisions, agentMemory = {}, cycle = 0) {
+export function applyDecisions(scenario, simState, decisions, agentMemory = {}, cycle = 0, rng = undefined) {
   const s = { ...simState };
   const mem = structuredClone(agentMemory);
   const scenarioId = scenario.meta.id;
@@ -915,7 +980,7 @@ export function applyDecisions(scenario, simState, decisions, agentMemory = {}, 
     throw new Error("agentMemory.quantum missing — call initQuantumBeliefs(scenario) when seeding agentMemory");
   }
   const priorMarketEvent = mem.markets?.lastEvent ?? null;
-  const { newQuantum, event } = evolveAndCollapseQuantumState(scenario, mem.quantum, decisions, priorMarketEvent, cycle);
+  const { newQuantum, event } = evolveAndCollapseQuantumState(scenario, mem.quantum, decisions, priorMarketEvent, cycle, rng);
   mem.quantum = newQuantum;
   mem.quantum.lastEvent = event;
 
@@ -939,7 +1004,7 @@ export function applyDecisions(scenario, simState, decisions, agentMemory = {}, 
   if (!mem.markets) {
     throw new Error("agentMemory.markets missing — call initMarketBeliefs(scenario) when seeding agentMemory");
   }
-  const { newMarketState, event: marketEvent } = evolveAndCollapseMarkets(scenario, mem.markets, event, decisions, cycle);
+  const { newMarketState, event: marketEvent } = evolveAndCollapseMarkets(scenario, mem.markets, event, decisions, cycle, rng);
   mem.markets = newMarketState;
   mem.markets.lastEvent = marketEvent;
 

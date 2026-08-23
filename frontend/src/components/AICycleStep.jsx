@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs, proposeInstinctReadings, proposeInstinctReadingsViaQPU } from "../lib/agents";
+import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs, proposeInstinctReadings, proposeInstinctReadingsViaQPU, createRealEntropyPool } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 import { nationActionMenu } from "../lib/nationActions";
 
@@ -404,6 +404,7 @@ export function AICycleStep({ scenario, deployment, onResults }) {
   const [instinctReadings, setInstinctReadings] = useState({}); // { [nationId]: reading } — veto-capable nations only, see lib/instinct.js
   const [quantumEvent,    setQuantumEvent]    = useState(null); // Layer 1 collapse outcome from the last commit
   const [marketEvent,     setMarketEvent]     = useState(null); // Layer 2/3 collapse outcome from the last commit
+  const [entropySources,  setEntropySources]  = useState(null); // which real-vs-fallback entropy sourced the last commit's Layer 1/2/3 collapse — see createRealEntropyPool
   const [humanControlled, setHumanControlled] = useState({});   // { [nationId]: boolean } — "take this nation's turn myself" toggle
   const [humanDrafts,     setHumanDrafts]     = useState({});   // { [nationId]: { primaryAction, reasoning, metricDeltas } }
   const [useRealHardware, setUseRealHardware] = useState(false); // Tier 2 opt-in — see lib/agents.js's proposeInstinctReadingsViaQPU. Default OFF: ~10-15s per reading, spends real IBM Quantum quota once a token is configured server-side.
@@ -529,7 +530,17 @@ export function AICycleStep({ scenario, deployment, onResults }) {
     // once, right here at commit, not before. The researcher's edits below
     // are the classical baseline; the entangled effect (if any) is the
     // measurement's own contribution, observed only now.
-    const { newSimState, newAgentMemory } = applyDecisions(scenario, simState, decisions, agentMemory, cycle);
+    //
+    // The collapse itself is now real-entropy-sourced (ANU QRNG, PRNG
+    // fallback if unreachable) — pre-fetched here, before the synchronous
+    // collapse chain runs, since collapseQubit/measureA/measureQubit call
+    // rng() inline and can't themselves await a network call. See
+    // agents.js's createRealEntropyPool for why this is opt-in at this one
+    // call site rather than the shared default every other caller
+    // (including the offline statistical validation script) still uses.
+    const { rng: realRng, sourcesUsed } = await createRealEntropyPool();
+    const { newSimState, newAgentMemory } = applyDecisions(scenario, simState, decisions, agentMemory, cycle, realRng);
+    setEntropySources(sourcesUsed);
     const quantum = newAgentMemory.quantum.lastEvent;
     const market  = newAgentMemory.markets.lastEvent;
 
@@ -757,6 +768,15 @@ export function AICycleStep({ scenario, deployment, onResults }) {
               {" "}{quantumEvent.peacekeeperIntervention.original.stability} to {quantumEvent.entangledEffect.stability} stability
               (and {quantumEvent.peacekeeperIntervention.original.conflictEvents} to {quantumEvent.entangledEffect.conflictEvents} conflict events),
               not fully cancelled.
+            </p>
+          )}
+          {entropySources && (
+            <p className="muted" style={{ fontSize: 11, marginTop: "0.4rem" }}>
+              This collapse (political + economic) drew {entropySources.filter(s => s === "anu-qrng").length} of{" "}
+              {entropySources.length} values from real quantum entropy (ANU QRNG)
+              {entropySources.some(s => s !== "anu-qrng") && (
+                <> — {entropySources.filter(s => s !== "anu-qrng").length} fell back to a PRNG (ANU unreachable or pool exhausted)</>
+              )}.
             </p>
           )}
         </div>
