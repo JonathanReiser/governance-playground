@@ -119,6 +119,19 @@ npm run dev
 
 Walk through: **Connect → Scenario → Deploy → choose "AI Agent Cycle" → Run → Results.**
 
+### Running the tests
+
+Two separate suites:
+
+```bash
+npx hardhat test          # 83-test Solidity/Chai suite — contracts/
+cd frontend && npm test    # vitest — the quantum-engine plumbing (agents.js/markets.js)
+```
+
+Neither runs in CI yet except the frontend suite (`.github/workflows/frontend-tests.yml`,
+added alongside the Layer 2/3 → Layer 1 retrograde feedback tests) — the Hardhat suite is
+still local-only.
+
 ### Troubleshooting: MetaMask stuck on "Review alert"
 
 MetaMask runs every transaction through a third-party security scanner before letting you confirm
