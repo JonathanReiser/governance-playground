@@ -8,8 +8,13 @@
  *   ANTHROPIC_API_KEY=sk-... node server.js
  *
  * Endpoints:
- *   POST /api/agent/decide   { nation, worldState, scenarioId } → agent decision
- *   GET  /api/news           ?scenarioId=...&...worldState      → mock headlines for current cycle
+ *   POST /api/agent/decide         { nation, worldState, scenarioId } → agent decision
+ *   GET  /api/news                 ?scenarioId=...&...worldState      → mock headlines for current cycle
+ *   POST /api/instinct/qpu-reading { pressure, entangledReadout? }    → proxies to python-bridge/app.py
+ *                                     (Tier 2 — instinct.js's circuit on real IBM hardware, or a local
+ *                                     Aer simulator fallback; see python-bridge/README.md for setup and
+ *                                     current status — structurally complete, not yet live-verified
+ *                                     against real hardware).
  */
 
 const express   = require("express");
@@ -40,6 +45,18 @@ const agentDecideLimiter = rateLimit({
 });
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// python-bridge/app.py runs as a separate local process (see python-bridge/README.md)
+// — this is its base URL, not a key or anything sensitive. Real IBM hardware calls
+// (when python-bridge has a token) cost real quota, same reasoning as agentDecideLimiter.
+const PYTHON_BRIDGE_URL = process.env.PYTHON_BRIDGE_URL || "http://127.0.0.1:5001";
+const qpuReadingLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Rate limit reached for this demo (30 instinct readings/hour)." },
+});
 
 // ─────────────────────────────────────────────────────────────
 // SYSTEM PROMPTS
@@ -889,6 +906,44 @@ app.get("/api/news", (req, res) => {
     return res.status(400).json({ error: `Unknown or unsupported scenario: ${scenarioId}` });
   }
   res.json({ headlines: generateHeadlines(scenarioId, worldState) });
+});
+
+
+// Proxies to python-bridge/app.py — see that service's own README for
+// what it does and its current (structurally-complete, not yet
+// live-verified) status. This route's only job is forwarding the request
+// and translating python-bridge being unreachable into a clear error,
+// same "don't let this crash a governance cycle" standard as everything
+// else quantum-flavored in this project.
+app.post("/api/instinct/qpu-reading", qpuReadingLimiter, async (req, res) => {
+  const { pressure, entangledReadout } = req.body;
+
+  if (typeof pressure !== "number") {
+    return res.status(400).json({ error: "pressure (number, 0-100) is required" });
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000); // real hardware queueing can take a while
+
+  try {
+    const response = await fetch(`${PYTHON_BRIDGE_URL}/qpu-reading`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pressure, entangledReadout }),
+      signal: controller.signal,
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      return res.status(response.status).json(body);
+    }
+    res.json(body);
+  } catch (err) {
+    const reason = err.name === "AbortError" ? "python-bridge timed out after 30s" : `python-bridge unreachable: ${err.message}`;
+    console.error("[instinct/qpu-reading]", reason);
+    res.status(502).json({ error: reason, hint: "is python-bridge/app.py running? see python-bridge/README.md" });
+  } finally {
+    clearTimeout(timeout);
+  }
 });
 
 
