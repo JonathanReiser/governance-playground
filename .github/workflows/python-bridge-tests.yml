@@ -1,0 +1,32 @@
+name: Python Bridge Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python-bridge
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run test suite
+        run: python -m pytest tests/ -v
+        # No IBM_QUANTUM_TOKEN secret configured here on purpose — this
+        # exercises the local-simulator path only, same as every other
+        # test in this project that touches a credentialed external
+        # service. See python-bridge/README.md's Status section for what
+        # that does and doesn't verify.
