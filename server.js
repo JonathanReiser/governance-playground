@@ -1246,3 +1246,23 @@ if (require.main === module) {
 }
 
 module.exports = app;
+
+// Exposed for scripts/prereg.js: a pre-registration has to hash the exact
+// doctrine text and decision schemas a run will use, so they have to be
+// readable from outside this file without standing the server up.
+module.exports.agentContract = {
+  AGENT_MODEL,
+  SYSTEM_PROMPTS,
+  DECISION_SCHEMAS,
+  SITUATION_HEADING,
+  doctrineOf(scenarioId) {
+    const nations = SYSTEM_PROMPTS[scenarioId];
+    if (!nations) throw new Error(`Unknown scenario: ${scenarioId}`);
+    return Object.fromEntries(
+      Object.entries(nations).map(([n, tpl]) => {
+        const i = tpl.indexOf(SITUATION_HEADING);
+        return [n, i < 0 ? tpl : tpl.slice(0, i)];
+      }),
+    );
+  },
+};

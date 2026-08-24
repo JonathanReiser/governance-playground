@@ -152,8 +152,40 @@ That does not make cherry-picking impossible — it makes *non-publication visib
 mechanism that makes clinical-trial pre-registration work. A promised result that never appears is
 itself evidence.
 
-This is not implemented. It is the honest roadmap item for making the immutability claim mean what
-the docs used to imply. The sibling project
+**This is now implemented** (`server/prereg.js`, `scripts/prereg.js`, 15 tests in
+`test/prereg.test.js`). Three commands:
+
+```bash
+node scripts/prereg.js register middle-east-2026 --cycles 10 --in 15m   # promise
+node scripts/prereg.js draw <hash> --results run.json                   # execute + seal
+node scripts/prereg.js verify <hash>                                    # anyone can run this
+```
+
+`register` pins the scenario, cycle count, agent model, the doctrine half of every prompt and every
+decision schema, then binds them to a NIST beacon pulse identified only by a **future timestamp** —
+a pulse that does not exist yet, so nobody, including the operator, can know what it will say or
+which parameters would turn out favourable. `draw` refuses to run early, fetches that specific pulse
+(`/pulse/time/next/<ms>`, not `/pulse/last`), and hash-chains the run's output to both the promise
+and the entropy. Registrations are single-use.
+
+`verify` re-derives all of it from published files plus an independent call to NIST: that the
+registration hash recomputes, that the pulse is at or after the registered time, that the result
+chains to registration and entropy, that the run used only the registered model, and that NIST
+itself still returns the same pulse value. Verified end-to-end against the live beacon on
+2026-08-24 (pulse #1916207); editing a single sealed metric afterwards fails the chain check, as
+it should. There is deliberately **no PRNG fallback** on the entropy path — unlike the lottery,
+where a labeled fallback beats failing a draw, a pre-registration seeded from `Math.random` would
+hand the operator control of the one value they promised not to control. If NIST is unreachable,
+the correct outcome is that the run does not happen yet.
+
+What it proves: parameters were fixed before the entropy existed, the entropy is genuine and
+third-party, and the published result is bound to both. What it does not prove, stated in the
+tool's own output so nobody can quote a passing verification as more than it is: that no other runs
+were executed. The mechanism makes **non-publication visible** — `verify` on a registration with no
+result reports that as the finding rather than as an error, and `list` flags overdue registrations
+as `UNPUBLISHED`. A promised result that never appears is evidence.
+
+The sibling project
 [dao-governance-research](https://github.com/JonathanReiser/dao-governance-research) already applies
 the discipline in its plainest form — every design decision committed to git before the
 corresponding result was computed.
@@ -262,6 +294,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Instinct layer, Tier 1 (real ANU QRNG entropy) | ✅ Done, wired into the review UI, verified live |
 | Instinct layer, Tier 2 (real IBM quantum hardware) | ✅ Done — opt-in toggle, verified live end-to-end on real hardware (`ibm_marrakesh`), see `python-bridge/README.md` |
 | Political layer (Layer 1) + economic field (Layer 2/3), real entropy (Tier 1) | ✅ Done — the actual flagship collapse (not just the instinct veto's) now sources from real ANU QRNG at every live commit, verified live. `scripts/quantum-vs-classical-test.mjs`'s shared default is untouched on purpose (still `Math.random`, thousands of trials per validation run) |
+| Pre-registration (publish parameters, bind to a future NIST pulse, publish whatever comes back) | ✅ Done — `scripts/prereg.js`, verified end-to-end against the live beacon |
 | Political layer (Layer 1), real IBM quantum hardware (Tier 2) | ✅ Done — opt-in toggle, scoped to the entangled Iran/Israel pair only (standalone/peacekeeper stay Tier 1). Verified live end-to-end: real backend (`ibm_fez`), real job id, feeds the actual committed on-chain outcome, not a side display |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |

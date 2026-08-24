@@ -1,0 +1,191 @@
+{
+  "kind": "governance-playground/run-result",
+  "version": 1,
+  "registrationHash": "67bd00e6150e2ab525ecf93c20b63b3f9d659d866b1567accc0628a3ddb88208",
+  "beacon": {
+    "pulseIndex": 1916207,
+    "timeStamp": "2026-08-24T16:42:00.000Z",
+    "outputValue": "75EF438BE637579E63E63391AA0D9F03D5527E4A605004189F689CC8AF133360B1765A19C5772CAC5828597BA43585C385B24CC6282F110EDF774F3BD09D6DFA",
+    "uri": "https://beacon.nist.gov/beacon/2.0/pulse/time/next/1787589717756"
+  },
+  "completedAt": "2026-08-24T16:43:20.676Z",
+  "servedModels": [
+    "claude-opus-5"
+  ],
+  "cycles": [
+    {
+      "cycle": 1,
+      "decisions": {
+        "iran": {
+          "primaryAction": "DEMAND_RENEGOTIATION",
+          "supportingActions": [
+            "ESCALATE_PROXY",
+            "ACCELERATE_CHINA_TIES",
+            "ELEVATE_IRGC"
+          ],
+          "reasoning": "Congress blocked relief, so the hardliners' warning that American promises are worthless has been vindicated before the nation and the Majlis — we cannot pay in compliance for nothing. We therefore demand renegotiation rather than exit: the deal's cap remains a card we hold, while escalated resistance-axis tempo and elevation of the IRGC supply the visible defiance our coalition requires. Chinese oil channels replace the relief the Americans withheld, proving that patience is not dependence.",
+          "metricDeltas": {
+            "stability": -3,
+            "proxyActivity": 12,
+            "tradeVolume": 4,
+            "conflictEvents": 1,
+            "dealIntegrity": -11,
+            "hardlinerPressure": 8
+          },
+          "hormuzStatus": "OPEN",
+          "nuclearStatus": "CAPPED",
+          "coalitionSignal": "RESTLESS",
+          "researchNote": "Two-level games best explains this: with the domestic ratification set hardened by blocked sanctions relief, the leadership shrinks its international win-set through renegotiation demands and compensatory proxy defiance rather than absorbing a domestically fatal concession."
+        },
+        "israel": {
+          "primaryAction": "DEMAND_VERIFICATION",
+          "supportingActions": [
+            "MAINTAIN_DETERRENCE",
+            "COALITION_MANAGEMENT"
+          ],
+          "reasoning": "Deal integrity at 41 is too thin to trust and too valuable to discard — verification is the move that tests Iranian intent without handing the far right a collapse pretext or giving Tehran a pretext to walk. Maintaining visible deterrence posture is the precondition for any agreement holding; the Begin Doctrine is enforced by inspection now and by capability later. With sentiment at 49 I lack the capital for either concession or escalation, so coalition management buys the time to keep both flanks inside the tent.",
+          "metricDeltas": {
+            "stability": 1,
+            "proxyActivity": 1,
+            "tradeVolume": 2,
+            "conflictEvents": 0,
+            "dealIntegrity": 3,
+            "publicSentiment": 3
+          },
+          "coalitionStatus": "STRAINED",
+          "existentialFrameActive": false,
+          "researchNote": "Two-level games best explains this: the verification demand is a deliberately ratifiable position that satisfies domestic veto players while leaving the international agreement intact."
+        },
+        "saudi_arabia": {
+          "primaryAction": "INVOKE_BEIJING_AGREEMENT",
+          "supportingActions": [
+            "BACK_CHANNEL_IRAN",
+            "PAUSE_NORMALIZATION",
+            "VISION_2030_SIGNAL"
+          ],
+          "reasoning": "The Iranian parliament's hardening posture threatens the fragile Beijing framework that keeps Hormuz open and our eastern flank quiet; invoking it publicly with Chinese cover costs us nothing and locks Tehran into commitments it has already made. Quiet back-channels preserve deniability while we pause normalization talks that carry no Palestinian gesture and would only inflame the religious establishment at the worst moment. Oil stays stable — we do not gamble revenue on a market signal when Vision 2030 needs predictable pricing, and reversible diplomatic tools are always preferred to irreversible commitments.",
+          "metricDeltas": {
+            "stability": 5,
+            "proxyActivity": -4,
+            "tradeVolume": 4,
+            "conflictEvents": -1,
+            "dealIntegrity": 6,
+            "reformPressure": 2
+          },
+          "oilProductionStance": "STABLE",
+          "normalizationStatus": "PAUSED",
+          "coalitionSignal": "SATISFIED",
+          "researchNote": "Prospect theory dominates: facing a fragile but non-losing status quo, Riyadh takes the certain modest gain of reinforcing the Beijing framework over any gamble on normalization or oil-market leverage."
+        },
+        "us": {
+          "primaryAction": "BROKER_TALKS",
+          "supportingActions": [
+            "CONGRESSIONAL_LOBBYING",
+            "QUIET_PRESSURE"
+          ],
+          "reasoning": "We claimed credit for this agreement, so its collapse is a loss against a booked gain — that justifies spending real effort now rather than waiting for the parties to stabilize themselves. With sanctions relief BLOCKED, our economic lever is unavailable, so the play is to keep the technical channel alive while lobbying Congress to convert the deal's central term from a promise into law, and to press Netanyahu's strained coalition privately rather than publicly so we neither entrap ourselves in unilateral Israeli action nor signal abandonment. Public sentiment at 41 rules out costly visible arm-twisting or carrier theater this cycle; quiet, credible follow-through is the affordable instrument.",
+          "metricDeltas": {
+            "stability": 2,
+            "dealIntegrity": 4,
+            "tradeVolume": 2,
+            "publicSentiment": -1,
+            "diplomaticCapital": 4
+          },
+          "congressionalRatification": "PENDING",
+          "coalitionSignal": "RESTLESS",
+          "researchNote": "Two-level games (Putnam) dominates: the binding constraint is domestic ratification, so the guarantor's primary move is to work its own Level II while using diplomacy to buy time at Level I."
+        }
+      },
+      "stability": 50,
+      "dealIntegrity": 54
+    },
+    {
+      "cycle": 2,
+      "decisions": {
+        "iran": {
+          "primaryAction": "DEMAND_RENEGOTIATION",
+          "supportingActions": [
+            "ESCALATE_PROXY",
+            "ACCELERATE_CHINA_TIES",
+            "ELEVATE_IRGC"
+          ],
+          "reasoning": "Congress has blocked relief, which proves to the Supreme Leader and the IRGC that the Americans took our nuclear cap and gave nothing — to keep honoring the text now would be the surrender our parliament has already denounced. We therefore reopen the file formally rather than exit it, and compensate with visible defiance: raised tempo across the resistance axis and expanded Chinese oil channels that make sanctions leverage irrelevant. Stability at 50 permits probing, not gambling; Hormuz and the enrichment ceiling remain in reserve as the cards we do not spend yet.",
+          "metricDeltas": {
+            "stability": -3,
+            "proxyActivity": 13,
+            "tradeVolume": 6,
+            "conflictEvents": 1,
+            "dealIntegrity": -11,
+            "hardlinerPressure": 8
+          },
+          "hormuzStatus": "OPEN",
+          "nuclearStatus": "CAPPED",
+          "coalitionSignal": "RESTLESS",
+          "researchNote": "Two-level games best explains this: the failure of ratified sanctions relief on the US side collapsed Iran's domestic win-set, forcing renegotiation plus compensatory proxy escalation rather than compliance or rupture."
+        },
+        "israel": {
+          "primaryAction": "DEMAND_VERIFICATION",
+          "supportingActions": [
+            "MAINTAIN_DETERRENCE",
+            "COALITION_MANAGEMENT",
+            "DEEPEN_US_TIES"
+          ],
+          "reasoning": "With Iran's nuclear file capped but Tehran's parliament pushing back, the correct move is to test the deal rather than break it: intrusive verification costs us nothing strategically, keeps Washington aligned, and gives our far-right partners a visible display of distrust toward Iran without a concession vote. Deterrence posture remains unchanged because agreements hold only when backed by credible force, and at 49 public sentiment we lack the political capital for either escalation or generosity. We are in a gains frame — the ceasefire, the cap, and an open Hormuz are assets to be defended, not gambled.",
+          "metricDeltas": {
+            "stability": 1,
+            "proxyActivity": 1,
+            "tradeVolume": 3,
+            "conflictEvents": 0,
+            "dealIntegrity": 3,
+            "publicSentiment": 3
+          },
+          "coalitionStatus": "STRAINED",
+          "existentialFrameActive": false,
+          "researchNote": "Two-level games best explains this: verification is the rare move that satisfies the domestic veto players' demand for toughness while remaining inside the international agreement's win-set."
+        },
+        "saudi_arabia": {
+          "primaryAction": "BACK_CHANNEL_IRAN",
+          "supportingActions": [
+            "INVOKE_BEIJING_AGREEMENT",
+            "PAUSE_NORMALIZATION",
+            "MAINTAIN_POSTURE"
+          ],
+          "reasoning": "Tehran's parliament is hardening, so quiet channels — anchored in the Beijing framework we and China own — cost us nothing and preserve the one arrangement keeping Iranian pressure off Aramco and the Red Sea. With normalization talks stalled and no Palestinian gesture on the table, publicly advancing Israel files would inflame the religious establishment for no gain; pausing is the certain, reversible option. Oil stays steady: Vision 2030 needs predictable revenue, not a price war or a political cut.",
+          "metricDeltas": {
+            "stability": 4,
+            "proxyActivity": -5,
+            "tradeVolume": 3,
+            "conflictEvents": -1,
+            "dealIntegrity": 5,
+            "reformPressure": 1
+          },
+          "oilProductionStance": "STABLE",
+          "normalizationStatus": "PAUSED",
+          "coalitionSignal": "SATISFIED",
+          "researchNote": "Prospect theory dominates: facing a fragile but non-losing status quo, Riyadh takes the certain modest gain of quiet de-escalation over the gamble of visible normalization or coercive oil moves."
+        },
+        "us": {
+          "primaryAction": "CONGRESSIONAL_LOBBYING",
+          "supportingActions": [
+            "QUIET_PRESSURE",
+            "BROKER_TALKS"
+          ],
+          "reasoning": "Sanctions relief is the deal's central economic term and the only thing that can outbid Tehran's hardliners at 71 pressure — with ratification BLOCKED, my binding constraint is domestic, not regional, so I spend this cycle on the Hill rather than on theater. Quiet pressure on a STRAINED Israeli coalition manages the entrapment side of the security dilemma without the public arm-twisting my 41 public sentiment can't sustain, and continued brokering signals follow-through that keeps abandonment fears in check. Having claimed credit for this agreement, letting it decay at 51 integrity is a loss I am willing to spend real capital to avoid.",
+          "metricDeltas": {
+            "stability": 1,
+            "dealIntegrity": 4,
+            "tradeVolume": 2,
+            "publicSentiment": -2,
+            "diplomaticCapital": 4
+          },
+          "congressionalRatification": "PENDING",
+          "coalitionSignal": "RESTLESS",
+          "researchNote": "Putnam's two-level game dominates: the Level II ratification constraint, not Level I bargaining, is the binding limit on the guarantor's most powerful lever this cycle."
+        }
+      },
+      "stability": 53,
+      "dealIntegrity": 55
+    }
+  ],
+  "chain": "33ab01ba5cfff2ff7d7a28ad6e21632ede246dde45bc6b52c50900401b4fd6af"
+}
