@@ -4,8 +4,10 @@
 
 **A blockchain-based research sandbox for political science.** Load a real-world geopolitical
 scenario, let Claude-powered nation agents reason through it under quantum-modeled
-uncertainty, and watch the result get written — immutably, cycle by cycle — to a blockchain.
-Every finding is citable by block number.
+uncertainty, and watch each cycle's metrics get written to a smart contract — tamper-evident,
+timestamped, citable by block number. (What that does and does not guarantee is spelled out in
+[What the on-chain record actually is](#what-the-on-chain-record-actually-is) — the short version is
+that it is narrower than "immutable research".)
 
 **[Read a real, already-verified run →](https://claude.ai/code/artifact/25f0234e-bd9f-4136-98b0-edcc1e8d3700)**
 (a 5-cycle simulation, all four nations including the US peacekeeper — real Claude reasoning, real
@@ -52,10 +54,10 @@ is checked. This isn't that. Three constraints keep it honest:
   measured on real IBM quantum hardware* — the collapse that decides the committed political
   outcome is a genuine hardware measurement, not a simulation at all. Verified live: real backend
   (`ibm_fez`), real job id, the entangled-escalation logic firing correctly off that real reading.
-- **Nothing can be edited after the fact.** Every cycle's outcome is written to a smart contract.
-  The researcher can review and edit the *proposed* outcome before committing — but once
-  committed, it's on-chain, timestamped, and permanent. Parameters are always public before the
-  experiment runs.
+- **What is committed can't be quietly edited afterwards.** Each cycle's metrics are written to a
+  smart contract; the researcher can revise the *proposed* outcome before committing, but once
+  committed it is timestamped and tamper-evident. Note the limit, spelled out below: this protects
+  the record of what was published. It does not certify how the numbers were produced.
 
 ## What this isn't claiming
 
@@ -81,14 +83,80 @@ prediction that classical probability doesn't — the **QQ equality** (Wang & Bu
 held across 70+ national surveys. It has now been tested against 1,006 pairs of real DAO governance
 proposals (2.2M dual-voter observations) in
 [dao-governance-research](https://github.com/JonathanReiser/dao-governance-research), and **it fails
-by a factor of 6–8** — and fails in every subsample, including votes cast under a minute apart where
-no new information could have intervened.
+by a factor of 4–8** — surviving propensity-score weighting and a quasi-experiment where vote order
+was fixed by the calendar rather than chosen, and failing in every subsample including votes cast
+under a minute apart where no new information could have intervened.
 
 So: the mechanism here is real and physically verified — a genuine measurement on genuine quantum
 hardware. But the *empirical* case that human political decisions are quantum-structured has now
 been tested five ways against real data and has not survived any of them. This project is best read
 as an engineering demonstration of what real quantum measurement in a simulation looks like, not as
 evidence that entanglement is the right model of Iran and Israel.
+
+## What the on-chain record actually is
+
+Worth being precise, because "immutable blockchain research" invites a stronger reading than this
+project earns.
+
+**What is written.** Five integers per cycle, via `WorldRegistry.commitCycle`: stability index,
+conflict events, trade volume, proxy activity, deal integrity.
+
+**What is not written.** The agents' reasoning, the actions they chose, the quantum collapse
+outcomes, which IBM backend performed a Tier 2 measurement, and the entire Layer 2/3 economic and
+speculative layer. None of it is on-chain. An earlier version of this README claimed "every
+decision, every quantum collapse — permanent, citable"; that was false and has been corrected.
+
+**Where it is written.** In Dev Mode, a local Hardhat node that ceases to exist when you stop the
+process — no permanence whatsoever. The public deployment is **Sepolia, a testnet**: a genuine
+public chain, but one with no economic security behind it, and testnets get retired (Ropsten,
+Rinkeby, Kovan and Goerli have all been deprecated). "Permanent" overstates it.
+
+### The limit that actually matters
+
+Immutability gives you **tamper-evidence for what was published**. It does not give you **integrity
+of what was computed**. The metrics are calculated off-chain and then written. Nothing here prevents
+a researcher running the simulation fifty times and committing only the run they liked — the chain
+faithfully records that someone wrote these five numbers at this time, and certifies nothing about
+whether they were cherry-picked.
+
+So the honest version of this project's central claim is narrow: *the published record cannot be
+silently revised after the fact.* Not: *the findings are trustworthy because they are on a
+blockchain.*
+
+### How the spinoff solves this, and why this project can't fully copy it
+
+[civic-lottery-demo](https://github.com/JonathanReiser/civic-lottery-demo) — built out of this
+project's real-entropy work — closes exactly this gap, and the mechanism is worth understanding:
+
+1. **Pre-commit the deterministic parameters in public** — who is eligible, how many winners, which
+   algorithm, when the draw happens — *before the entropy exists*.
+2. **Draw entropy from independent third parties** (ANU's quantum RNG and NIST's public beacon) that
+   the operator cannot predict or influence.
+3. **Make everything after the seed deterministic**, so any verifier can re-run it and get the same
+   answer.
+
+Pre-commitment alone doesn't suffice (you could still pick favourable inputs in advance); external
+unpredictable entropy alone doesn't suffice (you could still re-run until you like the result).
+Together they close the loop, because at commit time nobody — including the operator — can know
+which inputs would even *be* favourable.
+
+**Governance Playground cannot fully replicate step 3.** The simulation has an LLM in the loop, so
+it is not deterministically reproducible from a seed: the same configuration and the same entropy
+will not reliably regenerate the same run. Cryptographic verifiability of the kind the lottery
+achieves is therefore off the table here.
+
+**What is achievable is the pre-registration form of the same idea**, which is weaker but real:
+publish the scenario config, the cycle count, the prompts and the model version, and commit in
+advance to running once against a future public beacon value and publishing whatever comes back.
+That does not make cherry-picking impossible — it makes *non-publication visible*, the same
+mechanism that makes clinical-trial pre-registration work. A promised result that never appears is
+itself evidence.
+
+This is not implemented. It is the honest roadmap item for making the immutability claim mean what
+the docs used to imply. The sibling project
+[dao-governance-research](https://github.com/JonathanReiser/dao-governance-research) already applies
+the discipline in its plainest form — every design decision committed to git before the
+corresponding result was computed.
 
 ## Architecture
 
@@ -114,8 +182,10 @@ Speculation (Layer 3)         Six synthetic trader archetypes react to the colla
                                that's where the fat-tailed price moves come from.
         │
         ▼
-On-chain record                WorldRegistry + MetricsOracle (Solidity). Every cycle's metrics,
-                               every decision, every quantum collapse — permanent, citable.
+On-chain record                WorldRegistry + MetricsOracle (Solidity). Five integers per cycle:
+                               stability index, conflict events, trade volume, proxy activity, deal
+                               integrity. Agent reasoning, chosen actions, quantum collapse outcomes
+                               and the market layer are NOT written on-chain.
 
 Retrograde feedback (2/3 → 1)  Middle East only, for now: next cycle, last cycle's collapsed
                                economic/speculative outcome rotates the political qubits back —
@@ -252,9 +322,20 @@ test/                83-test Hardhat/Chai suite
 
 ## Why blockchain
 
-Immutability makes findings credible. Nobody — not even the researcher — can alter results
-after the fact, and every parameter is public before the experiment runs. That's the whole
-pitch: this is a lab notebook that can't be edited retroactively.
+A lab notebook whose committed pages can't be rewritten afterwards. Once a cycle's metrics are
+committed they are timestamped and tamper-evident, and the scenario parameters are public before
+the experiment runs.
+
+What this does **not** give you: the researcher can still choose *which* run to commit. Immutability
+protects the record of what was published; it says nothing about whether what was published was
+selected. An earlier version of this section claimed "nobody — not even the researcher — can alter
+results after the fact," which overstated it — cherry-picking a favourable run is exactly a way of
+altering results that immutability does not prevent.
+
+See [What the on-chain record actually is](#what-the-on-chain-record-actually-is) for the full
+accounting, and for how the [civic-lottery-demo](https://github.com/JonathanReiser/civic-lottery-demo)
+spinoff closes this gap with pre-commitment — plus why an LLM in the loop stops this project from
+copying that approach wholesale.
 
 ## Research background
 

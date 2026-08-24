@@ -5,7 +5,7 @@
 
 ## Project Summary
 
-Governance Playground is an open-source research sandbox where political scientists, students, and policy researchers can model governance systems, load real-world geopolitical scenarios, run controlled "what if" experiments, and measure outcomes — all recorded on-chain. Every finding is permanently verifiable, reproducible, and citable by block number.
+Governance Playground is an open-source research sandbox where political scientists, students, and policy researchers can model governance systems, load real-world geopolitical scenarios, run controlled "what if" experiments, and measure outcomes — with each cycle's metrics recorded on-chain — tamper-evident, timestamped, and citable by block number. (Scope note: five metric integers per cycle are written; agent reasoning, chosen actions and quantum collapse outcomes are not. The deployment target is the Sepolia testnet.)
 
 **Live demo:** https://governance-playground.vercel.app — no install required.
 **Code:** https://github.com/JonathanReiser/governance-playground (public, ISC-licensed)
@@ -44,7 +44,7 @@ Existing simulation tools have three failure modes:
 
 Blockchain solves all three. When a simulation runs on Ethereum:
 - Every parameter is public before the experiment begins
-- Every result is permanently recorded and timestamped
+- Every committed cycle's metrics are timestamped and tamper-evident on-chain
 - Nobody — not even the researcher — can alter the record
 - Any finding can be independently reproduced by anyone with the code
 
@@ -69,7 +69,7 @@ Full proposal lifecycle: Propose → Vote → Queue → Execute. All on-chain.
 
 **`WorldRegistry.sol`** — The simulation controller. Deploys and tracks all nations, manages inter-nation relationships (Allied → Hostile on a 7-point scale), applies experiment changes, advances simulation cycles.
 
-**`MetricsOracle.sol`** — The measurement engine. Records stability index, conflict events, trade volume, proxy activity, and deal integrity every cycle. Compares experiment outcomes against baseline. Detects anomalies (sudden stability drops). All permanently on-chain.
+**`MetricsOracle.sol`** — The measurement engine. Records stability index, conflict events, trade volume, proxy activity, and deal integrity every cycle. Compares experiment outcomes against baseline. Detects anomalies (sudden stability drops). These five metrics per cycle are what is written on-chain.
 
 ### Scenario Config
 
@@ -105,7 +105,7 @@ The four experiments above were not hand-crafted results — they are the output
 
 **Finding 4 — The deal is more fragile than it appears.** In the baseline (no experiment), deal integrity decays at 2 points per cycle from a starting value of 32. At that rate, the deal collapses on its own by cycle 16 without intervention. The experiments accelerate a process that is already happening.
 
-All of these findings are permanently recorded. Every claim cites a block.
+The metrics behind these findings are recorded on-chain and cite a block. The reasoning and decisions behind them are not on-chain — they live in the run logs and artifacts.
 
 ---
 
@@ -119,7 +119,9 @@ When the simulation runs on Ethereum:
 - Any researcher anywhere can reproduce the exact run
 - The timestamp proves when the experiment was conducted relative to real-world events
 
-This is not blockchain-for-blockchain's-sake. It is the specific technical property — immutability of the record — that makes the research credible.
+This is not blockchain-for-blockchain's-sake: the specific property being used is that a committed record cannot be silently revised afterwards.
+
+But that property is narrower than it first appears, and this document should say so. Immutability protects the record of what was *published*; it does not certify how the numbers were *produced*. A researcher can still run a simulation repeatedly and commit only the run they prefer. Making that harder requires pre-commitment — publishing the configuration and committing in advance to report a single run against a future public beacon value — which is implemented in the sibling project civic-lottery-demo but not here, because an LLM in the loop makes the run non-reproducible from a seed. Treat the on-chain record as tamper-evidence for what was reported, not as a guarantee that it was not selected.
 
 ---
 
