@@ -73,8 +73,22 @@ null result on real speed-dating data and an invalid-by-design test on real conf
 three fair, independently-designed tests against real data, zero surviving entanglement. Order/
 sequential effects, by contrast, have replicated in every domain they've been tested in, including
 this project's own quantum-vs-classical statistical validation (`scripts/quantum-vs-classical-test.mjs`).
-So: the mechanism here is real and physically verified. Whether it's the *right* mechanism for
-predicting Iran and Israel specifically remains an open, and so far unsupportive, question.
+
+**Update, 2026-08-23 — the stronger version of that answer.** All of the above tests share a
+weakness: order effects and correlations are compatible with classical psychology too, so they
+can't *discriminate* between theories. Quantum-cognition models make exactly one parameter-free
+prediction that classical probability doesn't — the **QQ equality** (Wang & Busemeyer 2013), which
+held across 70+ national surveys. It has now been tested against 1,006 pairs of real DAO governance
+proposals (2.2M dual-voter observations) in
+[dao-governance-research](https://github.com/JonathanReiser/dao-governance-research), and **it fails
+by a factor of 6–8** — and fails in every subsample, including votes cast under a minute apart where
+no new information could have intervened.
+
+So: the mechanism here is real and physically verified — a genuine measurement on genuine quantum
+hardware. But the *empirical* case that human political decisions are quantum-structured has now
+been tested five ways against real data and has not survived any of them. This project is best read
+as an engineering demonstration of what real quantum measurement in a simulation looks like, not as
+evidence that entanglement is the right model of Iran and Israel.
 
 ## Architecture
 
