@@ -39,14 +39,29 @@ app.use(express.json());
 
 // Every request here calls the Anthropic API and costs real money — this is
 // a public demo server, not a trusted internal one, so it needs a real cap.
-// 30 decisions/hour/IP is ~10 full 10-cycle AI runs; generous for a demo,
-// cheap to abuse-proof.
+// One decision = one nation, one cycle. A full 10-cycle run is therefore 40
+// decisions for middle-east-2026 (4 nations) and 30 for taiwan-strait-2026 (3).
+// The old limit of 30 was commented as "~10 full 10-cycle AI runs", which was
+// wrong by more than an order of magnitude and, worse, meant a visitor running
+// the flagship scenario got cut off at cycle 8 of 10. 45 covers the largest
+// scenario's full run with a little headroom, and stops a second one inside the
+// hour.
+//
+// Cost, since it changed a lot when this layer moved to Opus 5: ~$0.026 per
+// decision (measured — ~1.2K uncached input, ~1.5K cached, ~800 output), so
+// this cap is ~$1.17/hour/IP.
+//
+// Read this limit honestly: express-rate-limit's default store is in-memory,
+// and on Vercel each serverless instance has its own memory, so this bounds a
+// single well-behaved client far better than it bounds a determined one. The
+// only robust global ceiling is a spend limit set on the Anthropic account
+// itself; this is a guard rail, not a budget.
 const agentDecideLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 30,
+  limit: 45,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Rate limit reached for this demo (30 agent decisions/hour). Try again later, or run it locally for unlimited use — see the README." },
+  message: { error: "Rate limit reached for this demo (45 agent decisions/hour — one full run). Try again later, or run it locally for unlimited use — see the README." },
 });
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
