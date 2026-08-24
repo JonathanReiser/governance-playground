@@ -753,6 +753,13 @@ Constraints:
 // version a published run was produced with.
 const AGENT_MODEL = "claude-opus-5";
 
+// Effort shapes the output as much as the model id does — the same model at
+// "low" and at "high" is not the same research instrument. Pinned next to the
+// model, and recorded in a pre-registration for the same reason the model is.
+// Note the operational cost of "high" here: a decision takes 9-12s wall clock,
+// which is why vercel.json raises the serverless maxDuration to 60s.
+const AGENT_EFFORT = "high";
+
 // Structured outputs replace what used to be hand-rolled repair of the model's
 // JSON (fence-stripping, and rewriting "+5" into "5"). Typing metricDeltas as
 // integers is what makes the "+5" case impossible rather than patched.
@@ -1041,7 +1048,7 @@ app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
       fallbacks: "default",
       thinking: { type: "adaptive" },
       output_config: {
-        effort: "high",
+        effort: AGENT_EFFORT,
         format: { type: "json_schema", schema: DECISION_SCHEMAS[scenarioId][nation] },
       },
       system: [
@@ -1252,6 +1259,7 @@ module.exports = app;
 // readable from outside this file without standing the server up.
 module.exports.agentContract = {
   AGENT_MODEL,
+  AGENT_EFFORT,
   SYSTEM_PROMPTS,
   DECISION_SCHEMAS,
   SITUATION_HEADING,

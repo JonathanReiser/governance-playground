@@ -115,11 +115,12 @@ async function fetchBeaconAtOrAfter(timeMs, { fetchImpl = fetch, timeoutMs = 150
  * @param {number} o.cycles              how many cycles will be run
  * @param {string} o.mode                e.g. "ai-quantum-tier1"
  * @param {string} o.agentModel          exact model id, e.g. "claude-opus-5"
+ * @param {string} [o.agentEffort]       output_config.effort the run will use
  * @param {Record<string,string>} o.doctrine   nation -> doctrine half of its prompt
  * @param {Record<string,object>} o.schemas    nation -> decision schema
  * @param {number} o.drawAfterMs         epoch ms; must be in the future
  */
-function createRegistration({ scenarioId, cycles, mode, agentModel, doctrine, schemas, drawAfterMs, now = Date.now() }) {
+function createRegistration({ scenarioId, cycles, mode, agentModel, agentEffort, doctrine, schemas, drawAfterMs, now = Date.now() }) {
   if (!Number.isFinite(drawAfterMs) || drawAfterMs <= now) {
     throw new Error("drawAfterMs must be in the future — the point is to bind to entropy that does not exist yet");
   }
@@ -131,6 +132,9 @@ function createRegistration({ scenarioId, cycles, mode, agentModel, doctrine, sc
     cycles,
     mode,
     agentModel,
+    // The same model at a different effort is a different instrument, so it is
+    // part of what a registration promises, not an implementation detail.
+    agentEffort: agentEffort ?? null,
     // Hash the prompts rather than inline them: the full text lives in the repo
     // at the committed revision, and a hash is what a verifier actually needs.
     doctrineHashes: Object.fromEntries(

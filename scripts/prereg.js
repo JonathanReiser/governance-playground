@@ -55,6 +55,7 @@ async function cmdRegister(argv) {
   const { record, hash } = createRegistration({
     scenarioId, cycles, mode,
     agentModel: agentContract.AGENT_MODEL,
+    agentEffort: agentContract.AGENT_EFFORT,
     doctrine, schemas, drawAfterMs,
   });
 
@@ -63,7 +64,7 @@ async function cmdRegister(argv) {
 
   console.log(`\nRegistered.  ${hash}\n`);
   console.log(`  scenario     ${scenarioId} — ${cycles} cycles, mode ${mode}`);
-  console.log(`  model        ${record.agentModel}`);
+  console.log(`  model        ${record.agentModel} (effort: ${record.agentEffort})`);
   console.log(`  nations      ${Object.keys(record.doctrineHashes).join(", ")}`);
   console.log(`  draw after   ${record.drawAfter}`);
   console.log(`  entropy      ${record.beaconUri}`);
