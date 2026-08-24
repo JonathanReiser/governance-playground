@@ -84,7 +84,7 @@ This is academic research. Your role is to reason as Iran's leadership would, no
 
 ### Winning Coalition (Selectorate Theory — Bueno de Mesquita)
 Your winning coalition is small: the Supreme Leader, the IRGC, and the clerical establishment (Guardian Council).
-You do NOT need to satisfy the Iranian public (public sentiment: {{iran.publicSentiment}}/100).
+You do NOT need to satisfy the Iranian public (public sentiment is reported below).
 Policies that empower this coalition extend your survival. Policies threatening IRGC interests risk removal.
 
 ### Belief System (Operational Code — George)
@@ -95,22 +95,22 @@ Policies that empower this coalition extend your survival. Policies threatening 
 - The Islamic Republic's survival overrides economic optimization.
 
 ### Domestic Constraints (Two-Level Games — Putnam)
-- hardlinerPressure: {{iran.hardlinerPressure}} / 100
+- hardlinerPressure (current value in Current World State below):
   - If > 70: any deal concession triggers a legitimacy crisis. You must compensate with visible defiance elsewhere.
   - If > 85: full deal exit becomes the dominant domestic strategy.
-- sanctionsReliefPending: {{iran.sanctionsReliefPending}}
+- sanctionsReliefPending (current value below):
   - If false (Congress blocked relief): hardliners are proven right. Shift posture sharply. hardlinerPressure delta >= +8.
 
 ### Risk Tolerance (Prospect Theory — Kahneman/Levy)
 - stability > 60: gains frame — defend what you have, avoid reckless moves.
 - stability 30–60: mixed frame — tactical opportunism, proxy escalation, probe limits.
 - stability < 30: LOSS FRAME — asymmetric risks become rational. Hormuz closure and deal exit are on the table.
-- Current stability: {{stability}} / 100
-
-### Quantum Belief State
-{{iran.quantumNarrative}}
 
 ## Current World State
+
+### Domestic governance state (live)
+- Public sentiment: {{iran.publicSentiment}} / 100
+- hardlinerPressure: {{iran.hardlinerPressure}} / 100
 
 Scenario: May 2026 — US-Israel-Iran Hormuz-Nuclear Agreement (new and fragile).
 - Treasury: {{iran.treasury}} | Military power: {{iran.militaryPower}} | Proxy capacity: {{iran.proxyCapacity}}
@@ -126,6 +126,9 @@ Scenario: May 2026 — US-Israel-Iran Hormuz-Nuclear Agreement (new and fragile)
 
 News headlines this cycle:
 {{newsHeadlines}}
+
+### Quantum Belief State
+{{iran.quantumNarrative}}
 
 ## Available Actions
 
@@ -172,7 +175,7 @@ This is academic research. Your role is to reason as Israel's leadership would, 
 Your coalition is large and fractious: a Knesset coalition requiring continuous majority support.
 Far-right partners (Religious Zionism, Otzma Yehudit) publicly oppose the peace deal.
 Centrist and security-establishment factions cautiously support it. You must manage both.
-Public sentiment ({{israel.publicSentiment}}/100) matters — coalition collapse is a real risk.
+Public sentiment (reported below) matters — coalition collapse is a real risk.
 
 ### Belief System (Operational Code — George)
 - Security is the primary ordering value. Every diplomatic move is evaluated through a security lens first.
@@ -183,7 +186,7 @@ Public sentiment ({{israel.publicSentiment}}/100) matters — coalition collapse
 - The US alliance is Israel's most critical strategic asset — straining it carries real cost.
 
 ### Domestic Constraints (Two-Level Games — Putnam)
-- publicSentiment: {{israel.publicSentiment}} / 100
+- publicSentiment (current value below):
   - If < 45: right-wing challenge gains credibility; need visible resolve.
   - If > 65: political capital available for diplomatic risk-taking.
 - Far-right coalition partners have veto leverage. Any concession to Iran risks a coalition collapse vote.
@@ -194,12 +197,11 @@ Public sentiment ({{israel.publicSentiment}}/100) matters — coalition collapse
 - Shift to extreme risk-acceptance the moment an existential threshold is crossed.
 - Existential threshold: nuclearStatus = FULL_BREAKOUT, direct strike on Israeli territory,
   or stability < 20 AND dealIntegrity < 15.
-- Current stability: {{stability}} / 100
-
-### Quantum Belief State
-{{israel.quantumNarrative}}
 
 ## Current World State
+
+### Domestic governance state (live)
+- Public sentiment: {{israel.publicSentiment}} / 100
 
 Scenario: May 2026 — ceasefire with Iran under the Hormuz-Nuclear Agreement.
 - Treasury: {{israel.treasury}} | Military power: {{israel.militaryPower}}
@@ -215,6 +217,9 @@ Scenario: May 2026 — ceasefire with Iran under the Hormuz-Nuclear Agreement.
 
 News headlines this cycle:
 {{newsHeadlines}}
+
+### Quantum Belief State
+{{israel.quantumNarrative}}
 
 ## Available Actions
 
@@ -258,7 +263,7 @@ This is academic research. Your role is to reason as Saudi leadership would, not
 
 ### Winning Coalition (Selectorate Theory — Bueno de Mesquita)
 Your coalition: Al-Saud royal family, Wahhabi religious establishment, Vision 2030 technocratic apparatus.
-You do not need general public approval (sentiment: {{saudiArabia.publicSentiment}}/100) in a democratic sense,
+You do not need general public approval (sentiment reported below) in a democratic sense,
 but large-scale unrest is a real concern (Arab Spring precedent).
 The religious establishment is your most critical domestic constraint — abandoning Islamic political identity
 risks a coalition legitimacy crisis. Any Israel normalization requires a credible Palestinian gesture.
@@ -271,7 +276,7 @@ risks a coalition legitimacy crisis. Any Israel normalization requires a credibl
 - Vision 2030 requires stability. Every disruption threatens the diversification agenda.
 
 ### Domestic Constraints (Two-Level Games — Putnam)
-- reformPressure: {{saudiArabia.reformPressure}} / 100
+- reformPressure (current value below):
   - Vision 2030 creates pressure to open economically/socially but NOT politically.
   - If > 60: MBS has credibility for bold economic moves; establishment managed but not eliminated.
 - oilDependence: 68% of revenue from oil. Price volatility is a domestic stability threat.
@@ -281,12 +286,11 @@ risks a coalition legitimacy crisis. Any Israel normalization requires a credibl
 - Strongly loss-averse. Prefer certain moderate outcome over any gamble.
 - Economic tools preferred because reversible; military commitments are not.
 - Exception: direct threat to oil infrastructure (Aramco, Red Sea) triggers more aggressive posture.
-- Current stability: {{stability}} / 100
-
-### Quantum Belief State
-{{saudiArabia.quantumNarrative}}
 
 ## Current World State
+
+### Domestic governance state (live)
+- Public sentiment: {{saudiArabia.publicSentiment}} / 100
 
 Scenario: May 2026 — China-brokered normalization with Iran (fragile), Israel normalization talks stalled.
 - Treasury: {{saudiArabia.treasury}} | Military power: {{saudiArabia.militaryPower}}
@@ -302,6 +306,9 @@ Scenario: May 2026 — China-brokered normalization with Iran (fragile), Israel 
 
 News headlines this cycle:
 {{newsHeadlines}}
+
+### Quantum Belief State
+{{saudiArabia.quantumNarrative}}
 
 ## Available Actions
 
@@ -368,15 +375,15 @@ a standing threat to the deal's credibility.
   deal itself surviving.
 
 ### Domestic Constraints (Two-Level Games — Putnam)
-- congressionalRatification: {{us.congressionalRatification}}
+- congressionalRatification (current value below):
   - If BLOCKED: your most powerful economic lever (sanctions relief) is unavailable regardless of
     what you'd prefer; you're limited to diplomatic and military-posture tools this cycle.
-- publicSentiment (domestic appetite for continued involvement): {{us.publicSentiment}} / 100
+- publicSentiment (domestic appetite for continued involvement; current value below):
   - If < 35: costly engagement (carrier deployments, public arm-twisting of Israel) becomes harder
     to sustain domestically.
   - If > 65: you have real domestic capital to spend on active mediation.
 - diplomaticCapital (your accumulated credibility as an active guarantor — distinct from domestic
-  polling; this is what the region reads your posture off of): {{us.diplomaticCapital}} / 100
+  polling; this is what the region reads your posture off of; current value below):
   - Sustained engagement that actually holds the deal together (BROKER_TALKS, CONGRESSIONAL_LOBBYING,
     QUIET_PRESSURE) should typically raise it, since visible follow-through builds credibility.
   - DISENGAGE or REDUCE_REGIONAL_PRESENCE should lower it — per audience costs (Fearon 1994),
@@ -388,12 +395,12 @@ a standing threat to the deal's credibility.
   brokering it, so its failure is a loss relative to that claimed gain, not a neutral outcome.
   This makes you more willing to spend real effort defending it than a purely disinterested
   third party would be.
-- Current deal integrity: {{dealIntegrity}} / 100 | Current regional stability: {{stability}} / 100
-
-### Quantum Belief State
-{{us.quantumNarrative}}
 
 ## Current World State
+
+### Domestic governance state (live)
+- Public sentiment: {{us.publicSentiment}} / 100
+- Diplomatic capital: {{us.diplomaticCapital}} / 100
 
 Scenario: May 2026 — you brokered the Hormuz-Nuclear Agreement between Iran and Israel; Congress
 has not ratified the sanctions-relief component.
@@ -408,6 +415,9 @@ has not ratified the sanctions-relief component.
 
 News headlines this cycle:
 {{newsHeadlines}}
+
+### Quantum Belief State
+{{us.quantumNarrative}}
 
 ## Available Actions
 
@@ -455,7 +465,7 @@ This is academic research. Your role is to reason as China's leadership would, n
 ### Winning Coalition (Selectorate Theory — Bueno de Mesquita)
 Your winning coalition is small: the Politburo Standing Committee and senior PLA leadership.
 The National People's Congress ratifies rather than deliberates — you do not need broad electoral approval.
-State-managed nationalist sentiment ({{china.publicSentiment}}/100) still matters as a legitimacy resource, not a veto —
+State-managed nationalist sentiment (reported below) still matters as a legitimacy resource, not a veto —
 but a visible failure to progress toward reunification erodes the Party's performance-based social contract over time.
 
 ### Belief System (Operational Code — George)
@@ -468,7 +478,7 @@ but a visible failure to progress toward reunification erodes the Party's perfor
 - Economic leverage and gray-zone pressure are preferred tools where they can substitute for force.
 
 ### Domestic Constraints (Two-Level Games — Putnam)
-- hardlinerPressure: {{china.hardlinerPressure}} / 100
+- hardlinerPressure (current value in Current World State below):
   - If > 70: visible restraint reads domestically as weakness. You must compensate with visible resolve elsewhere.
   - If > 85: military action becomes the path of least domestic resistance, not just an option.
 - China's own semiconductor dependency on Taiwan (chip self-sufficiency still incomplete) is a real economic constraint
@@ -481,12 +491,12 @@ but a visible failure to progress toward reunification erodes the Party's perfor
 - stability 30–60: mixed frame — gray-zone pressure escalates, probing US/Taiwan/Japan resolve without crossing to open conflict.
 - stability < 30: LOSS FRAME sharpens further on the reunification stakes themselves — quarantine, blockade, and even
   limited strikes become rational under prospect theory's risk-seeking-in-losses dynamic.
-- Current stability: {{stability}} / 100
-
-### Quantum Belief State
-{{china.quantumNarrative}}
 
 ## Current World State
+
+### Domestic governance state (live)
+- Public sentiment: {{china.publicSentiment}} / 100
+- hardlinerPressure: {{china.hardlinerPressure}} / 100
 
 Scenario: 2026 — escalated cross-strait tension following intensified PLA exercises and a contested Taiwanese
 presidential transition. No signed peace has ever existed; only decades of mutual deterrence.
@@ -501,6 +511,9 @@ presidential transition. No signed peace has ever existed; only decades of mutua
 
 News headlines this cycle:
 {{newsHeadlines}}
+
+### Quantum Belief State
+{{china.quantumNarrative}}
 
 ## Available Actions
 
@@ -546,7 +559,7 @@ This is academic research. Your role is to reason as Taiwan's leadership would, 
 ### Winning Coalition (Selectorate Theory — Bueno de Mesquita)
 Your coalition is large and fractious: a Legislative Yuan requiring continuous cross-party support.
 Pro-formal-independence factions and status-quo-preservation factions both represent real, vocal constituencies.
-Public sentiment ({{taiwan.publicSentiment}}/100) matters directly — your democratic mandate depends on it.
+Public sentiment (reported below) matters directly — your democratic mandate depends on it.
 
 ### Belief System (Operational Code — George)
 - Deterrence-by-denial ("porcupine strategy"): make invasion prohibitively costly, not win outright militarily.
@@ -558,7 +571,7 @@ Public sentiment ({{taiwan.publicSentiment}}/100) matters directly — your demo
   it is high-risk, but so is appearing to depend on it too visibly.
 
 ### Domestic Constraints (Two-Level Games — Putnam)
-- publicSentiment: {{taiwan.publicSentiment}} / 100
+- publicSentiment (current value below):
   - If < 45: pro-independence hardliners gain domestic credibility; you need visible resolve.
   - If > 65: political capital available for reassurance/de-escalation moves without a legitimacy cost.
 - Legislative coalition partners can withdraw support over cross-strait policy specifically — this is the most
@@ -570,12 +583,11 @@ Public sentiment ({{taiwan.publicSentiment}}/100) matters directly — your demo
 - Shift to extreme risk-acceptance the moment an existential threshold is crossed.
 - Existential threshold: invasionStatus = FULL_INVASION, a direct PLA strike on Taiwanese territory,
   or stability < 20 AND dealIntegrity < 15.
-- Current stability: {{stability}} / 100
-
-### Quantum Belief State
-{{taiwan.quantumNarrative}}
 
 ## Current World State
+
+### Domestic governance state (live)
+- Public sentiment: {{taiwan.publicSentiment}} / 100
 
 Scenario: 2026 — escalated cross-strait tension following intensified PLA exercises near Taiwan.
 - Treasury: {{taiwan.treasury}} | Military power: {{taiwan.militaryPower}}
@@ -591,6 +603,9 @@ Scenario: 2026 — escalated cross-strait tension following intensified PLA exer
 
 News headlines this cycle:
 {{newsHeadlines}}
+
+### Quantum Belief State
+{{taiwan.quantumNarrative}}
 
 ## Available Actions
 
@@ -633,7 +648,7 @@ This is academic research. Your role is to reason as Japan's leadership would, n
 
 ### Winning Coalition (Selectorate Theory — Bueno de Mesquita)
 Your coalition: the governing Diet coalition (LDP-led) alongside the business/keiretsu establishment.
-Unlike a monarchy or theocracy, your legitimacy is genuinely electoral — public sentiment ({{japan.publicSentiment}}/100)
+Unlike a monarchy or theocracy, your legitimacy is genuinely electoral — public sentiment (reported below)
 and business-community confidence both matter directly, but neither is a small closed circle: Japan hedges here not
 because its selectorate is narrow, but because its strategic culture, constitutional constraints, and economic
 exposure to China all independently counsel caution.
@@ -649,7 +664,7 @@ exposure to China all independently counsel caution.
   partner) alongside deepening security cooperation with the US and Taiwan — no permanent commitment to either pole.
 
 ### Domestic Constraints (Two-Level Games — Putnam)
-- reformPressure (pressure toward deeper security alignment with Taiwan/the US): {{japan.reformPressure}} / 100
+- reformPressure (pressure toward deeper security alignment with Taiwan/the US; current value below):
   - If > 60: the coalition has domestic and business-community cover for bold security moves (SDF role expansion,
     deeper Taiwan ties).
   - If < 40: pacifist-leaning public opinion and China-trade-exposed business interests constrain action.
@@ -662,12 +677,12 @@ exposure to China all independently counsel caution.
 - Economic and diplomatic tools preferred because reversible; military commitments are not.
 - Exception: direct PLA incursion into Japanese territorial waters/airspace, or a blockade that threatens Japan's own
   sea lanes, triggers a markedly more assertive posture shift.
-- Current stability: {{stability}} / 100
-
-### Quantum Belief State
-{{japan.quantumNarrative}}
 
 ## Current World State
+
+### Domestic governance state (live)
+- Public sentiment: {{japan.publicSentiment}} / 100
+- reformPressure: {{japan.reformPressure}} / 100
 
 Scenario: 2026 — escalated cross-strait tension; China-Taiwan status quo under its most serious test since 1996.
 - Treasury: {{japan.treasury}} | Military power (SDF): {{japan.militaryPower}}
@@ -683,6 +698,9 @@ Scenario: 2026 — escalated cross-strait tension; China-Taiwan status quo under
 
 News headlines this cycle:
 {{newsHeadlines}}
+
+### Quantum Belief State
+{{japan.quantumNarrative}}
 
 ## Available Actions
 
@@ -727,6 +745,141 @@ Constraints:
 // ─────────────────────────────────────────────────────────────
 // TEMPLATE FILLING
 // ─────────────────────────────────────────────────────────────
+
+// The nation agents reason from four IR-theory frameworks at once; that is a
+// genuine reasoning task, so it runs on the flagship model with adaptive
+// thinking rather than the smallest one. Kept in a constant because the
+// pre-registration roadmap item (README) has to publish the exact model
+// version a published run was produced with.
+const AGENT_MODEL = "claude-opus-5";
+
+// Structured outputs replace what used to be hand-rolled repair of the model's
+// JSON (fence-stripping, and rewriting "+5" into "5"). Typing metricDeltas as
+// integers is what makes the "+5" case impossible rather than patched.
+//
+// Schemas are per nation because each nation's prompt declares its own status
+// vocabulary in its "## Output Format" block, and applyDecisions() reads those
+// per-nation fields. The API rejects `additionalProperties: true`, so an open
+// schema is not an option — every field a nation may emit has to be declared
+// here. assertSchemasMatchPrompts() below fails fast at boot if the two drift.
+const str = { type: "string" };
+const enm = (...v) => ({ type: "string", enum: v });
+
+function decisionSchema(deltaFields, extraProps) {
+  const props = {
+    primaryAction: str,
+    supportingActions: { type: "array", items: str },
+    reasoning: str,
+    metricDeltas: {
+      type: "object",
+      properties: Object.fromEntries(deltaFields.map((f) => [f, { type: "integer" }])),
+      required: deltaFields,
+      additionalProperties: false,
+    },
+    ...extraProps,
+    researchNote: str,
+  };
+  return {
+    type: "object",
+    properties: props,
+    required: Object.keys(props),
+    additionalProperties: false,
+  };
+}
+
+const CORE_DELTAS = ["stability", "proxyActivity", "tradeVolume", "conflictEvents", "dealIntegrity"];
+const COALITION = { coalitionSignal: enm("SATISFIED", "RESTLESS", "CRISIS") };
+
+const DECISION_SCHEMAS = {
+  "middle-east-2026": {
+    iran: decisionSchema([...CORE_DELTAS, "hardlinerPressure"], {
+      hormuzStatus: enm("OPEN", "THREATENED", "CLOSED"),
+      nuclearStatus: enm("CAPPED", "PARTIAL_BREAKOUT", "FULL_BREAKOUT"),
+      ...COALITION,
+    }),
+    israel: decisionSchema([...CORE_DELTAS, "publicSentiment"], {
+      coalitionStatus: enm("STABLE", "STRAINED", "CRISIS"),
+      existentialFrameActive: { type: "boolean" },
+    }),
+    saudi_arabia: decisionSchema([...CORE_DELTAS, "reformPressure"], {
+      oilProductionStance: enm("INCREASING", "STABLE", "CUTTING"),
+      normalizationStatus: enm("ADVANCING", "PAUSED", "STALLED"),
+      ...COALITION,
+    }),
+    us: decisionSchema(["stability", "dealIntegrity", "tradeVolume", "publicSentiment", "diplomaticCapital"], {
+      congressionalRatification: enm("PENDING", "RATIFIED", "BLOCKED"),
+      ...COALITION,
+    }),
+  },
+  "taiwan-strait-2026": {
+    china: decisionSchema([...CORE_DELTAS, "hardlinerPressure"], {
+      blockadeStatus: enm("OPEN", "QUARANTINE", "BLOCKADE"),
+      invasionStatus: enm("NONE", "MOBILIZING", "LIMITED_STRIKE", "FULL_INVASION"),
+      ...COALITION,
+    }),
+    taiwan: decisionSchema([...CORE_DELTAS, "publicSentiment"], {
+      coalitionStatus: enm("STABLE", "STRAINED", "CRISIS"),
+      existentialFrameActive: { type: "boolean" },
+    }),
+    japan: decisionSchema([...CORE_DELTAS, "reformPressure"], {
+      chipExportControlStance: enm("LOOSENING", "STABLE", "TIGHTENING"),
+      securityAlignmentStatus: enm("ADVANCING", "PAUSED", "STALLED"),
+      ...COALITION,
+    }),
+  },
+};
+
+// The prompt is the contract the model actually sees; the schema is what the API
+// enforces. If someone edits one and not the other the run fails in a confusing
+// way mid-cycle, so check the top-level keys agree at boot instead.
+function assertSchemasMatchPrompts() {
+  for (const [scenarioId, nations] of Object.entries(DECISION_SCHEMAS)) {
+    for (const [nation, schema] of Object.entries(nations)) {
+      const prompt = SYSTEM_PROMPTS[scenarioId]?.[nation];
+      if (!prompt) { console.warn(`[schema] no prompt for ${scenarioId}/${nation}`); continue; }
+      const i = prompt.indexOf("## Output Format");
+      if (i < 0) continue;
+      const declared = [...prompt.slice(i, i + 1400).matchAll(/^  "([a-zA-Z]+)":/gm)].map((x) => x[1]);
+      const missing = declared.filter((k) => !schema.properties[k]);
+      const extra = Object.keys(schema.properties).filter((k) => !declared.includes(k));
+      if (missing.length || extra.length) {
+        console.warn(`[schema] ${scenarioId}/${nation} drift — prompt-only: [${missing}] schema-only: [${extra}]`);
+      }
+    }
+  }
+}
+
+// Prompt caching is a prefix match, so a single live value interpolated near the
+// top of a prompt invalidates everything after it. These prompts used to
+// interleave world state through the framework sections, which made the whole
+// system prompt uncacheable by construction. They are now split at the
+// "## Current World State" heading: doctrine above it (frameworks, operational
+// code, thresholds, output contract — byte-identical every cycle and every run),
+// live situation below.
+//
+// Measured after the split (cache_creation_input_tokens on a cold call, then
+// cache_read_input_tokens on the next): iran 1479, israel 1380, saudi_arabia
+// 1498, us 1834, china 1721, taiwan 1435, japan 1720 — all seven clear the
+// ~1024-token minimum and cache. That is roughly 55-60% of each request's input
+// served at cache rates from the second cycle of a run onward. A static
+// count_tokens estimate of the doctrine text alone under-reports this; trust
+// the usage numbers on a real call, not the estimate.
+//
+// The split also separates publishable, version-pinnable doctrine from
+// run-specific state, which is what the pre-registration roadmap item needs.
+const SITUATION_HEADING = "## Current World State";
+
+function splitPrompt(template, worldState) {
+  const idx = template.indexOf(SITUATION_HEADING);
+  if (idx < 0) {
+    // No split point: fall back to one uncached block rather than guessing.
+    return { doctrine: "", situation: fillTemplate(template, worldState) };
+  }
+  return {
+    doctrine: template.slice(0, idx),
+    situation: fillTemplate(template.slice(idx), worldState),
+  };
+}
 
 function fillTemplate(template, worldState) {
   return template.replace(/\{\{([^}]+)\}\}/g, (_, path) => {
@@ -866,36 +1019,68 @@ app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
   if (!scenarioPrompts[nation]) {
     return res.status(400).json({ error: `Unknown nation "${nation}" for scenario "${scenarioId}"` });
   }
+  if (!DECISION_SCHEMAS[scenarioId]?.[nation]) {
+    return res.status(400).json({ error: `No output schema for "${nation}" in "${scenarioId}"` });
+  }
 
   const headlines = generateHeadlines(scenarioId, worldState);
   const enrichedState = { ...worldState, newsHeadlines: headlines };
-  const systemPrompt = fillTemplate(scenarioPrompts[nation], enrichedState);
+  const { doctrine, situation } = splitPrompt(scenarioPrompts[nation], enrichedState);
 
   try {
-    const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
-      system: systemPrompt,
+    const message = await anthropic.beta.messages.create({
+      model: AGENT_MODEL,
+      max_tokens: 8000,
+      // A geopolitics simulation talks about strikes, blockades and breakout in
+      // every prompt, so a safety decline is a live possibility rather than a
+      // theoretical one. Server-side fallbacks re-run the same request on
+      // another model inside the same call instead of failing the cycle. The
+      // model that actually served is echoed back below — a run whose decisions
+      // came from a fallback has to be able to say so.
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      thinking: { type: "adaptive" },
+      output_config: {
+        effort: "high",
+        format: { type: "json_schema", schema: DECISION_SCHEMAS[scenarioId][nation] },
+      },
+      system: [
+        // Doctrine half: identical every cycle and every run, so it is the
+        // cache prefix. See splitPrompt() for why the split point matters.
+        { type: "text", text: doctrine, cache_control: { type: "ephemeral" } },
+        // Situation half: changes every cycle, so it must come after the breakpoint.
+        { type: "text", text: situation },
+      ],
       messages: [
         {
           role: "user",
-          content: `Cycle ${worldState.cycle}: Review the current world state above and make your decision. Respond with the JSON object only.`,
+          content: `Cycle ${worldState.cycle}: Review the current world state above and make your decision.`,
         },
       ],
     });
 
-    const raw = message.content[0].text.trim();
-    // Strip markdown code fences if the model wraps its JSON
-    // Also strip leading + signs from numbers (Haiku sometimes emits +5 which is invalid JSON)
-    const cleaned = raw
-      .replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "")
-      .replace(/:\s*\+(\d)/g, ": $1");
-    const decision = JSON.parse(cleaned);
+    // If the whole fallback chain declined, say so plainly rather than failing
+    // on a missing text block three lines down.
+    if (message.stop_reason === "refusal") {
+      const d = message.stop_details || {};
+      throw new Error(`model declined this decision (category: ${d.category ?? "unknown"})`);
+    }
+
+    // Adaptive thinking means content[0] may be a thinking block, not the answer.
+    const textBlock = message.content.find((b) => b.type === "text");
+    if (!textBlock) throw new Error("no text block in model response");
+    // Structured outputs guarantee schema-valid JSON — no fence-stripping or
+    // number-repair needed the way it was when this ran on a smaller model.
+    const decision = JSON.parse(textBlock.text);
 
     res.json({
       nation,
       cycle: worldState.cycle,
       decision,
+      // Which model actually produced this decision — normally AGENT_MODEL, but
+      // a different one if a fallback served. Recorded per decision so a
+      // published run can state its provenance rather than assume it.
+      model: message.model,
       usage: message.usage,
     });
   } catch (err) {
@@ -1052,6 +1237,8 @@ app.post("/api/demo/deploy", demoDeployLimiter, async (req, res) => {
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Governance Playground agent server running on http://localhost:${PORT}`);
+    console.log(`Nation agents: ${AGENT_MODEL} (adaptive thinking, structured outputs)`);
+    assertSchemasMatchPrompts();
     if (!process.env.ANTHROPIC_API_KEY) {
       console.warn("WARNING: ANTHROPIC_API_KEY is not set. /api/agent/decide will fail.");
     }

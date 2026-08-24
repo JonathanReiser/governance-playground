@@ -158,6 +158,41 @@ the docs used to imply. The sibling project
 the discipline in its plainest form — every design decision committed to git before the
 corresponding result was computed.
 
+## The agent layer's model, and why it is pinned
+
+The nation agents reason from four IR-theory frameworks simultaneously
+(Selectorate, Operational Code, Two-Level Games, Prospect Theory) and have to
+respect hard per-nation constraints — Iran cannot `EXIT_DEAL` unless deal
+integrity is under 30 or hardliner pressure is over 88, and so on. That is a
+real reasoning task, so it runs on **`claude-opus-5` with adaptive thinking**,
+set in one place (`AGENT_MODEL` in `server.js`).
+
+It did not always. Through 2026-08-24 this layer ran on `claude-haiku-4-5`, with
+the endpoint repairing the model's JSON in string-land afterwards — stripping
+markdown fences and rewriting `+5` into `5` because the smaller model emitted
+invalid JSON. Both workarounds are gone: the decision contract is now enforced
+by the API through per-nation JSON schemas (`DECISION_SCHEMAS`), one per nation,
+matching exactly the `## Output Format` block that nation's own prompt declares.
+`assertSchemasMatchPrompts()` runs at boot and warns if a prompt and its schema
+ever drift apart. Typing `metricDeltas` as integers is what makes the `+5` case
+impossible rather than patched.
+
+**This is a change of research substrate, not just a quality upgrade.** Any run
+produced before that date came from a different model, and results are not
+comparable across the boundary. That is precisely the thing the pre-registration
+item above exists to make legible: a published run has to name its model version,
+because "the simulation said X" is not a claim until you can say what was doing
+the simulating.
+
+The prompts were restructured at the same time so that doctrine (frameworks,
+operational code, thresholds, output contract — byte-identical every cycle and
+every run) sits above the `## Current World State` heading and live state sits
+below it. Both halves go to the model as before; the split exists so the doctrine
+half can be a cache prefix, and so the publishable part of a prompt is separable
+from the per-cycle part. Measured effect: 1,380–1,834 tokens per nation served
+from cache from the second cycle of a run onward, roughly 55–60% of each
+request's input.
+
 ## Architecture
 
 ```
@@ -219,7 +254,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 |---|---|
 | Smart contracts + test suite (83/83) | ✅ Done, runs in CI (`.github/workflows/contracts-tests.yml`) |
 | Classic (fixed-rule) experiments, 4 pre-built scenarios | ✅ Done |
-| AI agent layer (Claude-driven nation decisions) | ✅ Done, verified live |
+| AI agent layer (Claude-driven nation decisions) | ✅ Done, verified live — `claude-opus-5`, adaptive thinking, structured outputs (see below) |
 | Quantum extension — entangled political layer | ✅ Done, verified live |
 | Quantum extension — economic field + speculation (Layer 2/3) | ✅ Done, verified live |
 | Retrograde feedback, Layer 2/3 → Layer 1 (Middle East only) | ✅ Done |
@@ -314,6 +349,7 @@ contracts/          Solidity — WorldRegistry, NationDAO, CitizenToken, Metrics
 scenarios/           Scenario configs (nations, relationships, starting metrics, cited sources)
 scripts/             Deploy + experiment runners
 server.js            Express server proxying Claude API calls for the agent layer
+                     (AGENT_MODEL + DECISION_SCHEMAS + splitPrompt live here)
 frontend/
   src/lib/           quantum.js (engine), markets.js (Layer 2/3), agents.js (Layer 1 + Claude)
   src/components/    Step-by-step UI: Connect → Scenario → Deploy → Run → Results
