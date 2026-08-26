@@ -990,6 +990,94 @@ describe("WorldRegistry", function () {
       ).to.be.revertedWith("WorldRegistry: oracle not wired");
     });
   });
+
+  describe("Combined Cycle Commit With Narrative (commitCycleWithNarrative)", function () {
+    beforeEach(async function () {
+      await registry.initializeScenario("Test", "1.0", 3n);
+      await registry.startSimulation();
+    });
+
+    const decisions = [
+      { nationId: "iran", primaryAction: "Reject the MOU extension", reasoning: "Hardliners see it as capitulation.", researchNote: "Cites June 2026 MOU text." },
+      { nationId: "israel", primaryAction: "Continue quiet strikes", reasoning: "Deterrence posture unchanged pre-election.", researchNote: "" },
+    ];
+
+    it("updates oracle metrics AND advances the cycle, same as commitCycle", async function () {
+      await expect(
+        registry.commitCycleWithNarrative(65n, 2n, 150n, 30n, 70n, decisions, "Entangled qubits collapsed toward escalation.", "Oil futures ticked up 2%.")
+      ).to.emit(registry, "CycleAdvanced").withArgs(1n);
+
+      expect(await registry.currentCycle()).to.equal(1n);
+      expect(await oracle.regionalStabilityIndex()).to.equal(65n);
+      expect(await oracle.totalConflictEvents()).to.equal(2n);
+      expect(await oracle.totalTradeVolume()).to.equal(150n);
+      expect(await oracle.totalProxyActivity()).to.equal(30n);
+      expect(await oracle.peaceDealIntegrity()).to.equal(70n);
+    });
+
+    it("emits one DecisionRecorded event per nation, tagged with the cycle it belongs to", async function () {
+      const tx = await registry.commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, decisions, "quantum summary", "market summary");
+      await expect(tx).to.emit(registry, "DecisionRecorded").withArgs(1n, "iran", decisions[0].primaryAction, decisions[0].reasoning, decisions[0].researchNote);
+      await expect(tx).to.emit(registry, "DecisionRecorded").withArgs(1n, "israel", decisions[1].primaryAction, decisions[1].reasoning, decisions[1].researchNote);
+    });
+
+    it("emits exactly one CycleNarrativeRecorded event carrying the quantum/market summaries", async function () {
+      await expect(
+        registry.commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, decisions, "Entanglement broke toward de-escalation.", "Markets shrugged.")
+      ).to.emit(registry, "CycleNarrativeRecorded").withArgs(1n, "Entanglement broke toward de-escalation.", "Markets shrugged.");
+    });
+
+    it("tags the second cycle's events with cycle 2, not 1", async function () {
+      await registry.commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, decisions, "s1", "m1");
+      await expect(
+        registry.commitCycleWithNarrative(55n, 1n, 100n, 20n, 60n, decisions, "s2", "m2")
+      ).to.emit(registry, "CycleNarrativeRecorded").withArgs(2n, "s2", "m2");
+    });
+
+    it("works with zero decisions (an empty array is valid calldata)", async function () {
+      await expect(
+        registry.commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, [], "no nations acted", "flat")
+      ).to.emit(registry, "CycleNarrativeRecorded").withArgs(1n, "no nations acted", "flat");
+    });
+
+    it("is independently queryable via getLogs after the fact, same as any other event", async function () {
+      await registry.commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, decisions, "s1", "m1");
+      const filter = registry.filters.DecisionRecorded();
+      const logs = await registry.queryFilter(filter);
+      expect(logs.length).to.equal(2);
+      expect(logs[0].args.nationId).to.equal("iran");
+      expect(logs[0].args.reasoning).to.equal(decisions[0].reasoning);
+      expect(logs[1].args.nationId).to.equal("israel");
+    });
+
+    it("propagates MetricsOracle's own validation, same as commitCycle", async function () {
+      await expect(
+        registry.commitCycleWithNarrative(101n, 0n, 0n, 0n, 0n, decisions, "s", "m")
+      ).to.be.revertedWith("MetricsOracle: stability 0-100");
+    });
+
+    it("still respects onlyOwner", async function () {
+      await expect(
+        registry.connect(alice).commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, decisions, "s", "m")
+      ).to.be.revertedWithCustomError(registry, "OwnableUnauthorizedAccount");
+    });
+
+    it("still ends simulation at total cycles, same as commitCycle", async function () {
+      await registry.commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, decisions, "s1", "m1");
+      await registry.commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, decisions, "s2", "m2");
+      await expect(
+        registry.commitCycleWithNarrative(50n, 0n, 0n, 0n, 50n, decisions, "s3", "m3")
+      ).to.emit(registry, "SimulationEnded");
+      expect(await registry.simulationActive()).to.equal(false);
+    });
+
+    it("does not disturb the plain commitCycle path — both remain callable on the same registry", async function () {
+      await registry.commitCycle(50n, 0n, 0n, 0n, 50n);
+      await expect(
+        registry.commitCycleWithNarrative(55n, 1n, 100n, 20n, 60n, decisions, "s2", "m2")
+      ).to.emit(registry, "CycleAdvanced").withArgs(2n);
+    });
+  });
 });
 
 // ─────────────────────────────────────────────────────────────

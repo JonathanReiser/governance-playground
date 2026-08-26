@@ -208,6 +208,7 @@ describe("demo deploy — step machine", function () {
       const out1 = await commitDemoCycle(
         deployResult.registryAddress,
         { stability: 55, conflicts: 3, trade: 120, proxy: 40, dealIntegrity: 60 },
+        undefined,
         signer
       );
       expect(out1.currentCycle).to.equal(1);
@@ -217,6 +218,7 @@ describe("demo deploy — step machine", function () {
       const out2 = await commitDemoCycle(
         deployResult.registryAddress,
         { stability: 40, conflicts: 8, trade: 90, proxy: 60, dealIntegrity: 30 },
+        undefined,
         signer
       );
       expect(out2.currentCycle).to.equal(2);
@@ -230,10 +232,65 @@ describe("demo deploy — step machine", function () {
       const out = await commitDemoCycle(
         deployResult.registryAddress,
         { stability: 500, conflicts: -10, trade: "not a number", proxy: 40.7, dealIntegrity: 60 },
+        undefined,
         signer
       );
       expect(out.metrics).to.deep.equal({ stability: 100, conflicts: 0, trade: 0, proxy: 41, dealIntegrity: 60 });
       expect(out.currentCycle).to.equal(1);
+    });
+  });
+
+  describe("commitDemoCycle, with narrative (on-chain DecisionRecorded/CycleNarrativeRecorded)", function () {
+    this.timeout(60_000);
+
+    it("calls commitCycleWithNarrative and the events land on-chain, queryable after the fact", async function () {
+      const [signer] = await ethers.getSigners();
+      const deployResult = await deployDemoScenario("middle-east-2026", () => {}, signer);
+      const registry = new ethers.Contract(deployResult.registryAddress, WorldRegistryABI.abi, signer);
+
+      const narrative = {
+        decisions: [
+          { nationId: "iran", primaryAction: "Reject extension", reasoning: "Hardliners dominate this cycle.", researchNote: "cites MOU text" },
+          { nationId: "israel", primaryAction: "Hold posture", reasoning: "Deterrence unchanged.", researchNote: "" },
+        ],
+        quantumSummary: "iran: hardline; israel: firm — entangled escalation",
+        marketSummary: "primary: SPIKE, global: FIRMING",
+      };
+
+      const out = await commitDemoCycle(
+        deployResult.registryAddress,
+        { stability: 55, conflicts: 3, trade: 120, proxy: 40, dealIntegrity: 60 },
+        narrative,
+        signer
+      );
+      expect(out.currentCycle).to.equal(1);
+
+      const decisionLogs = await registry.queryFilter(registry.filters.DecisionRecorded());
+      expect(decisionLogs.length).to.equal(2);
+      expect(decisionLogs[0].args.nationId).to.equal("iran");
+      expect(decisionLogs[0].args.reasoning).to.equal("Hardliners dominate this cycle.");
+      expect(decisionLogs[1].args.nationId).to.equal("israel");
+
+      const narrativeLogs = await registry.queryFilter(registry.filters.CycleNarrativeRecorded());
+      expect(narrativeLogs.length).to.equal(1);
+      expect(narrativeLogs[0].args.quantumSummary).to.equal(narrative.quantumSummary);
+      expect(narrativeLogs[0].args.marketSummary).to.equal(narrative.marketSummary);
+    });
+
+    it("falls back to plain commitCycle (no events) when narrative isn't given", async function () {
+      const [signer] = await ethers.getSigners();
+      const deployResult = await deployDemoScenario("taiwan-strait-2026", () => {}, signer);
+      const registry = new ethers.Contract(deployResult.registryAddress, WorldRegistryABI.abi, signer);
+
+      await commitDemoCycle(
+        deployResult.registryAddress,
+        { stability: 50, conflicts: 0, trade: 100, proxy: 20, dealIntegrity: 55 },
+        undefined,
+        signer
+      );
+
+      const decisionLogs = await registry.queryFilter(registry.filters.DecisionRecorded());
+      expect(decisionLogs.length).to.equal(0);
     });
   });
 

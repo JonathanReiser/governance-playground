@@ -21,12 +21,19 @@ const GOVERNANCE_TYPE_LABELS = [
  * would. That's deliberate: the whole point of "citable" is that the
  * citation shouldn't depend on this specific frontend still being alive.
  *
- * Shows exactly what's actually on-chain (five metrics, each nation's
- * governance config) and nothing more — no AI reasoning, no quantum
- * narrative, none of that is written on-chain (see README's "what the
- * on-chain record actually is" section). A run this page can't fully
- * reconstruct is not a bug in this page; it's the honest boundary of what
- * "on-chain" actually covers here.
+ * Shows what's on-chain: the five metrics, each nation's governance
+ * config, AND — for any run committed via commitCycleWithNarrative()
+ * (every no-wallet "watch it play out" run does this; a run from the
+ * wallet-connected researcher tool via plain commitCycle() does not,
+ * since that call was never changed) — every cycle's actual per-nation
+ * decisions and quantum/market narrative, read back via
+ * DecisionRecorded/CycleNarrativeRecorded event logs. Events are not
+ * contract storage: this page finds them the same way Etherscan's own
+ * "Logs" tab would, via queryFilter's getLogs, which is why this is
+ * still a read-only provider call with no server involved. A run with no
+ * such logs (an older run, or one made through the wallet flow) simply
+ * shows none — that's the real, honest state of that run's chain
+ * history, not a fetch failure.
  */
 export function ViewRunPage({ registryAddress, onBack }) {
   const [state, setState] = useState({ status: "loading" });
@@ -84,12 +91,42 @@ export function ViewRunPage({ registryAddress, onBack }) {
           };
         }
 
+        // Event logs, not contract state — queryFilter with no block
+        // range scans this contract's whole history, which is fine here:
+        // one WorldRegistry deployment only ever lives for its own
+        // scenario's handful of cycles, nothing like the full chain.
+        const [decisionLogs, narrativeLogs] = await Promise.all([
+          registry.queryFilter(registry.filters.DecisionRecorded()),
+          registry.queryFilter(registry.filters.CycleNarrativeRecorded()),
+        ]);
+
+        const cycleMap = new Map(); // cycle number -> { decisions: [], narrative }
+        for (const log of decisionLogs) {
+          const cycle = Number(log.args.cycle);
+          if (!cycleMap.has(cycle)) cycleMap.set(cycle, { decisions: [], narrative: null });
+          cycleMap.get(cycle).decisions.push({
+            nationId: log.args.nationId,
+            primaryAction: log.args.primaryAction,
+            reasoning: log.args.reasoning,
+            researchNote: log.args.researchNote,
+          });
+        }
+        for (const log of narrativeLogs) {
+          const cycle = Number(log.args.cycle);
+          if (!cycleMap.has(cycle)) cycleMap.set(cycle, { decisions: [], narrative: null });
+          cycleMap.get(cycle).narrative = {
+            quantumSummary: log.args.quantumSummary,
+            marketSummary: log.args.marketSummary,
+          };
+        }
+        const cycles = [...cycleMap.entries()].sort((a, b) => a[0] - b[0]).map(([cycle, v]) => ({ cycle, ...v }));
+
         if (!cancelled) {
           setState({
             status: "ready",
             scenarioName, scenarioVersion,
             currentCycle: Number(currentCycle), totalCycles: Number(totalCycles),
-            simulationActive, oracleAddress, nations, metrics,
+            simulationActive, oracleAddress, nations, metrics, cycles,
           });
         }
       } catch (e) {
@@ -147,10 +184,9 @@ export function ViewRunPage({ registryAddress, onBack }) {
             )}
 
             <p className="muted" style={{ fontSize: 12, marginTop: "1rem" }}>
-              This is exactly what's written on-chain — the five metrics above, plus each
-              nation's governance config below. AI reasoning and quantum-collapse narration are
-              never written on-chain (see the README's own note on what "on-chain record"
-              actually covers), so this page can't show those even for a run that had them.
+              {state.cycles.length > 0
+                ? "The five metrics above, each nation's governance config below, and — since this run committed through the no-wallet \"watch it play out\" path — the full per-cycle reasoning transcript further down, all read straight from this contract's on-chain event logs."
+                : "This is exactly what's written on-chain — the five metrics above, plus each nation's governance config below. This particular run has no DecisionRecorded/CycleNarrativeRecorded event logs (it predates that feature, or was committed through the wallet-connected researcher tool's plain commitCycle path), so there's no reasoning transcript to show for it."}
             </p>
 
             <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -175,6 +211,39 @@ export function ViewRunPage({ registryAddress, onBack }) {
                   {state.oracleAddress}
                 </a>
               </p>
+            )}
+
+            {state.cycles.length > 0 && (
+              <div style={{ marginTop: "1.5rem" }}>
+                <h3 style={{ fontSize: 14, marginBottom: "0.5rem" }}>Reasoning Transcript</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {state.cycles.map(({ cycle, decisions, narrative }) => (
+                    <div key={cycle} className="muted" style={{ fontSize: 12, border: "1px solid currentColor", borderRadius: 4, padding: "0.6rem" }}>
+                      <div style={{ fontWeight: 600, marginBottom: "0.3rem" }}>Cycle {cycle}</div>
+                      {decisions.map((d, i) => {
+                        const nation = state.nations.find((n) => n.id === d.nationId);
+                        return (
+                          <div key={i} style={{ marginBottom: "0.3rem" }}>
+                            <strong>{nation?.name || d.nationId}:</strong> {d.primaryAction}
+                            {d.reasoning && <div style={{ marginLeft: "0.75rem" }}>— {d.reasoning}</div>}
+                            {d.researchNote && (
+                              <div style={{ marginLeft: "0.75rem", fontStyle: "italic", opacity: 0.8 }}>
+                                Research note: {d.researchNote}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {narrative && (
+                        <div style={{ marginTop: "0.3rem", opacity: 0.9 }}>
+                          {narrative.quantumSummary && <div>⚛ {narrative.quantumSummary}</div>}
+                          {narrative.marketSummary && <div>📈 {narrative.marketSummary}</div>}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         )}

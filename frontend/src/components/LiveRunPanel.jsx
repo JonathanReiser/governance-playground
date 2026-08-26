@@ -1,5 +1,8 @@
 import { useState, useRef } from "react";
-import { runAutonomousCycle, buildNationMeta, CYCLE_COUNT_OPTIONS, initSimState } from "../lib/cycleRunner";
+import {
+  runAutonomousCycle, buildNationMeta, CYCLE_COUNT_OPTIONS, initSimState,
+  buildDecisionRecords, summarizeQuantum, summarizeMarket,
+} from "../lib/cycleRunner";
 import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 
@@ -81,6 +84,13 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
               proxy: committed.proxy,
               dealIntegrity: committed.dealIntegrity,
             },
+            // The actual reasoning behind those metrics — written on-chain
+            // as event logs (DecisionRecorded/CycleNarrativeRecorded), not
+            // contract storage, specifically so a run is replayable later
+            // (see ViewRunPage.jsx), not just its final numbers.
+            decisions: buildDecisionRecords(decisions),
+            quantumSummary: summarizeQuantum(scenario, quantum),
+            marketSummary: summarizeMarket(market),
           }),
         });
 

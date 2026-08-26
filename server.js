@@ -1404,6 +1404,45 @@ const demoRunLimiter = rateLimit({
 // browser structurally cannot do itself. See commitDemoCycle's own header
 // comment on why `metrics` is clamped but not independently re-verified —
 // same trust boundary MetaMask already has in the wallet-connected flow.
+// Independently re-caps and re-shapes the client's decisions/summary
+// payload before it's ever handed to a signer — the client-side caps in
+// cycleRunner.js are a courtesy (smaller request, lower gas), not a
+// security boundary. A malformed or hostile payload here fails the
+// request rather than reaching commitCycleWithNarrative() with garbage
+// types (calldata string args, so a non-string would revert at the ABI
+// encoding step anyway, but failing fast with a clear 400 is better than
+// an opaque ethers encoding error).
+const CHAIN_FIELD_MAX = 600;
+const MAX_DECISIONS_PER_CYCLE = 12; // generous over the largest scenario's nation count
+
+function sanitizeChainString(v) {
+  if (typeof v !== "string") return "";
+  return v.length > CHAIN_FIELD_MAX ? v.slice(0, CHAIN_FIELD_MAX) : v;
+}
+
+// Returns `null` (meaning: fall back to the plain commitCycle path) when
+// the client sent nothing narrative-shaped at all — decisions is the
+// signal field: an omitted or non-array `decisions` means "no narrative
+// this call", not "narrative with zero decisions" (which IS valid and
+// preserved as an empty array, e.g. every agent call errored this cycle).
+function sanitizeNarrative(body) {
+  if (!Array.isArray(body?.decisions)) return null;
+  if (body.decisions.length > MAX_DECISIONS_PER_CYCLE) {
+    throw new Error(`Too many decisions in one cycle (max ${MAX_DECISIONS_PER_CYCLE})`);
+  }
+  const decisions = body.decisions.map((d) => ({
+    nationId: sanitizeChainString(d?.nationId).slice(0, 60),
+    primaryAction: sanitizeChainString(d?.primaryAction),
+    reasoning: sanitizeChainString(d?.reasoning),
+    researchNote: sanitizeChainString(d?.researchNote),
+  }));
+  return {
+    decisions,
+    quantumSummary: sanitizeChainString(body?.quantumSummary),
+    marketSummary: sanitizeChainString(body?.marketSummary),
+  };
+}
+
 app.post("/api/demo/commit-cycle", demoRunLimiter, async (req, res) => {
   const { scenarioId, cycleIndex, totalCycles, mac, metrics } = req.body || {};
   if (!scenarioId || !Number.isInteger(cycleIndex) || !CYCLE_COUNT_OPTIONS.includes(totalCycles)) {
@@ -1419,8 +1458,14 @@ app.post("/api/demo/commit-cycle", demoRunLimiter, async (req, res) => {
   if (!verifySealedState(scenarioId, cycleIndex, state, mac, "run")) {
     return res.status(400).json({ error: "Invalid or tampered run state — start a new deploy." });
   }
+  let narrative;
   try {
-    const out = await commitDemoCycle(state.registryAddress, metrics);
+    narrative = sanitizeNarrative(req.body);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+  try {
+    const out = await commitDemoCycle(state.registryAddress, metrics, narrative);
     const done = cycleIndex === totalCycles - 1;
     const sealed = sealState(scenarioId, cycleIndex + 1, state, "run");
     res.json({

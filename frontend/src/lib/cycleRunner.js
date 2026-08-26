@@ -154,6 +154,66 @@ export function computeCommittedMetrics(proposed, quantum, newSimState) {
   };
 }
 
+// ─────────────────────────────────────────────
+// On-chain narrative — turning this cycle's decisions/quantum/market
+// objects into the plain strings commitCycleWithNarrative() emits as
+// event logs (see contracts/core/WorldRegistry.sol). Kept as small pure
+// functions here (not inline in LiveRunPanel.jsx) so they're covered by
+// the same unit tests as the rest of this file's pipeline, and so
+// AICycleStep.jsx's wallet-connected commit flow can reuse them too if
+// it ever wants to write narrative on-chain the same way. Field lengths
+// are capped client-side as a courtesy (smaller tx, lower gas) — the
+// server independently re-caps everything before it ever reaches a
+// signer, so a compromised or hand-rolled client can't force an
+// oversized transaction; see server.js's own caps on this route.
+const CHAIN_FIELD_MAX = 480;
+
+function truncateForChain(s, max = CHAIN_FIELD_MAX) {
+  if (typeof s !== "string") return "";
+  return s.length > max ? `${s.slice(0, max - 1)}…` : s;
+}
+
+// One DecisionRecord per nation that actually produced a decision this
+// cycle — a nation whose agent call errored has nothing true to record,
+// so it's skipped rather than padded with placeholder text.
+export function buildDecisionRecords(decisions) {
+  return Object.entries(decisions)
+    .filter(([, r]) => !r.error && r.decision)
+    .map(([nationId, r]) => ({
+      nationId,
+      primaryAction: truncateForChain(r.decision.primaryAction || ""),
+      reasoning: truncateForChain(r.decision.reasoning || ""),
+      researchNote: truncateForChain(r.decision.researchNote || ""),
+    }));
+}
+
+// A readable one-line summary of this cycle's Layer 1 quantum collapse:
+// each qubit's collapsed outcome, plus the derived entangled effect
+// label (which already names peacekeeper dampening when it applied —
+// see agents.js's packageCollapseResult).
+export function summarizeQuantum(scenario, quantum) {
+  if (!quantum) return "No quantum collapse recorded this cycle.";
+  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
+  const parts = [];
+  for (const id of [entangled.aId, entangled.bId, standalone.id, peacekeeper?.id].filter(Boolean)) {
+    if (quantum[id]) parts.push(`${id}: ${quantum[id]}`);
+  }
+  const effect = quantum.entangledEffect?.label ? ` — ${quantum.entangledEffect.label}` : "";
+  return truncateForChain(`${parts.join("; ")}${effect}`);
+}
+
+// A readable one-line summary of this cycle's Layer 2/3 market collapse.
+export function summarizeMarket(market) {
+  if (!market?.outcomes) return "No market movement recorded this cycle.";
+  const { outcomes, derivedNote } = market;
+  const parts = [
+    `primary: ${outcomes.primary}`, `currencyA: ${outcomes.currencyA}`,
+    `currencyB: ${outcomes.currencyB}`, `global: ${outcomes.global}`,
+  ];
+  if (derivedNote) parts.push(`${derivedNote.label}: ${derivedNote.value}`);
+  return truncateForChain(parts.join(", "));
+}
+
 /**
  * Runs one cycle straight through, no human in the loop: every nation's
  * decision is asked for and applied as-is (Tier 1 real-entropy quantum
