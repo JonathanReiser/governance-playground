@@ -2,8 +2,9 @@
   "meta": {
     "id": "taiwan-strait-2026",
     "name": "Taiwan Strait — 2026",
-    "version": "1.0.0",
-    "description": "Escalated cross-strait tension scenario following intensified PLA military exercises near Taiwan and a contested Taiwanese presidential transition. The decades-old 'status quo' ambiguity — never a signed peace, just mutual deterrence — faces its most serious test since 1996.",
+    "version": "2.0.0",
+    "baselineAsOf": "2026-08-26",
+    "description": "Cross-strait tension scenario as of mid-2026: a real Trump-Xi summit (May 2026) that settled nothing on the status quo, a long-delayed $14B Taiwan arms package, and real China-Japan escalation over Taiwan remarks — alongside PLA exercise tempo that has actually eased back toward its pre-2024 baseline rather than continuing to climb. The decades-old 'status quo' ambiguity — never a signed peace, just mutual deterrence — remains genuinely unresolved, unevenly across its diplomatic, economic, and military axes.",
     "tags": [
       "taiwan-strait",
       "cross-strait",
@@ -13,7 +14,7 @@
     ],
     "suggestedExperiments": [
       "What if China formally abandons the status quo?",
-      "What if the US ends strategic ambiguity?",
+      "What if the US finally delivers the delayed arms package?",
       "What if Japan deepens security ties with Taiwan?",
       "What if PLA hardliners gain dominant influence over Taiwan policy?"
     ],
@@ -59,8 +60,8 @@
         "vetoCouncil": false,
         "guardianVeto": false,
         "royalVeto": true,
-        "hardlinerPressure": 78,
-        "source_hardliner": "CSIS China Power Project 2026 assessment"
+        "hardlinerPressure": 74,
+        "source_hardliner": "CSIS China Power Project 2026; Taiwan MND PLA activity reports, Aug 2026"
       },
       "economy": {
         "treasury": 22000,
@@ -96,7 +97,7 @@
       "color": "#0ea5e9",
       "governance": {
         "type": "PARLIAMENTARY_DEMOCRACY",
-        "description": "Semi-presidential multi-party democracy. President and Legislative Yuan directly elected. High citizen participation. No formal mutual-defense treaty with any external power.",
+        "description": "Semi-presidential multi-party democracy. President and Legislative Yuan directly elected. High citizen participation. No formal mutual-defense treaty with any external power — a real, current stake given the January 2026-announced $14B US arms package remains delayed, and the May 2026 Trump-Xi summit left US commitment more ambiguous, not more reassuring.",
         "source": "Freedom House 2024 — Score: 94/100 (Free)",
         "proposalThreshold": 150,
         "quorum": 35,
@@ -142,7 +143,7 @@
       "color": "#ec4899",
       "governance": {
         "type": "PARLIAMENTARY_DEMOCRACY",
-        "description": "Constitutional monarchy with a parliamentary system. National Diet elected; Self-Defense Forces constitutionally constrained but expanding role under evolving security doctrine.",
+        "description": "Constitutional monarchy with a parliamentary system. National Diet elected; Self-Defense Forces constitutionally constrained but expanding role under evolving security doctrine. China banned dual-use tech exports to Japanese military end-users in January 2026, directly after Taiwan remarks by PM Sanae Takaichi — a real, dated escalation specifically on this bilateral axis, not a generic regional one.",
         "source": "Freedom House 2024 — Score: 96/100 (Free)",
         "proposalThreshold": 200,
         "quorum": 40,
@@ -151,8 +152,8 @@
         "vetoCouncil": false,
         "guardianVeto": false,
         "royalVeto": false,
-        "reformPressure": 58,
-        "source_reform": "IISS Military Balance 2026 assessment"
+        "reformPressure": 66,
+        "source_reform": "IISS Military Balance 2026; China-Japan export-ban reporting (Jan 2026); Taiwan News (Jul 22, 2026)"
       },
       "economy": {
         "treasury": 9500,
@@ -187,9 +188,9 @@
       "from": "china",
       "to": "taiwan",
       "type": "COLD",
-      "description": "No formal diplomatic relations. China considers Taiwan a renegade province, not a separate state. Frequent PLA median-line incursions and gray-zone pressure short of open conflict.",
-      "source": "CSIS China Power Project, IISS 2026",
-      "stabilityScore": 22,
+      "description": "No formal diplomatic relations. China considers Taiwan a renegade province, not a separate state. The May 2026 Trump-Xi summit produced no change to this status quo — Xi warned missteps on Taiwan could mean 'conflict' — but real PLA sortie tempo around Taiwan has eased toward its pre-2024 baseline rather than continuing to climb.",
+      "source": "Global Taiwan Institute, Al Jazeera (May 2026); Taiwan MND activity reports (Aug 2026)",
+      "stabilityScore": 26,
       "treatyActive": false,
       "treatyName": ""
     },
@@ -197,9 +198,9 @@
       "from": "china",
       "to": "japan",
       "type": "COLD",
-      "description": "Deep economic interdependence alongside real security tension — East China Sea disputes, Senkaku/Diaoyu proximity, historical grievances. Neither partnership nor open hostility.",
-      "source": "IISS Military Balance 2026",
-      "stabilityScore": 38,
+      "description": "Deep economic interdependence alongside real, now-concrete security tension: China banned dual-use technology exports to Japanese military end-users in January 2026, directly following Taiwan remarks by PM Sanae Takaichi — a real, dated act of economic retaliation on this specific bilateral relationship, not a background regional dispute.",
+      "source": "China-Japan export-ban reporting (Jan 2026); IISS Military Balance 2026",
+      "stabilityScore": 28,
       "treatyActive": false,
       "treatyName": ""
     },
@@ -207,9 +208,9 @@
       "from": "taiwan",
       "to": "japan",
       "type": "COLD",
-      "description": "No formal diplomatic relations (Japan recognized only the PRC after 1972 normalization) but substantive informal economic and quasi-security cooperation, sharpened by Japan's own proximity stakes in a Taiwan Strait crisis.",
-      "source": "IISS Military Balance 2026, CSIS 2026",
-      "stabilityScore": 65,
+      "description": "No formal diplomatic relations (Japan recognized only the PRC after 1972 normalization) but real, deepening informal cooperation — a March 2026 trilateral MOU (Kumamoto Prefecture, Kaohsiung City, and Arizona) on advanced semiconductor manufacturing, and TSMC's Kumamoto Fab 1 reaching operational breakeven — sharpened by Japan's own proximity stakes in a Taiwan Strait crisis.",
+      "source": "Taiwan News (Jul 22, 2026); BigGo Finance semiconductor forum coverage (2026)",
+      "stabilityScore": 70,
       "treatyActive": false,
       "treatyName": ""
     }
@@ -225,19 +226,20 @@
         "taiwan"
       ],
       "externalGuarantor": "US",
-      "description": "Decades-old ambiguous arrangement maintained by mutual deterrence, not a signed agreement: the US Taiwan Relations Act (1979) commits to Taiwan's defensive capacity without a mutual-defense treaty; China's Anti-Secession Law (2005) authorizes 'non-peaceful means' if Taiwan formally declares independence. Both sides tolerate the ambiguity because the alternative — resolving it — is worse for everyone.",
+      "description": "Decades-old ambiguous arrangement maintained by mutual deterrence, not a signed agreement: the US Taiwan Relations Act (1979) commits to Taiwan's defensive capacity without a mutual-defense treaty; China's Anti-Secession Law (2005) authorizes 'non-peaceful means' if Taiwan formally declares independence. A real May 14-15, 2026 Trump-Xi summit changed none of this on paper — Xi warned missteps on Taiwan could mean 'conflict,' and Trump's posture on the long-delayed $14B arms package (announced January 2026) was ambiguous rather than reassuring. Real PLA exercise tempo, meanwhile, has eased back toward its pre-2024 baseline.",
       "terms": [
         "China: refrains from military invasion so long as Taiwan doesn't declare formal independence",
         "Taiwan: maintains de facto independence without a formal declaration",
-        "US: maintains 'strategic ambiguity' — supplies defensive arms, no mutual-defense treaty"
+        "US: maintains 'strategic ambiguity' — supplies defensive arms, no mutual-defense treaty (the $14B package announced Jan 2026 remains delayed as of this baseline)"
       ],
       "vulnerabilities": [
         "No verification mechanism — the arrangement rests entirely on mutual restraint",
-        "PLA capability and exercise tempo near Taiwan has grown sharply",
+        "The May 2026 Trump-Xi summit left US commitment more ambiguous, not more reassuring",
+        "China has already shown willingness to retaliate concretely against a third party (Japan, Jan 2026) over Taiwan-related remarks — the spillover risk is demonstrated, not theoretical",
         "Taiwanese public opinion trends away from unification over time",
         "US strategic ambiguity itself is domestically contested"
       ],
-      "source": "US Taiwan Relations Act 1979, China Anti-Secession Law 2005, CSIS 2026"
+      "source": "US Taiwan Relations Act 1979, China Anti-Secession Law 2005, CSIS 2026, Global Taiwan Institute (May 2026)"
     },
     {
       "id": "semiconductor_chokepoint",
@@ -257,7 +259,7 @@
         "id": "stability_index",
         "name": "Cross-Strait Stability Index",
         "description": "Overall measure of peaceful status-quo maintenance (0–100)",
-        "startingValue": 40
+        "startingValue": 38
       },
       {
         "id": "conflict_events",
@@ -269,7 +271,7 @@
         "id": "trade_volume",
         "name": "Trade Volume",
         "description": "Economic exchange between the three nations",
-        "startingValue": 340
+        "startingValue": 345
       },
       {
         "id": "proxy_activity",
@@ -281,7 +283,7 @@
         "id": "deal_integrity",
         "name": "Status Quo Integrity",
         "description": "Likelihood the current ambiguous arrangement holds (0–100)",
-        "startingValue": 48
+        "startingValue": 40
       }
     ]
   },
@@ -393,10 +395,10 @@
     {
       "id": "exp_ambiguity_ends",
       "name": "US Strategic Ambiguity Ends",
-      "question": "What if the US formally commits to Taiwan's defense?",
+      "question": "What if the US finally delivers the delayed arms package and formally commits to Taiwan's defense?",
       "change": {
         "target": "nations.china.governance.hardlinerPressure",
-        "from": 78,
+        "from": 74,
         "to": 90
       },
       "effects": {
@@ -442,7 +444,7 @@
     {
       "id": "exp_japan_deepens_ties",
       "name": "Japan Deepens Security Ties with Taiwan",
-      "question": "What if Japan formally deepens defense cooperation with Taiwan?",
+      "question": "What if Japan formally deepens defense cooperation with Taiwan, on top of already-real semiconductor cooperation?",
       "change": {
         "target": "relationships.taiwan_japan.type",
         "from": "COLD",
@@ -492,10 +494,10 @@
     {
       "id": "exp_pla_hardliners_win",
       "name": "PLA Hardliners Gain Dominant Influence",
-      "question": "What if PLA hardliners gain dominant influence over China's Taiwan policy?",
+      "question": "What if PLA hardliners gain dominant influence over China's Taiwan policy despite the real recent lull in sortie tempo?",
       "change": {
         "target": "nations.china.governance.hardlinerPressure",
-        "from": 78,
+        "from": 74,
         "to": 95
       },
       "effects": {

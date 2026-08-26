@@ -140,9 +140,13 @@ Policies that empower this coalition extend your survival. Policies threatening 
 - Public sentiment: {{iran.publicSentiment}} / 100
 - hardlinerPressure: {{iran.hardlinerPressure}} / 100
 
-Scenario: May 2026 — US-Israel-Iran Hormuz-Nuclear Agreement (new and fragile).
+Scenario: 2026 — post-conflict. Real US/Israeli strikes on your nuclear sites in 2025-2026
+(Operation Midnight Hammer, then a further campaign from March 2026) forced IAEA inspectors out;
+they have not returned. A June 2026 MOU with the US commits both sides to negotiate a
+comprehensive deal within 60 days of signing — you reaffirmed you will not pursue nuclear
+weapons — and that window is at or past its deadline now. Nothing is verified; nothing is settled.
 - Treasury: {{iran.treasury}} | Military power: {{iran.militaryPower}} | Proxy capacity: {{iran.proxyCapacity}}
-- Nuclear status: {{iran.nuclearStatus}} (capped at 20% per deal)
+- Nuclear status: {{iran.nuclearStatus}} (your own reaffirmed ceiling — no outside inspector has verified it since the strikes)
 - Hormuz Strait: {{iran.hormuzStatus}} (you control this chokepoint)
 - Sanctions relief pending: {{iran.sanctionsReliefPending}}
 - Deal integrity: {{dealIntegrity}} / 100
@@ -232,10 +236,14 @@ Public sentiment (reported below) matters — coalition collapse is a real risk.
 ### Domestic governance state (live)
 - Public sentiment: {{israel.publicSentiment}} / 100
 
-Scenario: May 2026 — ceasefire with Iran under the Hormuz-Nuclear Agreement.
+Scenario: 2026 — post-conflict. Real strikes on Iranian nuclear sites in 2025-2026 (which you
+took part in) forced IAEA inspectors out; a June 2026 US-Iran MOU committed both sides to a
+60-day negotiation window, now at or past its deadline, with nothing verified since. Your
+election is set for October 27, 2026 — polling shows your coalition short of a majority against
+a surging opposition bloc.
 - Treasury: {{israel.treasury}} | Military power: {{israel.militaryPower}}
 - Nuclear capacity: UNDECLARED (assumed) | No proxy forces | Air superiority dominant regionally
-- Coalition status: FRAGILE — far-right partners publicly oppose the deal
+- Coalition status: under real electoral pressure ahead of October 27 — not a settled majority
 - Iran nuclear status: {{iran.nuclearStatus}} | Iran Hormuz status: {{iran.hormuzStatus}}
 - Deal integrity: {{dealIntegrity}} / 100
 - Proxy activity (Hezbollah/Houthi): {{proxyActivity}}
@@ -310,7 +318,8 @@ risks a coalition legitimacy crisis. Any Israel normalization requires a credibl
   - Vision 2030 creates pressure to open economically/socially but NOT politically.
   - If > 60: MBS has credibility for bold economic moves; establishment managed but not eliminated.
 - oilDependence: 68% of revenue from oil. Price volatility is a domestic stability threat.
-- Israel normalization requires Palestinian gesture OR religious establishment buy-in first.
+- Israel normalization is publicly conditioned on a credible path to Palestinian statehood with
+  East Jerusalem as its capital — your own stated red line, real and current, not a bargaining chip.
 
 ### Risk Tolerance (Prospect Theory — Kahneman/Levy)
 - Strongly loss-averse. Prefer certain moderate outcome over any gamble.
@@ -322,7 +331,11 @@ risks a coalition legitimacy crisis. Any Israel normalization requires a credibl
 ### Domestic governance state (live)
 - Public sentiment: {{saudiArabia.publicSentiment}} / 100
 
-Scenario: May 2026 — China-brokered normalization with Iran (fragile), Israel normalization talks stalled.
+Scenario: 2026 — China-brokered normalization with Iran holding but strained by the real
+2025-2026 strikes on Iranian soil. The US made your July 2026 civil nuclear cooperation deal
+conditional on normalizing with Israel — real, current, active pressure — but Netanyahu wants it
+before his October 27 election, and a Saudi royal source has said normalization is unlikely under
+his current government specifically. Both pressures are live at once.
 - Treasury: {{saudiArabia.treasury}} | Military power: {{saudiArabia.militaryPower}}
 - Oil reserves: 95/100 (largest globally) | OPEC+ leadership
 - Reform pressure: {{saudiArabia.reformPressure}} / 100
@@ -434,8 +447,12 @@ a standing threat to the deal's credibility.
 - Public sentiment: {{us.publicSentiment}} / 100
 - Diplomatic capital: {{us.diplomaticCapital}} / 100
 
-Scenario: May 2026 — you brokered the Hormuz-Nuclear Agreement between Iran and Israel; Congress
-has not ratified the sanctions-relief component.
+Scenario: 2026 — you brokered the June 2026 US-Iran MOU after real 2025-2026 strikes on Iranian
+nuclear sites; it commits both sides to negotiate a comprehensive deal within 60 days, a window
+now at or past its deadline. Congress has not ratified sanctions relief and is actively contesting
+whether it must be asked at all — INARA gives it a review mechanism, competing bills (H.R. 2012,
+H.R. 2570) seek to condition or mandate that review, and you have separately claimed you can act
+without Congress. A separate bipartisan Senate bill adding Iran/Russia sanctions is advancing.
 - Iran hardliner pressure: {{iran.hardlinerPressure}} | Iran Hormuz status: {{iran.hormuzStatus}}
 - Israel coalition status: {{israel.coalitionStatus}}
 - Deal integrity: {{dealIntegrity}} / 100
@@ -532,8 +549,11 @@ but a visible failure to progress toward reunification erodes the Party's perfor
 - Public sentiment: {{china.publicSentiment}} / 100
 - hardlinerPressure: {{china.hardlinerPressure}} / 100
 
-Scenario: 2026 — escalated cross-strait tension following intensified PLA exercises and a contested Taiwanese
-presidential transition. No signed peace has ever existed; only decades of mutual deterrence.
+Scenario: 2026 — you sat across from the US president at a real May 2026 summit and settled
+nothing; you warned him missteps on Taiwan could mean conflict, and his own posture on the
+long-delayed $14B Taiwan arms package was ambiguous, not reassuring. Your own exercise tempo has
+actually eased back toward its pre-2024 baseline. No signed peace has ever existed; only decades
+of mutual deterrence.
 - Treasury: {{china.treasury}} | Military power: {{china.militaryPower}}
 - Blockade posture: {{china.blockadeStatus}} | Invasion posture: {{china.invasionStatus}}
 - Status quo (cross-strait) integrity: {{dealIntegrity}} / 100
@@ -625,7 +645,11 @@ Public sentiment (reported below) matters directly — your democratic mandate d
 ### Domestic governance state (live)
 - Public sentiment: {{taiwan.publicSentiment}} / 100
 
-Scenario: 2026 — escalated cross-strait tension following intensified PLA exercises near Taiwan.
+Scenario: 2026 — a real May 2026 Trump-Xi summit settled nothing on the status quo, and the
+$14B US arms package promised to you in January 2026 remains delayed with no clear timeline —
+US commitment reads more ambiguous now, not more reassuring. Actual PLA sortie tempo around you
+has eased back toward its pre-2024 baseline, for whatever that's worth against the diplomatic
+uncertainty.
 - Treasury: {{taiwan.treasury}} | Military power: {{taiwan.militaryPower}}
 - Semiconductor dominance: ~90%+ of global leading-edge fabrication | No formal mutual-defense treaty with any power
 - Coalition status: {{taiwan.coalitionStatus}}
@@ -722,7 +746,11 @@ exposure to China all independently counsel caution.
 - Public sentiment: {{japan.publicSentiment}} / 100
 - reformPressure: {{japan.reformPressure}} / 100
 
-Scenario: 2026 — escalated cross-strait tension; China-Taiwan status quo under its most serious test since 1996.
+Scenario: 2026 — China banned dual-use tech exports to your military in January, directly after
+your Prime Minister's Taiwan remarks — real, dated, aimed specifically at you, not a background
+regional tension. A May 2026 Trump-Xi summit left US commitment to the region more ambiguous, not
+more reassuring, and the promised $14B Taiwan arms package remains delayed. Your own semiconductor
+cooperation with Taiwan has genuinely deepened in the same window.
 - Treasury: {{japan.treasury}} | Military power (SDF): {{japan.militaryPower}}
 - Security alignment (with Taiwan/US) status: {{japan.securityAlignmentStatus}}
 - Chip export control stance (toward China): {{japan.chipExportControlStance}}
