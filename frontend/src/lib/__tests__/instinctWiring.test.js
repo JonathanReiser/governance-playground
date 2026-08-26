@@ -191,7 +191,17 @@ describe("proposeInstinctReadingsViaQPU (Tier 2)", () => {
 
     expect(readings.iran.tier).toBe("tier1-fallback");
     expect(readings.iran.qpuError).toBe("fetch failed");
-  });
+    // The Tier 1 fallback this exercises (proposeVetoInstinct -> quantumRandomFloat)
+    // makes a REAL network call to ANU's QRNG with its own 5000ms internal
+    // timeout — no fetchImpl is threaded through to fake it here. Vitest's
+    // default per-test timeout is also 5000ms, an exact tie that's a coin
+    // flip on any CI runner slower than a fast local machine (confirmed
+    // flaky in CI: "Error: Test timed out in 5000ms" right as ANU's own
+    // AbortController was firing at the same deadline). This test's actual
+    // assertions only care about the fallback's SHAPE, not about real
+    // entropy timing, so give it real margin over that inner timeout
+    // instead of racing it.
+  }, 10_000);
 
   it("returns {} immediately for a scenario with no veto-capable nation, without ever calling fetch", async () => {
     const fakeScenario = {
