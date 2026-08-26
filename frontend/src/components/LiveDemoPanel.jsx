@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { LiveRunPanel } from "./LiveRunPanel";
+import { saveRun } from "../lib/runHistory";
 import MIDDLE_EAST_2026 from "../scenarios/middle-east-2026.json";
 import TAIWAN_STRAIT_2026 from "../scenarios/taiwan-strait-2026.json";
 
@@ -141,6 +142,18 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
           setResult(data.result);
           setRunSeed({ state: data.runState, mac: data.runMac });
           setStatus("done");
+
+          const scenarioMeta = SCENARIOS.find((s) => s.id === id);
+          const proposal = (scenarioMeta?.data.startingConditionProposals || [])
+            .find((p) => p.id === data.state?.overrideId);
+          saveRun({
+            registryAddress: data.result.registryAddress,
+            oracleAddress: data.result.oracleAddress,
+            scenarioId: id,
+            scenarioName: scenarioMeta?.name || id,
+            startingConditionId: data.state?.overrideId || "as_researched",
+            startingConditionName: proposal?.name || "Deploy as researched (default)",
+          });
           return;
         }
 
@@ -328,6 +341,21 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
                 </a>
               </div>
             ))}
+          </div>
+          <div className="muted" style={{ fontSize: 12, marginTop: "0.75rem", padding: "0.5rem", border: "1px solid currentColor", borderRadius: 4 }}>
+            <strong>Bookmark or share this run:</strong>{" "}
+            <a
+              href={`${window.location.origin}${window.location.pathname}?view=${result.registryAddress}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ wordBreak: "break-all" }}
+            >
+              {`${window.location.origin}${window.location.pathname}?view=${result.registryAddress}`}
+            </a>
+            <div style={{ marginTop: "0.25rem" }}>
+              Anyone with this link can see this run's real, current on-chain state — no login, no
+              wallet. It's also saved to "My Runs" on this browser, from the Connect screen.
+            </div>
           </div>
           <p style={{ marginTop: "1rem", fontSize: 13 }}>
             That's real — check any of those addresses on Etherscan yourself. From here you
