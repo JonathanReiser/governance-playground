@@ -22,7 +22,7 @@ const SCENARIOS = [
  */
 export function LiveDemoPanel({ onBack, onWantWallet }) {
   const [scenarioId, setScenarioId] = useState(null);
-  const [status, setStatus] = useState("idle"); // idle | deploying | done | running | error
+  const [status, setStatus] = useState("idle"); // idle | picking-condition | deploying | done | running | error
   const [result, setResult] = useState(null);
   const [runSeed, setRunSeed] = useState(null); // { state, mac } — bridges deploy's last step into commit-cycle's first
   const [error, setError] = useState("");
@@ -36,8 +36,11 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   // or a backgrounded tab getting its network suspended partway through
   // (both hit this in practice, not hypothetically — see the "Failed to
   // fetch" case this was built for) shouldn't cost everything already
-  // confirmed on-chain.
-  const checkpoint = useRef({ stepIndex: 0, state: {}, mac: undefined });
+  // confirmed on-chain. `overrideId` rides along too — set once when the
+  // deploy starts, only actually read by the server on step 0 (see
+  // server.js's /api/demo/deploy/step), but kept here so a retry of that
+  // very first request still sends the same choice.
+  const checkpoint = useRef({ stepIndex: 0, state: {}, mac: undefined, overrideId: undefined });
 
   /**
    * A full deploy is ~15-20 confirmed on-chain transactions over several
@@ -61,11 +64,11 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   async function driveLoop(id) {
     try {
       while (true) {
-        const { stepIndex, state, mac } = checkpoint.current;
+        const { stepIndex, state, mac, overrideId } = checkpoint.current;
         const res = await fetch(`${SERVER_URL}/demo/deploy/step`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ scenarioId: id, stepIndex, state, mac }),
+          body: JSON.stringify({ scenarioId: id, stepIndex, state, mac, overrideId }),
         });
 
         // A dead/misconfigured serverless function, a proxy error, or a
@@ -112,13 +115,17 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
     }
   }
 
-  function runDemo(id) {
+  function pickScenario(id) {
     setScenarioId(id);
+    setStatus("picking-condition");
+  }
+
+  function startDeploy(overrideId) {
     setStatus("deploying");
     setError("");
     setProgress({ stepIndex: 0, totalSteps: null, label: "Starting…", txHashes: [] });
-    checkpoint.current = { stepIndex: 0, state: {}, mac: undefined };
-    driveLoop(id);
+    checkpoint.current = { stepIndex: 0, state: {}, mac: undefined, overrideId };
+    driveLoop(scenarioId);
   }
 
   function retryDemo() {
@@ -153,7 +160,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
           </p>
           <div className="connect-options">
             {SCENARIOS.map((s) => (
-              <button key={s.id} className="connect-option secondary" onClick={() => runDemo(s.id)}>
+              <button key={s.id} className="connect-option secondary" onClick={() => pickScenario(s.id)}>
                 <span className="connect-option-icon">🌐</span>
                 <div className="connect-option-text">
                   <strong>{s.name}</strong>
@@ -163,6 +170,32 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
             ))}
           </div>
           <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={onBack}>
+            ← Back
+          </button>
+        </>
+      )}
+
+      {status === "picking-condition" && (
+        <>
+          <p className="muted" style={{ fontSize: 13 }}>
+            Pick a starting condition. "Deploy as researched" uses this scenario's own cited
+            baseline. Every other option is a real, currently-pending or currently-live policy
+            proposal — picking one overrides only the specific numbers that proposal actually
+            affects, real-world, nothing else.
+          </p>
+          <div className="connect-options">
+            {(SCENARIOS.find((s) => s.id === scenarioId)?.data.startingConditionProposals || []).map((p) => (
+              <button key={p.id} className="connect-option secondary" onClick={() => startDeploy(p.id)}>
+                <span className="connect-option-icon">{p.id === "as_researched" ? "📌" : "📰"}</span>
+                <div className="connect-option-text">
+                  <strong>{p.name}</strong>
+                  <span>{p.description}</span>
+                  {p.source && <span style={{ fontStyle: "italic", opacity: 0.75 }}>Source: {p.source}</span>}
+                </div>
+              </button>
+            ))}
+          </div>
+          <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setStatus("idle")}>
             ← Back
           </button>
         </>

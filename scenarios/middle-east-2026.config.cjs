@@ -649,6 +649,94 @@ const MIDDLE_EAST_2026 = {
 
 
   // ─────────────────────────────────────────────
+  // STARTING CONDITION PROPOSALS
+  //
+  // Real, currently-pending or currently-live policy proposals, offered
+  // as alternative deploy-time starting conditions for the AI Agent Cycle
+  // mode — NOT the same thing as the `experiments` block above, which
+  // applies a mid-run change inside the classic fixed-rule engine. Pick
+  // exactly one (or none, for the researched default); it overrides the
+  // specific parameters that proposal actually affects, real-world, and
+  // nothing else — same "one variable changed at a time" discipline this
+  // project's whole pitch rests on, just grounded in what's actually
+  // being debated right now instead of an abstract slider.
+  //
+  // `overrides.nations.<id>` deep-merges into that nation's config;
+  // `overrides.metrics.<simulation.metrics id>` sets that metric's
+  // startingValue. See frontend/src/lib/scenarioOverrides.js /
+  // server/scenarioOverrides.js for the (shared-by-duplication, same
+  // precedent as the deploy logic itself) function that applies these.
+  // ─────────────────────────────────────────────
+
+  startingConditionProposals: [
+    {
+      id: "as_researched",
+      name: "Deploy as researched (default)",
+      description: "No override — this scenario's own re-baselined default, as of 2026-08-26.",
+      source: null,
+      overrides: null,
+    },
+    {
+      id: "congress_blocks_relief",
+      name: "Congress blocks sanctions relief outright",
+      description:
+        "H.R. 2012 and H.R. 2570 seek to mandate congressional review of any Iran sanctions " +
+        "relief under the Iran Nuclear Agreement Review Act (INARA). This proposal deploys as if " +
+        "that review succeeds and Congress blocks relief outright, rather than leaving the " +
+        "question pending.",
+      source: "Congress.gov CRS IF13247 (INARA and U.S. Sanctions, updated June 17, 2026)",
+      overrides: {
+        nations: {
+          iran: {
+            economy: { sanctionsReliefPending: false, sanctioned: true },
+            governance: { hardlinerPressure: 88 },
+          },
+          us: {
+            governance: { diplomaticCapital: 45 },
+          },
+        },
+        metrics: { deal_integrity: 25, stability_index: 26 },
+      },
+    },
+    {
+      id: "senate_sanctions_bill_enacted",
+      name: "The Iran/Russia sanctions bill is enacted",
+      description:
+        "A bipartisan Senate bill adding sanctions on major buyers of Russian and Iranian energy " +
+        "cleared a key procedural hurdle on July 28, 2026. This proposal deploys as if it's since " +
+        "been signed into law.",
+      source: "Bloomberg, \"Senators Reach Deal on Russia, Iran Sanctions Bill Targeting Energy Buyers\" (July 28, 2026)",
+      overrides: {
+        nations: {
+          iran: {
+            economy: { sanctionsReliefPending: false, sanctioned: true },
+            governance: { hardlinerPressure: 85 },
+          },
+        },
+        metrics: { trade_volume: 85, deal_integrity: 30 },
+      },
+    },
+    {
+      id: "saudi_normalizes_anyway",
+      name: "Saudi Arabia normalizes with Israel despite Netanyahu",
+      description:
+        "A Saudi royal source has said normalization is unlikely under Netanyahu's current " +
+        "government specifically, and MBS has publicly conditioned normalization on a credible " +
+        "Palestinian-statehood path. This proposal deploys as if Saudi Arabia moves forward " +
+        "anyway, accepting the US nuclear-deal-linked pressure over its own stated precondition.",
+      source: "NBC News, INSS, Haaretz (July 2026)",
+      overrides: {
+        nations: {
+          saudi_arabia: { governance: { reformPressure: 65 } },
+          iran: { governance: { hardlinerPressure: 85 } }, // real-mechanism proxy: Iran reading this as encirclement
+        },
+        metrics: { stability_index: 36, trade_volume: 140 },
+      },
+    },
+  ],
+
+
+  // ─────────────────────────────────────────────
   // CITIZEN TOKEN DISTRIBUTION
   // Data-driven per nation — no hardcoded nation IDs in the deploy
   // scripts; see scripts/deploy.js / frontend/src/lib/contracts.js.

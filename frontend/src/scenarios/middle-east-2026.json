@@ -534,6 +534,90 @@
       ]
     }
   ],
+  "startingConditionProposals": [
+    {
+      "id": "as_researched",
+      "name": "Deploy as researched (default)",
+      "description": "No override — this scenario's own re-baselined default, as of 2026-08-26.",
+      "source": null,
+      "overrides": null
+    },
+    {
+      "id": "congress_blocks_relief",
+      "name": "Congress blocks sanctions relief outright",
+      "description": "H.R. 2012 and H.R. 2570 seek to mandate congressional review of any Iran sanctions relief under the Iran Nuclear Agreement Review Act (INARA). This proposal deploys as if that review succeeds and Congress blocks relief outright, rather than leaving the question pending.",
+      "source": "Congress.gov CRS IF13247 (INARA and U.S. Sanctions, updated June 17, 2026)",
+      "overrides": {
+        "nations": {
+          "iran": {
+            "economy": {
+              "sanctionsReliefPending": false,
+              "sanctioned": true
+            },
+            "governance": {
+              "hardlinerPressure": 88
+            }
+          },
+          "us": {
+            "governance": {
+              "diplomaticCapital": 45
+            }
+          }
+        },
+        "metrics": {
+          "deal_integrity": 25,
+          "stability_index": 26
+        }
+      }
+    },
+    {
+      "id": "senate_sanctions_bill_enacted",
+      "name": "The Iran/Russia sanctions bill is enacted",
+      "description": "A bipartisan Senate bill adding sanctions on major buyers of Russian and Iranian energy cleared a key procedural hurdle on July 28, 2026. This proposal deploys as if it's since been signed into law.",
+      "source": "Bloomberg, \"Senators Reach Deal on Russia, Iran Sanctions Bill Targeting Energy Buyers\" (July 28, 2026)",
+      "overrides": {
+        "nations": {
+          "iran": {
+            "economy": {
+              "sanctionsReliefPending": false,
+              "sanctioned": true
+            },
+            "governance": {
+              "hardlinerPressure": 85
+            }
+          }
+        },
+        "metrics": {
+          "trade_volume": 85,
+          "deal_integrity": 30
+        }
+      }
+    },
+    {
+      "id": "saudi_normalizes_anyway",
+      "name": "Saudi Arabia normalizes with Israel despite Netanyahu",
+      "description": "A Saudi royal source has said normalization is unlikely under Netanyahu's current government specifically, and MBS has publicly conditioned normalization on a credible Palestinian-statehood path. This proposal deploys as if Saudi Arabia moves forward anyway, accepting the US nuclear-deal-linked pressure over its own stated precondition.",
+      "source": "NBC News, INSS, Haaretz (July 2026)",
+      "overrides": {
+        "nations": {
+          "saudi_arabia": {
+            "governance": {
+              "reformPressure": 65
+            }
+          },
+          "iran": {
+            "governance": {
+              "hardlinerPressure": 85
+            }
+          }
+        },
+        "metrics": {
+          "stability_index": 36,
+          "trade_volume": 140
+        }
+      }
+    }
+  ],
   "citizenDistribution": {
     "israel": [
       {

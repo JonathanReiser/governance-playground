@@ -25,6 +25,7 @@ const {
 } = require("../server/demoDeploy");
 
 const WorldRegistryABI = require("../frontend/src/abi/WorldRegistry.json");
+const NationDAOABI = require("../frontend/src/abi/NationDAO.json");
 const middleEast = require("../frontend/src/scenarios/middle-east-2026.json");
 const taiwanStrait = require("../frontend/src/scenarios/taiwan-strait-2026.json");
 
@@ -232,6 +233,52 @@ describe("demo deploy — step machine", function () {
       );
       expect(out.metrics).to.deep.equal({ stability: 100, conflicts: 0, trade: 0, proxy: 41, dealIntegrity: 60 });
       expect(out.currentCycle).to.equal(1);
+    });
+  });
+
+  describe("starting condition overrides, applied through the real deploy", function () {
+    this.timeout(60_000);
+
+    async function readHardlinerPressure(registryAddress, nationId, signer) {
+      const registry = new ethers.Contract(registryAddress, WorldRegistryABI.abi, signer);
+      const nation = await registry.getNation(nationId);
+      const dao = new ethers.Contract(nation.daoAddress, NationDAOABI.abi, signer);
+      const config = await dao.config();
+      return config.hardlinerPressure;
+    }
+
+    it("a real-proposal override lands on-chain in the deployed nation's DAO config", async function () {
+      const [signer] = await ethers.getSigners();
+      const result = await deployDemoScenario("middle-east-2026", () => {}, signer, "congress_blocks_relief");
+      const pressure = await readHardlinerPressure(result.registryAddress, "iran", signer);
+      expect(pressure).to.equal(88n);
+    });
+
+    it("an unknown overrideId falls back to the researched default, not an error", async function () {
+      const [signer] = await ethers.getSigners();
+      const result = await deployDemoScenario("middle-east-2026", () => {}, signer, "not-a-real-proposal");
+      const pressure = await readHardlinerPressure(result.registryAddress, "iran", signer);
+      expect(pressure).to.equal(BigInt(middleEast.nations.find((n) => n.id === "iran").governance.hardlinerPressure));
+    });
+
+    it("step-by-step: overrideId set on step 0 carries through every later step via sealed state", async function () {
+      const [signer] = await ethers.getSigners();
+      let state = {};
+      let out = await runDeployStep("taiwan-strait-2026", 0, state, signer, "arms_package_delivered");
+      state = out.state;
+      expect(state.overrideId).to.equal("arms_package_delivered");
+
+      let i = 1;
+      while (!out.done) {
+        // overrideId omitted here on purpose — every step after 0 must
+        // recover it from state, not from a fresh argument.
+        out = await runDeployStep("taiwan-strait-2026", i, state, signer);
+        state = out.state;
+        i += 1;
+      }
+
+      const pressure = await readHardlinerPressure(out.result.registryAddress, "china", signer);
+      expect(pressure).to.equal(82n);
     });
   });
 });

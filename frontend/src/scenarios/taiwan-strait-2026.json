@@ -287,6 +287,86 @@
       }
     ]
   },
+  "startingConditionProposals": [
+    {
+      "id": "as_researched",
+      "name": "Deploy as researched (default)",
+      "description": "No override — this scenario's own re-baselined default, as of 2026-08-26.",
+      "source": null,
+      "overrides": null
+    },
+    {
+      "id": "arms_package_delivered",
+      "name": "The $14B arms package is finally delivered",
+      "description": "A bipartisan group of senators urged Trump to formally notify Congress of the $14B Taiwan arms package ahead of the May 2026 summit; Trump's own posture on it stayed ambiguous rather than reassuring, and it remains delayed. This proposal deploys as if the US delivers it after all.",
+      "source": "exportcompliancedaily.com, \"Senators Call for Moving Ahead With US Arms Sales to Taiwan\" (May 12, 2026)",
+      "overrides": {
+        "nations": {
+          "china": {
+            "governance": {
+              "hardlinerPressure": 82
+            }
+          },
+          "taiwan": {
+            "governance": {
+              "hardlinerPressure": 32
+            }
+          }
+        },
+        "metrics": {
+          "deal_integrity": 32,
+          "stability_index": 34
+        }
+      }
+    },
+    {
+      "id": "china_expands_japan_export_ban",
+      "name": "China expands the export ban against Japan",
+      "description": "China banned dual-use technology exports to Japanese military end-users in January 2026, directly after Taiwan remarks by PM Sanae Takaichi. This proposal deploys as if that ban is expanded further, rather than staying at its January 2026 scope.",
+      "source": "China-Japan export-ban reporting (January 2026)",
+      "overrides": {
+        "nations": {
+          "japan": {
+            "governance": {
+              "reformPressure": 75
+            }
+          },
+          "china": {
+            "governance": {
+              "hardlinerPressure": 78
+            }
+          }
+        },
+        "metrics": {
+          "trade_volume": 310,
+          "stability_index": 34
+        }
+      }
+    },
+    {
+      "id": "trilateral_semiconductor_pact",
+      "name": "The Taiwan-Japan semiconductor cooperation is formalized trilaterally",
+      "description": "A March 2026 trilateral MOU (Kumamoto Prefecture, Kaohsiung City, and the US state of Arizona) on advanced semiconductor manufacturing is currently informal cooperation. This proposal deploys as if it's since been formalized into a binding trilateral pact.",
+      "source": "Taiwan News, \"Taiwan-Japan supply chains become security strategy\" (July 22, 2026)",
+      "overrides": {
+        "nations": {
+          "japan": {
+            "governance": {
+              "reformPressure": 72
+            }
+          },
+          "china": {
+            "governance": {
+              "hardlinerPressure": 79
+            }
+          }
+        },
+        "metrics": {
+          "trade_volume": 380
+        }
+      }
+    }
+  ],
   "citizenDistribution": {
     "china": [
       {

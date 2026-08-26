@@ -1335,12 +1335,18 @@ app.get("/api/demo/status", async (_req, res) => {
 // one — no server-side session, so it works the same regardless of which
 // Vercel instance picks up the next request.
 app.post("/api/demo/deploy/step", demoDeployLimiter, async (req, res) => {
-  const { scenarioId, stepIndex, mac } = req.body || {};
+  const { scenarioId, stepIndex, mac, overrideId } = req.body || {};
   if (!scenarioId || !Number.isInteger(stepIndex)) {
     return res.status(400).json({ error: "scenarioId and integer stepIndex required" });
   }
   // Step 0 starts a fresh run — any state the client sent is ignored, not
-  // just unverified, so there's nothing to forge yet.
+  // just unverified, so there's nothing to forge yet. Same reasoning
+  // applies to overrideId: it's only ever read from the request on step
+  // 0 (see runDeployStep) — every later step gets it back out of the
+  // already-verified, HMAC-sealed state instead, so it can't be swapped
+  // mid-deploy. An unknown overrideId isn't rejected here — see
+  // applyStartingConditionOverride's own comment on why that's safe:
+  // deploys the researched default rather than corrupting the run.
   const state = stepIndex === 0 ? {} : req.body?.state || {};
   if (JSON.stringify(state).length > 20_000) {
     return res.status(400).json({ error: "state payload too large" });
@@ -1349,7 +1355,7 @@ app.post("/api/demo/deploy/step", demoDeployLimiter, async (req, res) => {
     return res.status(400).json({ error: "Invalid or tampered deploy state — start a new deploy." });
   }
   try {
-    const out = await runDeployStep(scenarioId, stepIndex, state);
+    const out = await runDeployStep(scenarioId, stepIndex, state, undefined, overrideId);
     const sealed = sealState(scenarioId, out.stepIndex + 1, out.state);
     // On the final deploy step, also mint a run-phase seal (cycleIndex 0,
     // its own namespace) bound to the registry that just came out of
