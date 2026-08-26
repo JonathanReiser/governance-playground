@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { runAutonomousCycle, buildNationMeta, CYCLE_COUNT_OPTIONS, initSimState } from "../lib/cycleRunner";
 import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
@@ -41,26 +41,28 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
   }));
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
+  const [retryable, setRetryable] = useState(false);
 
-  async function runAll(count) {
-    setTotalCycles(count);
-    setPhase("thinking");
-    setError("");
+  // The last successfully-committed checkpoint — a ref, not state, so a
+  // retry reads exactly what the last confirmed commit-cycle response left
+  // behind, not a stale closure. Only ever advanced after a real 200 from
+  // /api/demo/commit-cycle (see below), so it's safe to resume from: never
+  // half-applied. A full run is several real minutes (Claude decisions +
+  // a Sepolia confirmation, per cycle) — long enough for the same "Failed
+  // to fetch" mid-run network drop the deploy loop was hardened against
+  // (LiveDemoPanel.jsx) to hit here too.
+  const checkpoint = useRef({ cycleIndex: 0, state: sealedState, mac: sealedMac, simState, agentMemory });
 
-    let state = sealedState;
-    let mac = sealedMac;
-    let curSimState = simState;
-    let curAgentMemory = agentMemory;
-    const newHistory = [];
-
+  async function driveLoop(count) {
     try {
-      for (let i = 0; i < count; i++) {
+      for (let i = checkpoint.current.cycleIndex; i < count; i++) {
         setCycleIndex(i);
         setPhase("thinking");
 
         const cycleNumber = i + 1; // buildWorldState/applyDecisions use 1-based cycle numbers, matching AICycleStep
-        const { decisions, committed, quantum, market, newAgentMemory } =
-          await runAutonomousCycle(scenario, curSimState, cycleNumber, curAgentMemory);
+        const { decisions, committed, quantum, market, newAgentMemory } = await runAutonomousCycle(
+          scenario, checkpoint.current.simState, cycleNumber, checkpoint.current.agentMemory
+        );
 
         setPhase("committing");
         const res = await fetch(`${SERVER_URL}/demo/commit-cycle`, {
@@ -70,8 +72,8 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
             scenarioId,
             cycleIndex: i,
             totalCycles: count,
-            state,
-            mac,
+            state: checkpoint.current.state,
+            mac: checkpoint.current.mac,
             metrics: {
               stability: committed.stability,
               conflicts: committed.conflicts,
@@ -90,22 +92,33 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Cycle commit failed");
 
-        state = data.state;
-        mac = data.mac;
-        curSimState = committed;
-        curAgentMemory = newAgentMemory;
+        checkpoint.current = {
+          cycleIndex: i + 1, state: data.state, mac: data.mac, simState: committed, agentMemory: newAgentMemory,
+        };
 
         const snapshot = { cycle: cycleNumber, committed, decisions, quantum, market, txHash: data.txHash };
-        newHistory.push(snapshot);
-        setHistory([...newHistory]);
+        setHistory((h) => [...h, snapshot]);
         setSimState(committed);
         setAgentMemory(newAgentMemory);
       }
       setPhase("finished");
     } catch (e) {
       setError(e.message);
+      setRetryable(!/Invalid or tampered/.test(e.message));
       setPhase("error");
     }
+  }
+
+  function runAll(count) {
+    setTotalCycles(count);
+    setError("");
+    checkpoint.current = { cycleIndex: 0, state: sealedState, mac: sealedMac, simState, agentMemory };
+    driveLoop(count);
+  }
+
+  function retryRun() {
+    setError("");
+    driveLoop(totalCycles);
   }
 
   const latest = history[history.length - 1];
@@ -199,7 +212,18 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
       {phase === "error" && (
         <div className="error-box" style={{ marginTop: "1rem" }}>
           {error}
-          <div style={{ marginTop: "0.6rem" }}>
+          {retryable && history.length > 0 && (
+            <p className="muted" style={{ fontSize: 12, marginTop: "0.4rem" }}>
+              Cycle{history.length === 1 ? "" : "s"} 1–{history.length} already committed for real above
+              — retrying picks up at cycle {history.length + 1}, not the start.
+            </p>
+          )}
+          <div style={{ marginTop: "0.6rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            {retryable && (
+              <button className="btn-primary" onClick={retryRun} style={{ fontSize: 12 }}>
+                ↻ Retry from here
+              </button>
+            )}
             <button className="btn-secondary" onClick={onExit} style={{ fontSize: 12 }}>
               ← Back
             </button>
