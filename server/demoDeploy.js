@@ -111,7 +111,7 @@ async function getDemoStatus() {
     enabled: true,
     address,
     balanceEth,
-    // A full scenario deploy is ~15-20 transactions; well under 0.02 ETH
+    // A full scenario deploy is ~10-12 transactions; well under 0.02 ETH
     // of Sepolia gas even at generous prices, but flag low balance before
     // it fails mid-deploy (worse UX than failing up front).
     lowBalance: balanceEth < 0.02,
@@ -121,8 +121,24 @@ async function getDemoStatus() {
 /**
  * The deterministic sequence of on-chain steps for a scenario — pure and
  * network-free, so it's a plain data description of "what deployDemoScenario
- * used to do inline" rather than a black box. Same order as the original
- * one-shot function; nothing reordered, nothing added or dropped.
+ * used to do inline" rather than a black box.
+ *
+ * Each step here is one real Sepolia transaction, and each transaction is
+ * a real block confirmation a visitor waits through — so the step COUNT
+ * directly is the deploy's wall-clock length. This list uses WorldRegistry's
+ * batched functions (bootstrapConfig, registerNationAndDistributeCitizenship,
+ * setRelationships, createGlobalEvents, setInitialMetricsAndStart) wherever
+ * a group of calls has no dependency on each other and was always issued
+ * back-to-back by this same signer anyway — see each function's own doc
+ * comment in WorldRegistry.sol for why that specific merge is safe. The
+ * four steps that genuinely can't merge (deployRegistry, deployOracle,
+ * deployTokenFactory, deployDaoFactory) are each a separate LARGE contract
+ * deployment — bundling any two of their creation bytecodes into one
+ * wrapper contract would exceed EIP-170's 24,576-byte limit, confirmed
+ * against their actual compiled sizes, not just estimated.
+ * For Middle East 2026 this is 12 steps, down from 21 before batching —
+ * confirmed by this file's own test coverage reaching the identical end
+ * state either way.
  */
 function getDeploySteps(scenarioId) {
   const scenario = SCENARIOS[scenarioId];
@@ -133,28 +149,23 @@ function getDeploySteps(scenarioId) {
   const steps = [
     { type: "deployRegistry", label: "Deploying WorldRegistry…" },
     { type: "deployOracle", label: "Deploying MetricsOracle…" },
-    { type: "wireOracle", label: "Wiring oracle…" },
     { type: "deployTokenFactory", label: "Deploying nation factories…" },
     { type: "deployDaoFactory", label: "Deploying nation factories…" },
-    { type: "wireFactories", label: "Wiring nation factories…" },
-    { type: "initScenario", label: "Initializing scenario…" },
+    { type: "bootstrapConfig", label: "Wiring contracts and initializing scenario…" },
   ];
   for (const nation of scenario.nations) {
     steps.push({ type: "registerNation", nationId: nation.id, label: `Deploying ${nation.name}…` });
   }
-  for (const nationId of Object.keys(scenario.citizenDistribution || {})) {
-    steps.push({ type: "distributeCitizenship", nationId, label: "Distributing citizenship tokens…" });
+  if (scenario.relationships.length > 0) {
+    steps.push({ type: "setRelationships", label: "Setting relationships…" });
   }
-  scenario.relationships.forEach((_rel, index) => {
-    steps.push({ type: "setRelationship", index, label: "Setting relationships…" });
-  });
-  scenario.activeEvents.forEach((evt, index) => {
-    if (evt.type === "PEACE_DEAL" || evt.type === "RESOURCE_EVENT") {
-      steps.push({ type: "registerEvent", index, label: "Registering events…" });
-    }
-  });
-  steps.push({ type: "setMetrics", label: "Setting initial metrics…" });
-  steps.push({ type: "startSimulation", label: "Starting simulation…" });
+  const qualifyingEvents = scenario.activeEvents.filter(
+    (evt) => evt.type === "PEACE_DEAL" || evt.type === "RESOURCE_EVENT"
+  );
+  if (qualifyingEvents.length > 0) {
+    steps.push({ type: "createGlobalEvents", label: "Registering events…" });
+  }
+  steps.push({ type: "setMetricsAndStart", label: "Setting initial metrics and starting simulation…" });
   return steps;
 }
 
@@ -200,8 +211,8 @@ function verifySealedState(scenarioId, stepIndex, state, mac, namespace = "deplo
  * Runs exactly ONE step of a scenario deploy and returns immediately —
  * this is the piece that used to be the entire body of deployDemoScenario,
  * split apart so a single HTTP request only ever does one confirmed
- * transaction's worth of work (a few seconds) instead of the whole ~15-20
- * tx, several-minute sequence. See server.js's /api/demo/deploy/step for
+ * transaction's worth of work (a few seconds) instead of the whole
+ * ~10-12 tx sequence. See server.js's /api/demo/deploy/step for
  * why: that full sequence run inside one Vercel serverless invocation is
  * what produced the "Unexpected token 'A'..." JSON-parse error — the
  * platform kills the function before it finishes and returns its own
@@ -232,7 +243,6 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
 
   const attach = (address, abi) => new ethers.Contract(address, abi, signer);
   const registry = () => attach(s.registryAddress, WorldRegistryABI.abi);
-  const oracle = () => attach(s.oracleAddress, MetricsOracleABI.abi);
 
   // Each case below either mutates `next`/`txHash` only after its await
   // resolves, or not at all before throwing — so re-running the whole
@@ -265,11 +275,6 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
       txHash = oracleContract.deploymentTransaction()?.hash;
       break;
     }
-    case "wireOracle": {
-      const receipt = await (await registry().setMetricsOracle(s.oracleAddress)).wait();
-      txHash = receipt.hash;
-      break;
-    }
     case "deployTokenFactory": {
       const TokenFactoryFactory = new ethers.ContractFactory(CitizenTokenFactoryABI.abi, CitizenTokenFactoryABI.bytecode, signer);
       const tokenFactory = await TokenFactoryFactory.deploy();
@@ -286,13 +291,11 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
       txHash = daoFactory.deploymentTransaction()?.hash;
       break;
     }
-    case "wireFactories": {
-      const receipt = await (await registry().setNationFactories(s.tokenFactoryAddress, s.daoFactoryAddress)).wait();
-      txHash = receipt.hash;
-      break;
-    }
-    case "initScenario": {
-      const receipt = await (await registry().initializeScenario(
+    case "bootstrapConfig": {
+      const receipt = await (await registry().bootstrapConfig(
+        s.oracleAddress,
+        s.tokenFactoryAddress,
+        s.daoFactoryAddress,
         scenario.meta.name,
         scenario.meta.version,
         BigInt(scenario.simulation.defaultCycles)
@@ -305,6 +308,9 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
     // where MetaMask/Dev Mode can expose multiple local accounts. Fine for
     // a demo: governance mechanics still run for real, just without
     // distinct human actors behind each veto role.
+    // Demo wallet fills every citizen slot too — see registerNation's own
+    // comment above; distribution addresses are all the same signer, real
+    // amounts, real on-chain balances, just no distinct human holders.
     case "registerNation": {
       const nation = scenario.nations.find((n) => n.id === step.nationId);
       const gov = nation.governance;
@@ -325,12 +331,21 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
         hardlinerPressure: BigInt(gov.hardlinerPressure || 0),
         reformPressure: BigInt(gov.reformPressure || 0),
       };
+      // Not every nation necessarily has citizen-distribution data — an
+      // empty array is valid calldata (see the contract function's own
+      // "works with zero citizens" test) and just means no distribution.
+      const allocations = scenario.citizenDistribution?.[nation.id] || [];
+      const citizenAddrs = allocations.map(() => addr);
+      const citizenAmounts = allocations.map((a) => BigInt(a.amount) * BigInt(10 ** 18));
+
       const reg = registry();
-      const receipt = await (await reg.registerNation(
+      const receipt = await (await reg.registerNationAndDistributeCitizenship(
         config,
         BigInt(1_000_000) * BigInt(10 ** 18),
         BigInt(nation.economy.treasury),
-        BigInt(nation.military.power)
+        BigInt(nation.military.power),
+        citizenAddrs,
+        citizenAmounts
       )).wait();
       txHash = receipt.hash;
       const registered = await reg.getNation(nation.id);
@@ -340,49 +355,42 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
       };
       break;
     }
-    case "distributeCitizenship": {
-      const allocations = scenario.citizenDistribution[step.nationId];
-      const addrs = allocations.map(() => addr); // single demo signer fills every slot
-      const amounts = allocations.map((a) => BigInt(a.amount) * BigInt(10 ** 18));
-      const receipt = await (await registry().distributeCitizenship(step.nationId, addrs, amounts)).wait();
+    case "setRelationships": {
+      const rels = scenario.relationships.map((rel) => ({
+        fromId: rel.from,
+        toId: rel.to,
+        relType: RelationshipType[rel.type] ?? RelationshipType.NEUTRAL,
+        stabilityScore: BigInt(rel.stabilityScore),
+        treatyActive: rel.treatyActive,
+        treatyName: rel.treatyName || "",
+      }));
+      const receipt = await (await registry().setRelationships(rels)).wait();
       txHash = receipt.hash;
       break;
     }
-    case "setRelationship": {
-      const rel = scenario.relationships[step.index];
-      const receipt = await (await registry().setRelationship(
-        rel.from, rel.to,
-        RelationshipType[rel.type] ?? RelationshipType.NEUTRAL,
-        BigInt(rel.stabilityScore),
-        rel.treatyActive, rel.treatyName || ""
-      )).wait();
+    case "createGlobalEvents": {
+      const events = scenario.activeEvents
+        .filter((evt) => evt.type === "PEACE_DEAL" || evt.type === "RESOURCE_EVENT")
+        .map((evt) => ({
+          id: evt.id,
+          name: evt.name,
+          eventType: EventType[evt.type] ?? EventType.PEACE_DEAL,
+          parties: evt.parties || [],
+          description: evt.description,
+        }));
+      const receipt = await (await registry().createGlobalEvents(events)).wait();
       txHash = receipt.hash;
       break;
     }
-    case "registerEvent": {
-      const evt = scenario.activeEvents[step.index];
-      const receipt = await (await registry().createGlobalEvent(
-        evt.id, evt.name,
-        EventType[evt.type] ?? EventType.PEACE_DEAL,
-        evt.parties || [], evt.description
-      )).wait();
-      txHash = receipt.hash;
-      break;
-    }
-    case "setMetrics": {
+    case "setMetricsAndStart": {
       const m = scenario.simulation.metrics;
-      const receipt = await (await oracle().updateMetrics(
+      const receipt = await (await registry().setInitialMetricsAndStart(
         BigInt(m.find((x) => x.id === "stability_index").startingValue),
         BigInt(m.find((x) => x.id === "conflict_events").startingValue),
         BigInt(m.find((x) => x.id === "trade_volume").startingValue),
         BigInt(m.find((x) => x.id === "proxy_activity").startingValue),
         BigInt(m.find((x) => x.id === "deal_integrity").startingValue)
       )).wait();
-      txHash = receipt.hash;
-      break;
-    }
-    case "startSimulation": {
-      const receipt = await (await registry().startSimulation()).wait();
       txHash = receipt.hash;
       break;
     }

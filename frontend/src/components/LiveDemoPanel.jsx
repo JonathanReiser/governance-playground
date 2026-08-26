@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { LiveRunPanel } from "./LiveRunPanel";
 import { saveRun, viewUrlFor } from "../lib/runHistory";
+import { estimateRemainingMs, formatDuration } from "../lib/eta";
 import MIDDLE_EAST_2026 from "../scenarios/middle-east-2026.json";
 import TAIWAN_STRAIT_2026 from "../scenarios/taiwan-strait-2026.json";
 
@@ -79,7 +80,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   // The last successfully-sealed checkpoint — a ref, not state, so a retry
   // reads the exact values a mid-loop failure left behind rather than a
   // stale closure over whatever `runDemo` captured at the start. A real
-  // multi-minute run is ~21 sequential requests; a dropped WiFi connection
+  // multi-minute run is ~10-12 sequential requests; a dropped WiFi connection
   // or a backgrounded tab getting its network suspended partway through
   // (both hit this in practice, not hypothetically — see the "Failed to
   // fetch" case this was built for) shouldn't cost everything already
@@ -89,8 +90,22 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   // very first request still sends the same choice.
   const checkpoint = useRef({ stepIndex: 0, state: {}, mac: undefined, overrideId: undefined });
 
+  // Wall-clock start of the current deploy attempt. `elapsedMs` is state,
+  // not a ref read during render: Date.now() and the ref itself are only
+  // ever touched inside the interval callback below, an effect, never in
+  // the render body (React's purity rules disallow both there).
+  const deployStartRef = useRef(null);
+  const [elapsedMs, setElapsedMs] = useState(0);
+  useEffect(() => {
+    if (status !== "deploying") return;
+    const id = setInterval(() => {
+      if (deployStartRef.current) setElapsedMs(Date.now() - deployStartRef.current);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [status]);
+
   /**
-   * A full deploy is ~15-20 confirmed on-chain transactions over several
+   * A full deploy is ~10-12 confirmed on-chain transactions over a couple
    * minutes — too long for one serverless request (that mismatch is what
    * used to break this originally: the platform killed the request and
    * returned a non-JSON timeout page, the "Unexpected token 'A'..." error).
@@ -185,6 +200,13 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
     setError("");
     setProgress({ stepIndex: 0, totalSteps: null, label: "Starting…", txHashes: [] });
     checkpoint.current = { stepIndex: 0, state: {}, mac: undefined, overrideId };
+    // Only ever runs from this onClick-triggered function, never during
+    // render; the lint rule can't distinguish that statically for a
+    // function this deep in the component body, but Date.now() here has
+    // no render-timing risk.
+    // eslint-disable-next-line react-hooks/purity
+    deployStartRef.current = Date.now();
+    setElapsedMs(0);
     driveLoop(scenarioId);
   }
 
@@ -271,9 +293,19 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
           <p style={{ fontSize: 13, fontWeight: 600 }}>{progress.label}</p>
           <p className="muted" style={{ fontSize: 12 }}>
             {progress.totalSteps ? `Step ${progress.stepIndex + 1} of ${progress.totalSteps}` : "Starting…"}
-            {" — each step is a real, separately confirmed Sepolia transaction (~6 minutes"}
-            {" end to end, on purpose: this isn't faking testnet block times)."}
+            {" — each step is a real, separately confirmed Sepolia transaction, on purpose:"}
+            {" this isn't faking testnet block times."}
           </p>
+          {(() => {
+            const etaMs = estimateRemainingMs(progress.txHashes.length, progress.totalSteps, elapsedMs);
+            const etaText = formatDuration(etaMs);
+            return (
+              <p className="muted" style={{ fontSize: 11 }}>
+                Elapsed: {formatDuration(elapsedMs) || "0s"}
+                {etaText ? ` — about ${etaText} remaining, based on this run's own pace so far` : ""}
+              </p>
+            );
+          })()}
           {progress.txHashes.length > 0 && (
             <div
               className="muted"

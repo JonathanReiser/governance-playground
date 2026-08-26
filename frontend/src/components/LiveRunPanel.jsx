@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   runAutonomousCycle, buildNationMeta, CYCLE_COUNT_OPTIONS, initSimState,
   buildDecisionRecords, summarizeQuantum, summarizeMarket,
 } from "../lib/cycleRunner";
 import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
+import { estimateRemainingMs, formatDuration } from "../lib/eta";
 
 const SERVER_URL = "/api";
 
@@ -55,6 +56,22 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
   // to fetch" mid-run network drop the deploy loop was hardened against
   // (LiveDemoPanel.jsx) to hit here too.
   const checkpoint = useRef({ cycleIndex: 0, state: sealedState, mac: sealedMac, simState, agentMemory });
+
+  // Same live elapsed/ETA pattern as LiveDemoPanel.jsx's deploy phase —
+  // see estimateRemainingMs's own header comment for why this is a real,
+  // data-driven estimate (built from this run's own pace) rather than a
+  // fixed guess. `elapsedMs` is state, not a ref read during render:
+  // Date.now() and the ref itself are only ever touched inside the
+  // interval callback below, an effect, never in the render body itself.
+  const runStartRef = useRef(null);
+  const [elapsedMs, setElapsedMs] = useState(0);
+  useEffect(() => {
+    if (phase !== "thinking" && phase !== "committing") return;
+    const id = setInterval(() => {
+      if (runStartRef.current) setElapsedMs(Date.now() - runStartRef.current);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [phase]);
 
   async function driveLoop(count) {
     try {
@@ -123,6 +140,11 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
     setTotalCycles(count);
     setError("");
     checkpoint.current = { cycleIndex: 0, state: sealedState, mac: sealedMac, simState, agentMemory };
+    // Only ever runs from this onClick-triggered function, never during
+    // render; see the identical case in LiveDemoPanel.jsx's startDeploy.
+    // eslint-disable-next-line react-hooks/purity
+    runStartRef.current = Date.now();
+    setElapsedMs(0);
     driveLoop(count);
   }
 
@@ -151,7 +173,7 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
               <button key={n} className="connect-option secondary" onClick={() => runAll(n)}>
                 <span className="connect-option-icon">▶</span>
                 <div className="connect-option-text">
-                  <strong>{n} cycles</strong>
+                  <strong>{n} cycle{n === 1 ? "" : "s"}</strong>
                   <span>~{n} minute{n === 1 ? "" : "s"}</span>
                 </div>
               </button>
@@ -169,6 +191,16 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
             Cycle {cycleIndex + 1} of {totalCycles}
             {phase === "thinking" ? " — nations are reasoning…" : " — committing to Sepolia…"}
           </p>
+          {(() => {
+            const etaMs = estimateRemainingMs(history.length, totalCycles, elapsedMs);
+            const etaText = formatDuration(etaMs);
+            return (
+              <p className="muted" style={{ fontSize: 11 }}>
+                Elapsed: {formatDuration(elapsedMs) || "0s"}
+                {etaText ? ` — about ${etaText} remaining, based on this run's own pace so far` : ""}
+              </p>
+            );
+          })()}
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", margin: "0.5rem 0" }}>
             {nationIds.map((id) => (
               <span

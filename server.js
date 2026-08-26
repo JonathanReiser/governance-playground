@@ -1297,11 +1297,11 @@ const { getDemoStatus, runDeployStep, commitDemoCycle, sealState, verifySealedSt
 // Keep in sync with frontend/src/lib/cycleRunner.js's CYCLE_COUNT_OPTIONS —
 // duplicated rather than shared for the same reason demoDeploy.js's own
 // header comment gives for its ABI/deploy-logic duplication: this file is
-// CommonJS, the frontend is ESM, and a 3-element array isn't worth a
+// CommonJS, the frontend is ESM, and a 4-element array isn't worth a
 // module-system workaround.
-const CYCLE_COUNT_OPTIONS = [3, 5, 10];
+const CYCLE_COUNT_OPTIONS = [1, 3, 5, 10];
 
-// Each deploy run is ~15-20 transactions split across that many step
+// Each deploy run is ~10-12 transactions split across that many step
 // requests now (see /api/demo/deploy/step below) — this caps DEPLOY RUNS,
 // not requests, so it still bounds how fast the funded demo wallet can be
 // drained by one abusive IP without also making a single full run

@@ -18,7 +18,7 @@
 
 import { NationAgent, buildWorldState, applyDecisions, createRealEntropyPool } from "./agents";
 
-export const CYCLE_COUNT_OPTIONS = [3, 5, 10];
+export const CYCLE_COUNT_OPTIONS = [1, 3, 5, 10];
 
 // Metric config ids (shared across every scenario, see simulation.metrics
 // in each scenario config) -> the camelCase keys used throughout
