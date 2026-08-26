@@ -11,6 +11,9 @@
  *   3. The step machine actually deploys a working scenario, run against
  *      Hardhat's local network (no real Sepolia ETH, no real time cost),
  *      with the demo wallet swapped for an injected local signer.
+ *   4. commitDemoCycle() — the no-wallet "watch it play out" run phase's
+ *      only on-chain piece — and the namespace that keeps its cycleIndex
+ *      counter from colliding with deploy's stepIndex counter.
  */
 
 const { expect } = require("chai");
@@ -18,7 +21,7 @@ const hre = require("hardhat");
 const { ethers } = hre;
 
 const {
-  getDeploySteps, runDeployStep, deployDemoScenario, sealState, verifySealedState,
+  getDeploySteps, runDeployStep, commitDemoCycle, deployDemoScenario, sealState, verifySealedState,
 } = require("../server/demoDeploy");
 
 const WorldRegistryABI = require("../frontend/src/abi/WorldRegistry.json");
@@ -162,6 +165,73 @@ describe("demo deploy — step machine", function () {
       }
       expect(threw).to.not.equal(null);
       expect(threw.message).to.match(/stepIndex out of range/);
+    });
+  });
+
+  describe("namespaced seals (deploy phase vs run phase)", function () {
+    const savedKey = process.env.DEMO_PRIVATE_KEY;
+    before(function () {
+      process.env.DEMO_PRIVATE_KEY = "test-only-hmac-key-not-a-real-wallet";
+    });
+    after(function () {
+      if (savedKey === undefined) delete process.env.DEMO_PRIVATE_KEY;
+      else process.env.DEMO_PRIVATE_KEY = savedKey;
+    });
+
+    it("a deploy-phase seal does not verify under the run namespace, even at the same index", function () {
+      const { state, mac } = sealState("middle-east-2026", 3, { registryAddress: "0xAAA" }); // default namespace: "deploy"
+      expect(verifySealedState("middle-east-2026", 3, state, mac, "deploy")).to.equal(true);
+      expect(verifySealedState("middle-east-2026", 3, state, mac, "run")).to.equal(false);
+    });
+
+    it("a run-phase seal does not verify under the deploy namespace", function () {
+      const { state, mac } = sealState("middle-east-2026", 0, { registryAddress: "0xAAA" }, "run");
+      expect(verifySealedState("middle-east-2026", 0, state, mac, "run")).to.equal(true);
+      expect(verifySealedState("middle-east-2026", 0, state, mac, "deploy")).to.equal(false);
+      expect(verifySealedState("middle-east-2026", 0, state, mac)).to.equal(false); // default namespace is "deploy"
+    });
+  });
+
+  describe("commitDemoCycle, run on a local network", function () {
+    this.timeout(120_000);
+
+    it("advances currentCycle and flips simulationActive off at the last cycle", async function () {
+      const [signer] = await ethers.getSigners();
+      const deployResult = await deployDemoScenario("middle-east-2026", () => {}, signer);
+      const registry = new ethers.Contract(deployResult.registryAddress, WorldRegistryABI.abi, signer);
+
+      expect(await registry.currentCycle()).to.equal(0n);
+      expect(await registry.totalCycles()).to.equal(BigInt(middleEast.simulation.defaultCycles));
+
+      const out1 = await commitDemoCycle(
+        deployResult.registryAddress,
+        { stability: 55, conflicts: 3, trade: 120, proxy: 40, dealIntegrity: 60 },
+        signer
+      );
+      expect(out1.currentCycle).to.equal(1);
+      expect(out1.simulationActive).to.equal(true);
+      expect(await registry.currentCycle()).to.equal(1n);
+
+      const out2 = await commitDemoCycle(
+        deployResult.registryAddress,
+        { stability: 40, conflicts: 8, trade: 90, proxy: 60, dealIntegrity: 30 },
+        signer
+      );
+      expect(out2.currentCycle).to.equal(2);
+      expect(out2.txHash).to.not.equal(out1.txHash);
+    });
+
+    it("clamps out-of-range and malformed metrics instead of reverting or writing garbage", async function () {
+      const [signer] = await ethers.getSigners();
+      const deployResult = await deployDemoScenario("taiwan-strait-2026", () => {}, signer);
+
+      const out = await commitDemoCycle(
+        deployResult.registryAddress,
+        { stability: 500, conflicts: -10, trade: "not a number", proxy: 40.7, dealIntegrity: 60 },
+        signer
+      );
+      expect(out.metrics).to.deep.equal({ stability: 100, conflicts: 0, trade: 0, proxy: 41, dealIntegrity: 60 });
+      expect(out.currentCycle).to.equal(1);
     });
   });
 });

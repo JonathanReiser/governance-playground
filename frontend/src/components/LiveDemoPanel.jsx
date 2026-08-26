@@ -1,29 +1,30 @@
 import { useState } from "react";
+import { LiveRunPanel } from "./LiveRunPanel";
+import MIDDLE_EAST_2026 from "../scenarios/middle-east-2026.json";
+import TAIWAN_STRAIT_2026 from "../scenarios/taiwan-strait-2026.json";
 
 const SERVER_URL = "/api";
 
 const SCENARIOS = [
-  { id: "middle-east-2026", name: "Middle East 2026", blurb: "Israel, Iran, Saudi Arabia, United States" },
-  { id: "taiwan-strait-2026", name: "Taiwan Strait", blurb: "China, Taiwan, Japan" },
+  { id: "middle-east-2026", name: "Middle East 2026", blurb: "Israel, Iran, Saudi Arabia, United States", data: MIDDLE_EAST_2026 },
+  { id: "taiwan-strait-2026", name: "Taiwan Strait", blurb: "China, Taiwan, Japan", data: TAIWAN_STRAIT_2026 },
 ];
 
 /**
  * No-wallet path: deploys a real, isolated scenario instance on Sepolia
  * using a server-held demo key, so a visitor with no MetaMask and no
- * testnet ETH can still see a genuine on-chain deployment.
- *
- * Deliberately scoped to deploy-only for now, not the full Run/Results
- * flow — running AI cycles writes further transactions, and letting a
- * stranger's browser drive a signer it doesn't hold isn't attempted here
- * (see server/demoDeploy.js's header comment). A visitor who wants to
- * actually run cycles is pointed at connecting their own wallet next,
- * which is an honest, not a dead-end, next step — their own deploy is
- * just as real and citable as this one.
+ * testnet ETH can still see a genuine on-chain deployment — and, once
+ * deployed, can optionally watch it play out for real too (LiveRunPanel):
+ * real Claude decisions, real quantum collapse, real Sepolia commits, no
+ * wallet needed for any of it, no human review in between (that's the
+ * one deliberate difference from the wallet-connected researcher tool —
+ * see LiveRunPanel's own header comment).
  */
 export function LiveDemoPanel({ onBack, onWantWallet }) {
   const [scenarioId, setScenarioId] = useState(null);
-  const [status, setStatus] = useState("idle"); // idle | deploying | done | error
+  const [status, setStatus] = useState("idle"); // idle | deploying | done | running | error
   const [result, setResult] = useState(null);
+  const [runSeed, setRunSeed] = useState(null); // { state, mac } — bridges deploy's last step into commit-cycle's first
   const [error, setError] = useState("");
   const [progress, setProgress] = useState({ stepIndex: 0, totalSteps: null, label: "", txHashes: [] });
 
@@ -76,6 +77,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
 
         if (data.done) {
           setResult(data.result);
+          setRunSeed({ state: data.runState, mac: data.runMac });
           setStatus("done");
           return;
         }
@@ -88,6 +90,19 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
       setError(e.message);
       setStatus("error");
     }
+  }
+
+  if (status === "running" && result && runSeed) {
+    return (
+      <LiveRunPanel
+        scenario={SCENARIOS.find((s) => s.id === scenarioId)?.data}
+        scenarioId={scenarioId}
+        registryAddress={result.registryAddress}
+        sealedState={runSeed.state}
+        sealedMac={runSeed.mac}
+        onExit={() => setStatus("done")}
+      />
+    );
   }
 
   return (
@@ -185,14 +200,19 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
             ))}
           </div>
           <p style={{ marginTop: "1rem", fontSize: 13 }}>
-            That's real — check any of those addresses on Etherscan yourself. To run
-            cycles and commit your own results on-chain, connect a wallet next; it's a
-            few minutes of setup (MetaMask + free Sepolia testnet ETH), and your run is
-            just as citable as this one.
+            That's real — check any of those addresses on Etherscan yourself. From here you
+            can watch it run right now with no wallet at all, or connect your own wallet next
+            to drive it yourself (with the human review this autonomous run skips) — either
+            way the result is just as real and citable.
           </p>
-          <button className="btn-primary" style={{ marginTop: "0.5rem" }} onClick={onWantWallet}>
-            Connect a wallet to play →
-          </button>
+          <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
+            <button className="btn-primary" onClick={() => setStatus("running")}>
+              ▶ Watch it play out (no wallet)
+            </button>
+            <button className="btn-secondary" onClick={onWantWallet}>
+              Connect a wallet to play →
+            </button>
+          </div>
         </div>
       )}
     </div>
