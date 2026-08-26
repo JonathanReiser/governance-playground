@@ -43,6 +43,7 @@ export function ConnectStep({ onConnect }) {
         <h1>Governance Playground</h1>
         <p className="hero-tagline">
           A transparent, tamper-proof political science lab.<br />
+          Nation agents read real, live news — this isn't fiction playing out on a script.<br />
           Run controlled experiments on real-world governance scenarios.<br />
           Every finding recorded on-chain — citable, reproducible, immutable.
         </p>
@@ -123,6 +124,11 @@ export function ConnectStep({ onConnect }) {
       )}
 
       <div className="feature-row">
+        <div className="feature">
+          <span className="feature-icon">📰</span>
+          <strong>Real news, programmable</strong>
+          <span>Live headlines feed every decision — a news outlet you can run experiments on</span>
+        </div>
         <div className="feature">
           <span className="feature-icon">🔬</span>
           <strong>Controlled experiments</strong>

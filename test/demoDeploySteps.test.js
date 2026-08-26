@@ -22,6 +22,7 @@ const { ethers } = hre;
 
 const {
   getDeploySteps, runDeployStep, commitDemoCycle, deployDemoScenario, sealState, verifySealedState,
+  isNonceError, withNonceRetry,
 } = require("../server/demoDeploy");
 
 const WorldRegistryABI = require("../frontend/src/abi/WorldRegistry.json");
@@ -279,6 +280,110 @@ describe("demo deploy — step machine", function () {
 
       const pressure = await readHardlinerPressure(out.result.registryAddress, "china", signer);
       expect(pressure).to.equal(82n);
+    });
+  });
+
+  describe("nonce-conflict retry", function () {
+    // Confirmed live in production: "nonce too low: next nonce 126, tx
+    // nonce 125" — two Vercel serverless instances, each with their own
+    // NonceManager cache (see getDemoSigner's header comment), raced on
+    // the shared demo wallet. The rejected transaction was never
+    // broadcast, so retrying with a freshly-fetched nonce is safe.
+
+    it("isNonceError recognizes the exact error shape seen in production", function () {
+      const real = { code: "NONCE_EXPIRED", message: 'nonce has already been used (transaction="0x02f9...", info={ "error": { "code": -32000, "message": "nonce too low: next nonce 126, tx nonce 125" } })' };
+      expect(isNonceError(real)).to.equal(true);
+    });
+
+    it("isNonceError does not misclassify an unrelated error", function () {
+      expect(isNonceError({ code: "CALL_EXCEPTION", message: "execution reverted: insufficient funds" })).to.equal(false);
+    });
+
+    it("withNonceRetry succeeds on the first attempt without ever resetting the signer", async function () {
+      const signer = { reset: () => { throw new Error("should not be called"); } };
+      const result = await withNonceRetry(signer, async () => 42);
+      expect(result).to.equal(42);
+    });
+
+    it("withNonceRetry resets the signer and retries on a nonce error, then succeeds", async function () {
+      let resetCalls = 0;
+      let attempts = 0;
+      const signer = { reset: () => { resetCalls += 1; } };
+
+      const result = await withNonceRetry(signer, async () => {
+        attempts += 1;
+        if (attempts < 3) {
+          const err = new Error("nonce too low: next nonce 126, tx nonce 125");
+          err.code = "NONCE_EXPIRED";
+          throw err;
+        }
+        return "ok";
+      });
+
+      expect(result).to.equal("ok");
+      expect(attempts).to.equal(3);
+      expect(resetCalls).to.equal(2);
+    });
+
+    it("withNonceRetry gives up and rethrows after exhausting retries", async function () {
+      const signer = { reset: () => {} };
+      let attempts = 0;
+      let threw = null;
+      try {
+        await withNonceRetry(signer, async () => {
+          attempts += 1;
+          const err = new Error("nonce too low");
+          err.code = "NONCE_EXPIRED";
+          throw err;
+        }, 2);
+      } catch (e) { threw = e; }
+      expect(threw).to.not.equal(null);
+      expect(attempts).to.equal(3); // initial attempt + 2 retries
+    });
+
+    it("withNonceRetry does not retry a non-nonce error at all", async function () {
+      const signer = { reset: () => { throw new Error("should not be called"); } };
+      let attempts = 0;
+      let threw = null;
+      try {
+        await withNonceRetry(signer, async () => {
+          attempts += 1;
+          throw new Error("execution reverted: insufficient funds");
+        });
+      } catch (e) { threw = e; }
+      expect(threw.message).to.equal("execution reverted: insufficient funds");
+      expect(attempts).to.equal(1);
+    });
+
+    it("a real deploy step recovers from a simulated nonce collision on the underlying signer", async function () {
+      const [realSigner] = await ethers.getSigners();
+      let failOnce = true;
+      // Wraps the real Hardhat signer so its very first transaction attempt
+      // this test makes throws exactly the production error shape once,
+      // then behaves normally — proving runDeployStep's retry actually
+      // recovers a live deploy, not just the isolated helper in the tests above.
+      const flakySigner = new Proxy(realSigner, {
+        get(target, prop, receiver) {
+          if (prop === "sendTransaction") {
+            return async (...args) => {
+              if (failOnce) {
+                failOnce = false;
+                const err = new Error("nonce too low: next nonce 1, tx nonce 0");
+                err.code = "NONCE_EXPIRED";
+                throw err;
+              }
+              return target.sendTransaction(...args);
+            };
+          }
+          const value = Reflect.get(target, prop, target);
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      });
+
+      const out = await runDeployStep("middle-east-2026", 0, {}, flakySigner);
+      expect(out.stepIndex).to.equal(0);
+      expect(ethers.isAddress(out.state.registryAddress)).to.equal(true);
+      expect(failOnce).to.equal(false); // confirms the flaky path actually fired once
     });
   });
 });

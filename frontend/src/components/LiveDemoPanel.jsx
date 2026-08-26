@@ -10,6 +10,52 @@ const SCENARIOS = [
   { id: "taiwan-strait-2026", name: "Taiwan Strait", blurb: "China, Taiwan, Japan", data: TAIWAN_STRAIT_2026 },
 ];
 
+const FIELD_LABELS = {
+  hardlinerPressure: "hardliner pressure", reformPressure: "reform pressure",
+  diplomaticCapital: "diplomatic capital", sanctionsReliefPending: "sanctions relief pending",
+  sanctioned: "sanctioned", treasury: "treasury",
+};
+
+/**
+ * Turns a startingConditionProposal into a real, numeric "was X, becomes
+ * Y" summary — the answer to "what actually is this baseline?" instead of
+ * a name and a paragraph of prose. `as_researched` (no overrides) shows
+ * the scenario's own current starting metrics directly; every other
+ * proposal is diffed against those same numbers so the size of the
+ * change is visible, not just its direction.
+ */
+function describeStartingCondition(scenarioData, proposal) {
+  const metricName = (id) => scenarioData.simulation.metrics.find((m) => m.id === id)?.name || id;
+  const metricValue = (id) => scenarioData.simulation.metrics.find((m) => m.id === id)?.startingValue;
+
+  if (!proposal.overrides) {
+    return scenarioData.simulation.metrics
+      .map((m) => `${m.name}: ${m.startingValue}`)
+      .join(" · ");
+  }
+
+  const parts = [];
+  const { nations, metrics } = proposal.overrides;
+  if (metrics) {
+    for (const [id, value] of Object.entries(metrics)) {
+      parts.push(`${metricName(id)}: ${metricValue(id)} → ${value}`);
+    }
+  }
+  if (nations) {
+    for (const [nationId, patch] of Object.entries(nations)) {
+      const nation = scenarioData.nations.find((n) => n.id === nationId);
+      for (const fields of Object.values(patch)) {
+        for (const [field, value] of Object.entries(fields)) {
+          const was = nation?.governance?.[field] ?? nation?.economy?.[field];
+          const label = FIELD_LABELS[field] || field;
+          parts.push(`${nation?.name || nationId} ${label}: ${String(was)} → ${String(value)}`);
+        }
+      }
+    }
+  }
+  return parts.join(" · ");
+}
+
 /**
  * No-wallet path: deploys a real, isolated scenario instance on Sepolia
  * using a server-held demo key, so a visitor with no MetaMask and no
@@ -184,16 +230,20 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
             affects, real-world, nothing else.
           </p>
           <div className="connect-options">
-            {(SCENARIOS.find((s) => s.id === scenarioId)?.data.startingConditionProposals || []).map((p) => (
-              <button key={p.id} className="connect-option secondary" onClick={() => startDeploy(p.id)}>
-                <span className="connect-option-icon">{p.id === "as_researched" ? "📌" : "📰"}</span>
-                <div className="connect-option-text">
-                  <strong>{p.name}</strong>
-                  <span>{p.description}</span>
-                  {p.source && <span style={{ fontStyle: "italic", opacity: 0.75 }}>Source: {p.source}</span>}
-                </div>
-              </button>
-            ))}
+            {(() => {
+              const scenarioData = SCENARIOS.find((s) => s.id === scenarioId)?.data;
+              return (scenarioData?.startingConditionProposals || []).map((p) => (
+                <button key={p.id} className="connect-option secondary" onClick={() => startDeploy(p.id)}>
+                  <span className="connect-option-icon">{p.id === "as_researched" ? "📌" : "📰"}</span>
+                  <div className="connect-option-text">
+                    <strong>{p.name}</strong>
+                    <span>{p.description}</span>
+                    <span style={{ fontFamily: "monospace", opacity: 0.9 }}>{describeStartingCondition(scenarioData, p)}</span>
+                    {p.source && <span style={{ fontStyle: "italic", opacity: 0.75 }}>Source: {p.source}</span>}
+                  </div>
+                </button>
+              ));
+            })()}
           </div>
           <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setStatus("idle")}>
             ← Back
