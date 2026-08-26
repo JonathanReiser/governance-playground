@@ -26,6 +26,7 @@
 const crypto = require("crypto");
 const { ethers } = require("ethers");
 const { canonicalStringify } = require("./prereg");
+const { applyStartingConditionOverride } = require("./scenarioOverrides");
 
 const WorldRegistryABI       = require("../frontend/src/abi/WorldRegistry.json");
 const MetricsOracleABI       = require("../frontend/src/abi/MetricsOracle.json");
@@ -176,21 +177,26 @@ function verifySealedState(scenarioId, stepIndex, state, mac, namespace = "deplo
  * non-JSON timeout page.
  *
  * `state` carries whatever the previous step produced (contract
- * addresses, the nation registry so far); the caller is responsible for
- * holding it between requests (see sealState above for why that's safe).
- * `signer` defaults to the real demo wallet but is injectable so tests can
- * drive the exact same step sequence against a local Hardhat network.
+ * addresses, the nation registry so far, and — once set on step 0 — which
+ * `startingConditionProposals` entry (if any) this deploy is using); the
+ * caller is responsible for holding it between requests (see sealState
+ * above for why that's safe). `signer` defaults to the real demo wallet
+ * but is injectable so tests can drive the exact same step sequence
+ * against a local Hardhat network. `overrideId` only matters on step 0 —
+ * every later step reads it back out of `state.overrideId` instead, so a
+ * client only has to choose it once, not re-send it every call.
  */
-async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigner()) {
-  const scenario = SCENARIOS[scenarioId];
-  const steps = getDeploySteps(scenarioId);
+async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigner(), overrideId) {
+  const steps = getDeploySteps(scenarioId); // validates scenarioId, throws if unknown
   if (!Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex >= steps.length) {
     throw new Error(`stepIndex out of range: ${stepIndex} (0-${steps.length - 1})`);
   }
+  const s = state || {};
+  const effectiveOverrideId = stepIndex === 0 ? overrideId : s.overrideId;
+  const scenario = applyStartingConditionOverride(SCENARIOS[scenarioId], effectiveOverrideId);
   const step = steps[stepIndex];
   const addr = await signer.getAddress();
-  const s = state || {};
-  const next = { ...s };
+  const next = { ...s, overrideId: effectiveOverrideId };
   let txHash;
 
   const attach = (address, abi) => new ethers.Contract(address, abi, signer);
@@ -409,12 +415,12 @@ async function commitDemoCycle(registryAddress, metrics, signer = getDemoSigner(
  * runs, not a second copy of the deploy logic. No HMAC sealing needed
  * here: state never leaves the process between steps.
  */
-async function deployDemoScenario(scenarioId, onStatus = () => {}, signer = getDemoSigner()) {
+async function deployDemoScenario(scenarioId, onStatus = () => {}, signer = getDemoSigner(), overrideId) {
   const steps = getDeploySteps(scenarioId);
   let state = {};
   let out;
   for (let i = 0; i < steps.length; i++) {
-    out = await runDeployStep(scenarioId, i, state, signer);
+    out = await runDeployStep(scenarioId, i, state, signer, overrideId);
     onStatus(out.label);
     state = out.state;
   }
