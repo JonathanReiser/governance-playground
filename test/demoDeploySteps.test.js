@@ -135,6 +135,19 @@ describe("demo deploy — step machine", function () {
       expect(await registry.simulationActive()).to.equal(true);
       expect(await registry.getNationCount()).to.equal(BigInt(middleEast.nations.length));
       expect(await registry.scenarioName()).to.equal(middleEast.meta.name);
+
+      // registryBlock is what lets ViewRunPage.jsx query this contract's
+      // event logs starting exactly here instead of scanning from block
+      // 0 (which public RPCs reject past a max range) or binary-searching
+      // eth_getCode (which fails on pruned public nodes) — see
+      // onchainLogs.js. It should be a real, positive block number that
+      // actually is the registry's deployment block, not just present.
+      expect(Number.isInteger(result.registryBlock)).to.equal(true);
+      expect(result.registryBlock).to.be.greaterThan(0);
+      const code = await ethers.provider.getCode(result.registryAddress, result.registryBlock);
+      expect(code).to.not.equal("0x");
+      const codeOneBlockBefore = await ethers.provider.getCode(result.registryAddress, result.registryBlock - 1);
+      expect(codeOneBlockBefore).to.equal("0x");
     });
 
     it("driving runDeployStep directly, one call at a time, reaches the same end state", async function () {

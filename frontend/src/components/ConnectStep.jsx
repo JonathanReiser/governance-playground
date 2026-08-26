@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { connectWallet, connectDirect, switchToSepolia } from "../lib/contracts";
 import { LiveDemoPanel } from "./LiveDemoPanel";
-import { listRuns, removeRun } from "../lib/runHistory";
+import { listRuns, removeRun, viewUrlFor } from "../lib/runHistory";
 
 export function ConnectStep({ onConnect }) {
   const [error,   setError]   = useState("");
@@ -162,7 +162,7 @@ export function ConnectStep({ onConnect }) {
                   <a
                     className="btn-secondary"
                     style={{ fontSize: 11, padding: "0.3rem 0.6rem" }}
-                    href={`${window.location.pathname}?view=${run.registryAddress}`}
+                    href={`${window.location.pathname}${viewUrlFor(run)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

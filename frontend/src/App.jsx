@@ -19,14 +19,23 @@ export default function App() {
   const [results,    setResults]    = useState(null);
   const [mode,       setMode]       = useState(null); // "classic" | "ai"
 
-  // A shareable permalink — ?view=<registryAddress> — bypasses the whole
-  // Connect→Scenario→Deploy flow entirely and just reads that run's real
-  // state straight from Sepolia. Read once at mount (not on every
-  // render): this app has no client-side router, so leaving the view is
-  // a real navigation (see ViewRunPage's onBack), not a state change.
-  const [viewRegistryAddress] = useState(() => new URLSearchParams(window.location.search).get("view"));
+  // A shareable permalink — ?view=<registryAddress>&block=<deployBlock> —
+  // bypasses the whole Connect→Scenario→Deploy flow entirely and just
+  // reads that run's real state straight from Sepolia. Read once at
+  // mount (not on every render): this app has no client-side router, so
+  // leaving the view is a real navigation (see ViewRunPage's onBack),
+  // not a state change. `block` is optional — see onchainLogs.js and
+  // ViewRunPage's own comments for what it's for and what happens
+  // without it (an older link, from before this param existed).
+  const [viewParams] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const registryAddress = params.get("view");
+    const blockParam = params.get("block");
+    const deployBlock = blockParam !== null && /^\d+$/.test(blockParam) ? Number(blockParam) : null;
+    return { registryAddress, deployBlock };
+  });
 
-  if (viewRegistryAddress) {
+  if (viewParams.registryAddress) {
     return (
       <div className="app">
         <header className="app-header">
@@ -39,7 +48,8 @@ export default function App() {
         </header>
         <main className="app-main">
           <ViewRunPage
-            registryAddress={viewRegistryAddress}
+            registryAddress={viewParams.registryAddress}
+            deployBlock={viewParams.deployBlock}
             onBack={() => { window.location.href = window.location.pathname; }}
           />
         </main>
