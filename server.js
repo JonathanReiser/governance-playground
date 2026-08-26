@@ -26,6 +26,7 @@ const express   = require("express");
 const cors      = require("cors");
 const rateLimit = require("express-rate-limit");
 const Anthropic = require("@anthropic-ai/sdk").default;
+const { fetchRealHeadlines } = require("./server/news");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -1032,10 +1033,30 @@ const HEADLINE_GENERATORS = {
   "taiwan-strait-2026": generateHeadlinesTaiwanStrait,
 };
 
-function generateHeadlines(scenarioId, worldState) {
+// The old behavior, kept as the fallback — see getHeadlines below and
+// server/news.js's header comment for why this is no longer the primary
+// path.
+function generateMockHeadlines(scenarioId, worldState) {
   const gen = HEADLINE_GENERATORS[scenarioId];
   if (!gen) throw new Error(`Unknown scenario: ${scenarioId}`);
   return gen(worldState);
+}
+
+/**
+ * Real news first (server/news.js — GDELT, no key required, current
+ * real-world Iran/Israel or China/Taiwan coverage); honest mock fallback
+ * if GDELT is unreachable or returns nothing usable. `source` says which
+ * one actually ran ("real-gdelt" | "mock-fallback") so nothing is
+ * silently presented as real when it wasn't.
+ */
+async function getHeadlines(scenarioId, worldState) {
+  try {
+    const real = await fetchRealHeadlines(scenarioId);
+    return { text: real.join("\n"), source: "real-gdelt" };
+  } catch (err) {
+    console.warn(`[news] real headlines unavailable for ${scenarioId} (${err.message}); using mock fallback`);
+    return { text: generateMockHeadlines(scenarioId, worldState), source: "mock-fallback" };
+  }
 }
 
 
@@ -1057,7 +1078,7 @@ app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
     return res.status(400).json({ error: `No output schema for "${nation}" in "${scenarioId}"` });
   }
 
-  const headlines = generateHeadlines(scenarioId, worldState);
+  const { text: headlines, source: newsSource } = await getHeadlines(scenarioId, worldState);
   const enrichedState = { ...worldState, newsHeadlines: headlines };
   const { doctrine, situation } = splitPrompt(scenarioPrompts[nation], enrichedState);
 
@@ -1116,6 +1137,10 @@ app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
       // published run can state its provenance rather than assume it.
       model: message.model,
       usage: message.usage,
+      // "real-gdelt" | "mock-fallback" — see getHeadlines above. Recorded
+      // for the same reason `model` is: a published run should be able to
+      // say what actually grounded it, not assume.
+      newsSource,
     });
   } catch (err) {
     console.error(`[${nation}] agent error:`, err.message);
@@ -1124,12 +1149,13 @@ app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
 });
 
 
-app.get("/api/news", (req, res) => {
+app.get("/api/news", async (req, res) => {
   const { scenarioId, ...worldState } = req.query;
   if (!SYSTEM_PROMPTS[scenarioId]) {
     return res.status(400).json({ error: `Unknown or unsupported scenario: ${scenarioId}` });
   }
-  res.json({ headlines: generateHeadlines(scenarioId, worldState) });
+  const { text: headlines, source: newsSource } = await getHeadlines(scenarioId, worldState);
+  res.json({ headlines, newsSource });
 });
 
 
