@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { LiveRunPanel } from "./LiveRunPanel";
 import MIDDLE_EAST_2026 from "../scenarios/middle-east-2026.json";
 import TAIWAN_STRAIT_2026 from "../scenarios/taiwan-strait-2026.json";
@@ -26,29 +26,42 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   const [result, setResult] = useState(null);
   const [runSeed, setRunSeed] = useState(null); // { state, mac } — bridges deploy's last step into commit-cycle's first
   const [error, setError] = useState("");
+  const [retryable, setRetryable] = useState(false);
   const [progress, setProgress] = useState({ stepIndex: 0, totalSteps: null, label: "", txHashes: [] });
+
+  // The last successfully-sealed checkpoint — a ref, not state, so a retry
+  // reads the exact values a mid-loop failure left behind rather than a
+  // stale closure over whatever `runDemo` captured at the start. A real
+  // multi-minute run is ~21 sequential requests; a dropped WiFi connection
+  // or a backgrounded tab getting its network suspended partway through
+  // (both hit this in practice, not hypothetically — see the "Failed to
+  // fetch" case this was built for) shouldn't cost everything already
+  // confirmed on-chain.
+  const checkpoint = useRef({ stepIndex: 0, state: {}, mac: undefined });
 
   /**
    * A full deploy is ~15-20 confirmed on-chain transactions over several
    * minutes — too long for one serverless request (that mismatch is what
-   * used to break this: the platform killed the request and returned a
-   * non-JSON timeout page, which is the "Unexpected token 'A'..." error).
-   * So this drives it as a loop instead: one step per request, each one
-   * a single transaction, with the server handing back sealed state to
-   * echo into the next call. See server.js's /api/demo/deploy/step.
+   * used to break this originally: the platform killed the request and
+   * returned a non-JSON timeout page, the "Unexpected token 'A'..." error).
+   * So this drives it as a loop instead: one step per request, each one a
+   * single transaction, with the server handing back sealed state to echo
+   * into the next call. See server.js's /api/demo/deploy/step.
+   *
+   * A SECOND failure mode surfaces here too, distinct from that one:
+   * `fetch()` itself can reject — no HTTP response at all — when the
+   * connection drops mid-run (real Sepolia block times mean this loop can
+   * run several real minutes; a laptop sleeping, a tab getting throttled
+   * in the background, a WiFi hiccup, are all real events over that
+   * window, confirmed live: a user hit exactly this). The browser's own
+   * error for that is the bare, unhelpful "Failed to fetch" — caught below
+   * and given a real explanation, plus resumed from the last confirmed
+   * step instead of losing the run.
    */
-  async function runDemo(id) {
-    setScenarioId(id);
-    setStatus("deploying");
-    setError("");
-    setProgress({ stepIndex: 0, totalSteps: null, label: "Starting…", txHashes: [] });
-
-    let state = {};
-    let mac;
-    let stepIndex = 0;
-
+  async function driveLoop(id) {
     try {
       while (true) {
+        const { stepIndex, state, mac } = checkpoint.current;
         const res = await fetch(`${SERVER_URL}/demo/deploy/step`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -82,14 +95,36 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
           return;
         }
 
-        state = data.state;
-        mac = data.mac;
-        stepIndex = data.stepIndex + 1;
+        // Only advance the checkpoint on a confirmed successful response —
+        // this is what makes retry-from-here safe: whatever's in the ref
+        // when a failure is caught is always the last step the server
+        // actually completed, never a half-applied one.
+        checkpoint.current = { stepIndex: data.stepIndex + 1, state: data.state, mac: data.mac };
       }
     } catch (e) {
       setError(e.message);
+      // The server's own answer to "this state doesn't check out" is the
+      // one failure retrying can't fix — anything else (a network drop, a
+      // platform timeout page, a transient 5xx) is worth trying again from
+      // the same checkpoint.
+      setRetryable(!/Invalid or tampered/.test(e.message));
       setStatus("error");
     }
+  }
+
+  function runDemo(id) {
+    setScenarioId(id);
+    setStatus("deploying");
+    setError("");
+    setProgress({ stepIndex: 0, totalSteps: null, label: "Starting…", txHashes: [] });
+    checkpoint.current = { stepIndex: 0, state: {}, mac: undefined };
+    driveLoop(id);
+  }
+
+  function retryDemo() {
+    setStatus("deploying");
+    setError("");
+    driveLoop(scenarioId);
   }
 
   if (status === "running" && result && runSeed) {
@@ -166,9 +201,21 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
       {status === "error" && (
         <div className="error-box">
           {error}
-          <div style={{ marginTop: "0.6rem" }}>
+          {retryable && (
+            <p className="muted" style={{ fontSize: 12, marginTop: "0.4rem" }}>
+              Whatever confirmed on-chain so far ({progress.txHashes.length} transaction
+              {progress.txHashes.length === 1 ? "" : "s"}) isn't lost — retrying picks up
+              from step {progress.stepIndex + 1} of {progress.totalSteps}, not the start.
+            </p>
+          )}
+          <div style={{ marginTop: "0.6rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            {retryable && (
+              <button className="btn-primary" onClick={retryDemo} style={{ fontSize: 12 }}>
+                ↻ Retry from here
+              </button>
+            )}
             <button className="btn-secondary" onClick={() => setStatus("idle")} style={{ fontSize: 12 }}>
-              ← Try again
+              ← Start a new deploy
             </button>
           </div>
         </div>

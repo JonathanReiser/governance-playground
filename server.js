@@ -30,6 +30,18 @@ const Anthropic = require("@anthropic-ai/sdk").default;
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
+// Vercel puts exactly one proxy hop (its own edge) in front of this
+// function and sets X-Forwarded-For accordingly. Express defaults to NOT
+// trusting that header at all, which made express-rate-limit refuse to
+// derive a per-IP key from it — logged every cold start as
+// ERR_ERL_UNEXPECTED_X_FORWARDED_FOR (harmless in itself, found while
+// diagnosing an unrelated "Failed to fetch" report, worth fixing since it
+// means the demo endpoints' per-IP rate limits weren't reliably keyed by
+// real client IP). `1` trusts exactly the first hop, matching Vercel's
+// actual topology — not `true`, which would trust an arbitrary number of
+// hops and let a client spoof its own X-Forwarded-For.
+app.set("trust proxy", 1);
+
 // In production (Vercel) the frontend and this API share one domain, so
 // same-origin requests carry no Origin header at all and need no CORS entry.
 // The explicit origins below only matter for local dev, where the Vite dev
