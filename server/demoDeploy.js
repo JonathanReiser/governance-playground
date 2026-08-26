@@ -245,7 +245,16 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
       const registryContract = await RegistryFactory.deploy(addr);
       await registryContract.waitForDeployment();
       next.registryAddress = await registryContract.getAddress();
-      txHash = registryContract.deploymentTransaction()?.hash;
+      const deployTx = registryContract.deploymentTransaction();
+      txHash = deployTx?.hash;
+      // Recorded so ViewRunPage.jsx can query this contract's event logs
+      // starting exactly here instead of scanning from block 0 — public
+      // RPCs cap eth_getLogs to a maximum block range per call, and (on
+      // the pruned nodes most free public RPCs run) eth_getCode at an
+      // arbitrary past block to auto-discover this via binary search
+      // fails outright ("historical state ... is not available"). See
+      // onchainLogs.js's header comment for the full story.
+      next.registryBlock = deployTx ? (await deployTx.wait()).blockNumber : null;
       break;
     }
     case "deployOracle": {
@@ -386,6 +395,7 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
   const result = done
     ? {
         registryAddress: next.registryAddress,
+        registryBlock: next.registryBlock ?? null,
         oracleAddress: next.oracleAddress,
         signerAddress: addr,
         nations: next.nations || {},

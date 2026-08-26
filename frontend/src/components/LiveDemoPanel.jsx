@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { LiveRunPanel } from "./LiveRunPanel";
-import { saveRun } from "../lib/runHistory";
+import { saveRun, viewUrlFor } from "../lib/runHistory";
 import MIDDLE_EAST_2026 from "../scenarios/middle-east-2026.json";
 import TAIWAN_STRAIT_2026 from "../scenarios/taiwan-strait-2026.json";
 
@@ -148,6 +148,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
             .find((p) => p.id === data.state?.overrideId);
           saveRun({
             registryAddress: data.result.registryAddress,
+            registryBlock: data.result.registryBlock,
             oracleAddress: data.result.oracleAddress,
             scenarioId: id,
             scenarioName: scenarioMeta?.name || id,
@@ -345,12 +346,12 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
           <div className="muted" style={{ fontSize: 12, marginTop: "0.75rem", padding: "0.5rem", border: "1px solid currentColor", borderRadius: 4 }}>
             <strong>Bookmark or share this run:</strong>{" "}
             <a
-              href={`${window.location.origin}${window.location.pathname}?view=${result.registryAddress}`}
+              href={`${window.location.origin}${window.location.pathname}${viewUrlFor(result)}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{ wordBreak: "break-all" }}
             >
-              {`${window.location.origin}${window.location.pathname}?view=${result.registryAddress}`}
+              {`${window.location.origin}${window.location.pathname}${viewUrlFor(result)}`}
             </a>
             <div style={{ marginTop: "0.25rem" }}>
               Anyone with this link can see this run's real, current on-chain state — no login, no

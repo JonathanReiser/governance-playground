@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import WorldRegistryABI from "../abi/WorldRegistry.json";
 import NationDAOABI from "../abi/NationDAO.json";
 import MetricsOracleABI from "../abi/MetricsOracle.json";
+import { findLogsLowerBound, queryLogsChunked } from "../lib/onchainLogs.js";
 
 // Same default the demo path uses (server/demoDeploy.js) — a real,
 // public, free Sepolia RPC. This page needs no signer and no wallet: on-
@@ -14,7 +15,8 @@ const GOVERNANCE_TYPE_LABELS = [
 ];
 
 /**
- * A shareable permalink for one deployment: `?view=<registryAddress>`.
+ * A shareable permalink for one deployment: `?view=<registryAddress>`,
+ * optionally with `&block=<deployBlock>` (see onchainLogs.js for why).
  * Reads everything straight from Sepolia — no server, no scenario JSON,
  * no wallet — so a link to this page keeps working for anyone, forever,
  * independent of this app's own uptime, the same way an Etherscan link
@@ -35,7 +37,7 @@ const GOVERNANCE_TYPE_LABELS = [
  * shows none — that's the real, honest state of that run's chain
  * history, not a fetch failure.
  */
-export function ViewRunPage({ registryAddress, onBack }) {
+export function ViewRunPage({ registryAddress, deployBlock, onBack }) {
   const [state, setState] = useState({ status: "loading" });
 
   useEffect(() => {
@@ -91,13 +93,25 @@ export function ViewRunPage({ registryAddress, onBack }) {
           };
         }
 
-        // Event logs, not contract state — queryFilter with no block
-        // range scans this contract's whole history, which is fine here:
-        // one WorldRegistry deployment only ever lives for its own
-        // scenario's handful of cycles, nothing like the full chain.
+        // Event logs, not contract state. queryFilter() with no block
+        // range defaults to fromBlock: 0 — which this project's public
+        // RPC (and most public RPCs) rejects past a maximum span per
+        // call ("exceed maximum block range: 50000" in production,
+        // since Sepolia is already well past 11M blocks). `deployBlock`
+        // (the `?block=` URL param, threaded through from the actual
+        // deploy transaction's receipt — see server/demoDeploy.js) gives
+        // an exact, free starting point for every run saved after this
+        // fix shipped; a link saved before it (or hand-typed with just
+        // `?view=`) falls back to a bounded backward scan instead — see
+        // onchainLogs.js for why a plain binary search over eth_getCode
+        // doesn't work here.
+        const latestBlock = await provider.getBlockNumber();
+        const fromBlock = Number.isInteger(deployBlock) && deployBlock >= 0
+          ? Math.max(0, deployBlock - 2) // small buffer, not load-bearing precision
+          : await findLogsLowerBound(provider, registryAddress, latestBlock);
         const [decisionLogs, narrativeLogs] = await Promise.all([
-          registry.queryFilter(registry.filters.DecisionRecorded()),
-          registry.queryFilter(registry.filters.CycleNarrativeRecorded()),
+          queryLogsChunked(registry, registry.filters.DecisionRecorded(), fromBlock, latestBlock),
+          queryLogsChunked(registry, registry.filters.CycleNarrativeRecorded(), fromBlock, latestBlock),
         ]);
 
         const cycleMap = new Map(); // cycle number -> { decisions: [], narrative }
@@ -136,7 +150,7 @@ export function ViewRunPage({ registryAddress, onBack }) {
 
     load();
     return () => { cancelled = true; };
-  }, [registryAddress]);
+  }, [registryAddress, deployBlock]);
 
   return (
     <div className="step-panel center-panel">

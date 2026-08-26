@@ -15,6 +15,19 @@
 const STORAGE_KEY = "governance-playground:runs";
 const MAX_RUNS = 50;
 
+/**
+ * Builds the `?view=` query string for a run, including `&block=` when
+ * the run has a registryBlock — see onchainLogs.js's header comment for
+ * why ViewRunPage.jsx needs that to read event logs at all on a public
+ * RPC. A run saved before this field existed simply omits it; ViewRunPage
+ * falls back to a bounded recent-window search in that case.
+ */
+export function viewUrlFor(run) {
+  const params = new URLSearchParams({ view: run.registryAddress });
+  if (Number.isInteger(run.registryBlock)) params.set("block", String(run.registryBlock));
+  return `?${params.toString()}`;
+}
+
 export function listRuns() {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
