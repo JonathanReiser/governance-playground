@@ -2,8 +2,7 @@
  * GOVERNANCE PLAYGROUND
  * Scenario: Middle East — 2026
  *
- * This config represents the geopolitical state of the Middle East
- * as of May 2026, following the US/Israel-Iran peace deal.
+ * BASELINE AS OF: 2026-08-26 (v2.0.0 — re-baselined; see CHANGELOG below)
  *
  * Every parameter is cited. Every number is adjustable.
  * If you disagree with a value — fork this file, change it,
@@ -16,6 +15,45 @@
  *   - ACLED 2026 (conflict event data)
  *   - Arab Barometer Wave 7 (public sentiment)
  *   - EIA 2026 (energy/oil data)
+ *   - Congress.gov CRS: "Possible U.S.-Iran Agreement: INARA and U.S.
+ *     Sanctions" (IF13247, updated June 17, 2026)
+ *   - Congress.gov CRS: "Iran's Nuclear Program and 2025 UN Sanctions
+ *     Reimposition" (IF11583)
+ *   - Bloomberg, "Senators Reach Deal on Russia, Iran Sanctions Bill
+ *     Targeting Energy Buyers" (July 28, 2026)
+ *   - NBC News, "Trump says Saudi Arabia must normalize Israel ties
+ *     before nuclear deal is approved" (July 2026)
+ *   - INSS, "Saudi Arabia's New Approach to Israel and the Normalization
+ *     Process" (2026)
+ *   - Haaretz, "Netanyahu Coalition Announces Israel's 2026 Election
+ *     Will Take Place on October 27" (July 12, 2026)
+ *   - CIE, "2026 Israeli Election Polling: The Month Ending July 31"
+ *   - Al Jazeera / CNN / Global Taiwan Institute reporting on the 2026
+ *     conflict and the June 2026 US-Iran MOU
+ *
+ * CHANGELOG (v1.0.0 -> v2.0.0, 2026-08-26):
+ * The original baseline described "a new, fragile peace deal" as of May
+ * 2026 — Iran capping enrichment, Hormuz open, a ceasefire freshly
+ * signed. That premise is no longer what happened. Real events since:
+ * the US struck three Iranian nuclear sites in June 2025 (Operation
+ * Midnight Hammer — Natanz, Esfahan, Fordow), a further joint US-Israeli
+ * campaign struck nuclear fuel-cycle sites again beginning March 1,
+ * 2026, and IAEA inspectors were withdrawn after the first round of
+ * strikes — the actual extent of damage to Iran's program is disputed,
+ * not confirmed. Out of that, a June 2026 US-Iran memorandum of
+ * understanding committed both sides to negotiate a comprehensive deal
+ * within a maximum 60 days (extendable by mutual consent), with Iran
+ * reaffirming it will not pursue nuclear weapons. That window is at or
+ * past its original deadline right now. This is not a downgrade from the
+ * original scenario — a real post-conflict MOU at its decision point,
+ * with contested congressional authority over sanctions relief and an
+ * active but conditional Saudi-Israel normalization track, is a richer
+ * and more mechanically interesting starting point than a fictional
+ * fresh ceasefire, and it's real. Numbers below marked "reasoned
+ * estimate" are exactly that — an interpretation of cited real events
+ * into this simulation's 0-100 scale, the same practice the original
+ * baseline already used (e.g. hardlinerPressure was never a literal V-Dem
+ * field), not a claim that a poll produced this specific figure.
  */
 
 const MIDDLE_EAST_2026 = {
@@ -26,15 +64,19 @@ const MIDDLE_EAST_2026 = {
 
   meta: {
     id: "middle-east-2026",
-    name: "Middle East — May 2026",
-    version: "1.0.0",
+    name: "Middle East — 2026",
+    version: "2.0.0",
+    baselineAsOf: "2026-08-26",
     description:
-      "Post-war scenario following the US/Israel-Iran peace deal. " +
-      "Iran has agreed to cap nuclear enrichment and reopen the Hormuz Strait. " +
-      "The US has lifted partial sanctions. Regional stability is fragile.",
-    tags: ["middle-east", "peace-deal", "nuclear", "hormuz", "2026"],
+      "Post-conflict scenario following real 2025-2026 US/Israeli strikes on Iranian nuclear " +
+      "sites and a June 2026 US-Iran memorandum of understanding committing both sides to a " +
+      "60-day negotiation window — now at or past that deadline. IAEA access has not been " +
+      "restored since the strikes; the real state of Iran's program is disputed, not confirmed. " +
+      "Congress has not ratified sanctions relief, and a separate bipartisan Iran/Russia " +
+      "sanctions bill is advancing in the Senate. Regional stability is genuinely uncertain.",
+    tags: ["middle-east", "post-conflict", "nuclear", "hormuz", "2026"],
     suggestedExperiments: [
-      "What if the peace deal collapses in year 1?",
+      "What if the 60-day MOU window expires with no deal?",
       "What if US Congress blocks sanctions relief?",
       "What if Saudi Arabia formally normalizes with Israel?",
       "What if Iran's hardliners gain domestic power?",
@@ -97,8 +139,12 @@ const MIDDLE_EAST_2026 = {
         type: "PARLIAMENTARY_DEMOCRACY",
         description:
           "Multi-party parliamentary system. Requires coalition " +
-          "majorities. High citizen participation. No formal constitution.",
-        source: "Freedom House 2026 — Score: 76/100",
+          "majorities. High citizen participation. No formal constitution. " +
+          "The current Netanyahu coalition is on track to be the first in four decades to " +
+          "serve a full term; a general election is set for October 27, 2026, the last " +
+          "possible date. Polling through July 2026 shows Netanyahu's bloc short of a " +
+          "majority, with an anti-Netanyahu bloc led by former IDF chief Gadi Eisenkot surging.",
+        source: "Freedom House 2026 — Score: 76/100; Haaretz, CIE polling (July 2026)",
 
         proposalThreshold: 100,   // low — any citizen can propose
         quorum: 40,               // 40% must vote
@@ -132,8 +178,10 @@ const MIDDLE_EAST_2026 = {
 
       population: {
         size: "MEDIUM",           // 9.7 million
-        sentiment: 58,            // public trust in government (0–100)
-        source: "Arab Barometer Wave 7 / Pew Research 2026",
+        sentiment: 52,            // reasoned estimate — down from the prior baseline, reflecting a
+                                   // contested pre-election climate and Netanyahu's coalition polling
+                                   // behind an ascendant opposition bloc, not a specific new poll figure
+        source: "Arab Barometer Wave 7 / Pew Research 2026; CIE Israeli election polling, July 2026",
       },
     },
 
@@ -161,15 +209,23 @@ const MIDDLE_EAST_2026 = {
         guardianVeto: true,       // clerical council can override any vote
         royalVeto: false,
 
-        hardlinerPressure: 72,    // internal pressure to act aggressively
-        source_hardliner: "V-Dem Dataset 2026",
+        hardlinerPressure: 80,    // reasoned estimate, raised from the prior baseline (72) — real
+                                   // US/Israeli strikes on Iranian soil in 2025-2026 are a materially
+                                   // more inflammatory domestic event than a deal-signing was; not a
+                                   // literal survey figure, same interpretive basis the original number used
+        source_hardliner: "V-Dem Dataset 2026; strike history per IAEA/ANS reporting and CRS IF12106",
       },
 
       economy: {
         treasury: 4200,
         source: "World Bank — Iran GDP ~$401B (sanctions-reduced, 2026)",
-        sanctioned: true,         // partial sanctions remain post-deal
-        sanctionsReliefPending: true,
+        sanctioned: true,         // sanctions remain; a bipartisan Senate bill targeting Russia/Iran
+                                   // energy buyers cleared a key hurdle July 28, 2026 (Bloomberg) —
+                                   // the real pressure is toward MORE sanctions, not relief
+        sanctionsReliefPending: true, // contested, not settled: INARA (Iran Nuclear Agreement Review
+                                   // Act) gives Congress a review mechanism, H.R. 2012/H.R. 2570 seek to
+                                   // condition or mandate that review, and the administration (VP Vance)
+                                   // has stated it believes it can lift sanctions without Congress at all
         tradeOpenness: "LOW",
       },
 
@@ -177,8 +233,10 @@ const MIDDLE_EAST_2026 = {
         power: 620,
         source: "SIPRI 2026 — est. $10B military expenditure",
         range: [580, 740],        // wide range — estimates are contested
-        nuclearCapacity: false,   // capped under peace deal
-        nuclearDealActive: true,
+        nuclearCapacity: false,   // per the June 2026 MOU's reaffirmation not to pursue weapons —
+                                   // but IAEA inspectors have not returned since the 2025 strikes, so
+                                   // this is a diplomatic commitment, not a verified/inspected status
+        nuclearDealActive: true,  // the June 2026 MOU, not a comprehensive deal — see activeEvents below
         proxyForces: true,        // Hezbollah, Houthis, Iraqi militias
         proxyCapacity: 85,        // HIGH proxy reach across region
       },
@@ -188,7 +246,8 @@ const MIDDLE_EAST_2026 = {
         water: 25,
         source: "EIA 2026",
         hormuzControl: true,      // can threaten strait closure
-        hormuzOpen: true,         // currently open — per peace deal
+        hormuzOpen: true,         // no reporting of an actual closure; strikes targeted nuclear sites,
+                                   // not the strait itself
       },
 
       population: {
@@ -281,11 +340,12 @@ const MIDDLE_EAST_2026 = {
         // fallback and would throw undefined into the contract call.
         type: "FEDERAL_REPUBLIC",
         description:
-          "Executive brokered the deal; Congress has not ratified sanctions " +
-          "relief. Domestic political investment in the deal succeeding is " +
-          "real but not unconditional — an election-cycle asset, not a " +
-          "permanent commitment.",
-        source: "Congressional Research Service 2026",
+          "Brokered the June 2026 MOU with Iran; Congress has not ratified sanctions relief and " +
+          "is actively contesting who even has that authority — INARA gives Congress a review " +
+          "mechanism, competing bills (H.R. 2012, H.R. 2570) seek to condition or mandate it, and " +
+          "the administration has separately claimed it can act without Congress at all. Domestic " +
+          "political investment in the MOU succeeding is real but conditional, not permanent.",
+        source: "Congressional Research Service 2026 (IF13247, IF11583)",
 
         // Genuinely representative federal system, unlike China's use of the
         // same enum slot (see taiwan-strait-2026.config.cjs) -- broad
@@ -300,11 +360,14 @@ const MIDDLE_EAST_2026 = {
         royalVeto: false,
 
         // Starting lean toward active mediation: having just brokered and
-        // publicly staked credibility on this deal, backing away has a real
+        // publicly staked credibility on the MOU, backing away has a real
         // political cost (audience costs — Fearon 1994), so the prior favors
         // engagement, not disengagement, but it's a lean, not a lock.
-        diplomaticCapital: 65,
-        source_capital: "Reflects post-brokering audience-cost exposure, not polling data",
+        diplomaticCapital: 60,     // reasoned estimate, slightly down from the prior baseline (65) —
+                                   // the MOU is a narrower, more contested instrument than a signed
+                                   // comprehensive deal, and congressional authority over its central
+                                   // economic term is genuinely disputed, not just unratified
+        source_capital: "Reflects post-MOU audience-cost exposure and contested congressional authority, not polling data",
       },
 
       economy: {
@@ -339,23 +402,33 @@ const MIDDLE_EAST_2026 = {
       to: "iran",
       type: "FRAGILE_PEACE",
       description:
-        "Active hostility transformed by the 2026 peace deal. " +
-        "Deep mutual distrust remains. Deal is under strain from " +
-        "Israeli hardliners and Iranian Revolutionary Guard elements.",
-      source: "Reuters, AP — May 2026",
-      stabilityScore: 28,         // how likely this holds (0–100)
+        "Active conflict in 2025-2026 (US/Israeli strikes on Iranian nuclear sites), interrupted " +
+        "by a June 2026 US-brokered MOU committing both sides to a 60-day negotiation window — " +
+        "now at or past that deadline. No IAEA verification access has been restored since the " +
+        "strikes. This is a live decision point, not a settled ceasefire.",
+      source: "IAEA/ANS reporting, CRS IF13247, Al Jazeera/CNN 2026 coverage",
+      stabilityScore: 22,          // reasoned estimate, down from the prior baseline (28) — a real
+                                    // post-strike MOU at its own deadline is more precarious than a
+                                    // freshly-signed deal was assumed to be
       treatyActive: true,
-      treatyName: "US-brokered Hormuz-Nuclear Agreement 2026",
+      treatyName: "US-Iran Memorandum of Understanding (June 2026)",
     },
     {
       from: "israel",
       to: "saudi_arabia",
       type: "COLD",
       description:
-        "No formal diplomatic relations. Back-channel cooperation " +
-        "on Iran containment exists. Normalization talks stalled.",
-      source: "Foreign Affairs, May 2026",
-      stabilityScore: 55,
+        "No formal diplomatic relations. Real, active pressure toward normalization exists: the " +
+        "US made Saudi Arabia's July 2026 civil nuclear cooperation deal conditional on " +
+        "normalizing with Israel, and Netanyahu has pushed for a deal before Israel's October 27 " +
+        "election. But Saudi Crown Prince Mohammed bin Salman has publicly reaffirmed that " +
+        "normalization requires a credible path to Palestinian statehood with East Jerusalem as " +
+        "its capital, and a Saudi royal source has said normalization is unlikely under " +
+        "Netanyahu's current government specifically.",
+      source: "NBC News, INSS, Haaretz — July 2026",
+      stabilityScore: 48,          // reasoned estimate — real active pressure exists on both sides,
+                                    // but a specific, named obstacle (Palestinian statehood) is publicly
+                                    // unresolved, so this is genuinely live, not stalled or settled
       treatyActive: false,
       normalizationTalksActive: true,
     },
@@ -364,8 +437,9 @@ const MIDDLE_EAST_2026 = {
       to: "saudi_arabia",
       type: "FRAGILE_PEACE",
       description:
-        "China-brokered normalization from 2023 holding but strained. " +
-        "Proxy conflicts in Yemen and Lebanon create ongoing friction.",
+        "China-brokered normalization from 2023 holding but strained. Proxy conflicts in Yemen " +
+        "and Lebanon create ongoing friction. The 2025-2026 strikes on Iran are a real, separate " +
+        "shock to the regional balance this relationship sits inside.",
       source: "Crisis Group Middle East Report 2026",
       stabilityScore: 42,
       treatyActive: true,
@@ -381,28 +455,35 @@ const MIDDLE_EAST_2026 = {
   activeEvents: [
     {
       id: "hormuz_nuclear_deal",
-      name: "US-Israel-Iran Peace Deal",
+      name: "US-Iran Memorandum of Understanding",
       type: "PEACE_DEAL",
       status: "ACTIVE_FRAGILE",
       parties: ["israel", "iran"],
       externalGuarantor: "US",
       description:
-        "Iran agrees to cap nuclear enrichment and keep Hormuz Strait open. " +
-        "US lifts partial sanctions. Israel agrees to ceasefire. " +
-        "Deal is new and untested — spoiler risk is high on both sides.",
+        "Follows real 2025-2026 US/Israeli strikes on Iranian nuclear facilities (Operation " +
+        "Midnight Hammer, June 2025; a further joint campaign beginning March 1, 2026). IAEA " +
+        "inspectors were withdrawn after the first round and have not returned — the actual " +
+        "extent of damage to Iran's program is disputed, not confirmed by outside verification. " +
+        "In June 2026 the US and Iran signed an MOU committing to negotiate a comprehensive deal " +
+        "within a maximum 60 days, extendable only by mutual consent; Iran reaffirmed it will not " +
+        "pursue nuclear weapons. That window is at or past its original deadline now — this " +
+        "scenario opens at that decision point, not at a settled outcome.",
       terms: [
-        "Iran: nuclear enrichment capped at 20% (civilian threshold)",
+        "Iran: reaffirms it will not procure or develop nuclear weapons (MOU language, not an inspected commitment)",
         "Iran: Hormuz Strait remains open to international shipping",
-        "US: partial sanctions relief on Iranian oil exports",
-        "Israel: ceasefire — no offensive strikes on Iranian territory",
+        "US and Iran: committed to negotiate a comprehensive deal within 60 days of the June 2026 MOU",
+        "No IAEA verification access restored since the 2025 strikes",
       ],
       vulnerabilities: [
-        "No verification mechanism agreed yet",
-        "US Congress has not ratified sanctions relief",
-        "Iranian Revolutionary Guard not party to deal",
-        "Israeli far-right coalition partners publicly oppose deal",
+        "No verification mechanism in place — the MOU's core claims are unconfirmed",
+        "US Congress has not ratified sanctions relief, and disputes whether it must be asked at all",
+        "A separate bipartisan Senate bill (cleared a key hurdle July 28, 2026) would add further " +
+          "sanctions on Iran/Russia energy buyers, cutting against the MOU's premise",
+        "Iranian Revolutionary Guard not party to the MOU",
+        "Israeli far-right coalition partners' position on the MOU is unresolved ahead of the October 27 election",
       ],
-      source: "Reuters, BBC, Al Jazeera — May 2026",
+      source: "IAEA/ANS reporting, Congress.gov CRS IF13247/IF11583, Bloomberg (July 28, 2026)",
     },
     {
       id: "hormuz_status",
@@ -411,9 +492,10 @@ const MIDDLE_EAST_2026 = {
       status: "OPEN",
       controlledBy: "iran",
       description:
-        "Strait is currently open following the peace deal. " +
-        "20% of global oil supply passes through this chokepoint. " +
-        "Iran retains the legal and physical ability to close it.",
+        "Strait is currently open — no reporting of an actual closure during the 2025-2026 " +
+        "strikes, which targeted nuclear fuel-cycle sites rather than the strait. 20% of global " +
+        "oil supply passes through this chokepoint. Iran retains the legal and physical ability " +
+        "to close it.",
       economicImpact: "HIGH",
     },
   ],
@@ -432,31 +514,39 @@ const MIDDLE_EAST_2026 = {
         id: "stability_index",
         name: "Regional Stability Index",
         description: "Overall measure of peaceful governance (0–100)",
-        startingValue: 38,        // fragile — post-war, new deal
+        startingValue: 32,        // reasoned estimate, down from the prior baseline (38) — a real
+                                   // post-strike MOU at its own 60-day deadline, with no restored
+                                   // verification access, is a more volatile starting point than a
+                                   // freshly-signed deal was assumed to be
       },
       {
         id: "conflict_events",
         name: "Conflict Events",
         description: "Number of hostile cross-DAO actions per cycle",
-        startingValue: 3,
+        startingValue: 4,         // reasoned estimate, up from 3 — reflects the real strike history
+                                   // this scenario now opens after, not an active clash this cycle
       },
       {
         id: "trade_volume",
         name: "Trade Volume",
         description: "Economic exchange between nations",
-        startingValue: 120,       // reduced — sanctions partially lifted
+        startingValue: 110,       // reduced — sanctions remain contested, and a further sanctions
+                                   // bill is actively advancing in the Senate (Bloomberg, July 2026)
       },
       {
         id: "proxy_activity",
         name: "Proxy Activity",
         description: "Cross-border faction funding and operations",
-        startingValue: 45,
+        startingValue: 48,
       },
       {
         id: "deal_integrity",
-        name: "Peace Deal Integrity",
-        description: "Likelihood the current peace deal holds (0–100)",
-        startingValue: 52,        // coin flip — new and untested
+        name: "MOU Integrity",
+        description: "Likelihood the current US-Iran MOU holds and converts into a real deal (0–100)",
+        startingValue: 42,        // reasoned estimate, down from the prior baseline (52) — an MOU at
+                                   // its own deadline, with unresolved verification and contested
+                                   // congressional authority, starts from a weaker position than a
+                                   // freshly-signed comprehensive deal would have
       },
     ],
   },
@@ -469,8 +559,8 @@ const MIDDLE_EAST_2026 = {
   experiments: [
     {
       id: "exp_deal_collapse",
-      name: "The Deal Collapses",
-      question: "What happens if the peace deal collapses in cycle 1?",
+      name: "The MOU Collapses",
+      question: "What happens if the 60-day window expires with no deal?",
       change: {
         target: "activeEvents.hormuz_nuclear_deal.status",
         from: "ACTIVE_FRAGILE",
@@ -491,7 +581,7 @@ const MIDDLE_EAST_2026 = {
     {
       id: "exp_congress_blocks",
       name: "US Congress Blocks Sanctions Relief",
-      question: "What if the US fails to deliver on its sanctions promise?",
+      question: "What if Congress asserts INARA review and blocks relief outright?",
       change: {
         target: "nations.iran.economy.sanctionsReliefPending",
         from: true,
@@ -504,7 +594,7 @@ const MIDDLE_EAST_2026 = {
       effects: { dealIntegrity: { delta: -25 }, proxy: { delta: 10 } },
       hypothesis:
         "Iran's hardliner pressure increases. " +
-        "Deal integrity drops. " +
+        "MOU integrity drops. " +
         "Proxy activity resumes within 5 cycles.",
       hypothesisChecks: [
         { label: "Deal integrity deteriorated >15 pts", metric: "dealIntegrity", op: "belowBaselineMinus", value: 15 },
@@ -516,7 +606,7 @@ const MIDDLE_EAST_2026 = {
     {
       id: "exp_saudi_normalizes",
       name: "Saudi Arabia Normalizes with Israel",
-      question: "What if Saudi Arabia formally recognizes Israel?",
+      question: "What if Saudi Arabia formally recognizes Israel despite the Palestinian-statehood condition?",
       change: {
         target: "relationships.israel_saudi.type",
         from: "COLD",
@@ -526,7 +616,7 @@ const MIDDLE_EAST_2026 = {
       hypothesis:
         "Regional trade increases significantly. " +
         "Iran feels encircled — hardliner pressure rises. " +
-        "Palestinian DAO loses leverage.",
+        "Palestinian statehood loses leverage as an obstacle.",
       hypothesisChecks: [
         { label: "Trade increased >150", metric: "trade", op: "aboveBaselinePlus", value: 150 },
         { label: "Iran hardliner response (proxy rose)", metric: "proxy", op: "aboveBaselinePlus", value: 5 },
@@ -537,19 +627,19 @@ const MIDDLE_EAST_2026 = {
     {
       id: "exp_hardliners_win",
       name: "Iranian Hardliners Gain Power",
-      question: "What if hardliners replace moderates in Iran's government?",
+      question: "What if hardliners consolidate further off the real post-strike backlash?",
       change: {
         target: "nations.iran.governance.hardlinerPressure",
-        from: 72,
+        from: 80,
         to: 95,
       },
       effects: { dealIntegrity: { delta: -35 }, proxy: { delta: 25 }, stability: { delta: -10 }, isHardlinerEvent: true },
       hypothesis:
-        "Iran exits the nuclear deal. " +
+        "Iran walks away from the MOU. " +
         "Hormuz threatened within 4 cycles. " +
         "Proxy activity surges to maximum.",
       hypothesisChecks: [
-        { label: "Iran exits nuclear deal (integrity → 0)", metric: "dealIntegrity", op: "equals", value: 0 },
+        { label: "Iran walks from the MOU (integrity → 0)", metric: "dealIntegrity", op: "equals", value: 0 },
         { label: "Proxy activity surged to max >80", metric: "proxy", op: "above", value: 80 },
         { label: "Hormuz threatened (cycles below 50 trade)", metric: "trade", op: "cyclesBelow", value: 50 },
         { label: "Significant stability drop >15 pts", metric: "stability", op: "belowBaselineMinus", value: 15 },
