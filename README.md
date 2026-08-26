@@ -152,11 +152,78 @@ That does not make cherry-picking impossible — it makes *non-publication visib
 mechanism that makes clinical-trial pre-registration work. A promised result that never appears is
 itself evidence.
 
-This is not implemented. It is the honest roadmap item for making the immutability claim mean what
-the docs used to imply. The sibling project
+**This is now implemented** (`server/prereg.js`, `scripts/prereg.js`, 15 tests in
+`test/prereg.test.js`). Three commands:
+
+```bash
+node scripts/prereg.js register middle-east-2026 --cycles 10 --in 15m   # promise
+node scripts/prereg.js draw <hash> --results run.json                   # execute + seal
+node scripts/prereg.js verify <hash>                                    # anyone can run this
+```
+
+`register` pins the scenario, cycle count, agent model, the doctrine half of every prompt and every
+decision schema, then binds them to a NIST beacon pulse identified only by a **future timestamp** —
+a pulse that does not exist yet, so nobody, including the operator, can know what it will say or
+which parameters would turn out favourable. `draw` refuses to run early, fetches that specific pulse
+(`/pulse/time/next/<ms>`, not `/pulse/last`), and hash-chains the run's output to both the promise
+and the entropy. Registrations are single-use.
+
+`verify` re-derives all of it from published files plus an independent call to NIST: that the
+registration hash recomputes, that the pulse is at or after the registered time, that the result
+chains to registration and entropy, that the run used only the registered model, and that NIST
+itself still returns the same pulse value. Verified end-to-end against the live beacon on
+2026-08-24 (pulse #1916207); editing a single sealed metric afterwards fails the chain check, as
+it should. There is deliberately **no PRNG fallback** on the entropy path — unlike the lottery,
+where a labeled fallback beats failing a draw, a pre-registration seeded from `Math.random` would
+hand the operator control of the one value they promised not to control. If NIST is unreachable,
+the correct outcome is that the run does not happen yet.
+
+What it proves: parameters were fixed before the entropy existed, the entropy is genuine and
+third-party, and the published result is bound to both. What it does not prove, stated in the
+tool's own output so nobody can quote a passing verification as more than it is: that no other runs
+were executed. The mechanism makes **non-publication visible** — `verify` on a registration with no
+result reports that as the finding rather than as an error, and `list` flags overdue registrations
+as `UNPUBLISHED`. A promised result that never appears is evidence.
+
+The sibling project
 [dao-governance-research](https://github.com/JonathanReiser/dao-governance-research) already applies
 the discipline in its plainest form — every design decision committed to git before the
 corresponding result was computed.
+
+## The agent layer's model, and why it is pinned
+
+The nation agents reason from four IR-theory frameworks simultaneously
+(Selectorate, Operational Code, Two-Level Games, Prospect Theory) and have to
+respect hard per-nation constraints — Iran cannot `EXIT_DEAL` unless deal
+integrity is under 30 or hardliner pressure is over 88, and so on. That is a
+real reasoning task, so it runs on **`claude-opus-5` with adaptive thinking**,
+set in one place (`AGENT_MODEL` in `server.js`).
+
+It did not always. Through 2026-08-24 this layer ran on `claude-haiku-4-5`, with
+the endpoint repairing the model's JSON in string-land afterwards — stripping
+markdown fences and rewriting `+5` into `5` because the smaller model emitted
+invalid JSON. Both workarounds are gone: the decision contract is now enforced
+by the API through per-nation JSON schemas (`DECISION_SCHEMAS`), one per nation,
+matching exactly the `## Output Format` block that nation's own prompt declares.
+`assertSchemasMatchPrompts()` runs at boot and warns if a prompt and its schema
+ever drift apart. Typing `metricDeltas` as integers is what makes the `+5` case
+impossible rather than patched.
+
+**This is a change of research substrate, not just a quality upgrade.** Any run
+produced before that date came from a different model, and results are not
+comparable across the boundary. That is precisely the thing the pre-registration
+item above exists to make legible: a published run has to name its model version,
+because "the simulation said X" is not a claim until you can say what was doing
+the simulating.
+
+The prompts were restructured at the same time so that doctrine (frameworks,
+operational code, thresholds, output contract — byte-identical every cycle and
+every run) sits above the `## Current World State` heading and live state sits
+below it. Both halves go to the model as before; the split exists so the doctrine
+half can be a cache prefix, and so the publishable part of a prompt is separable
+from the per-cycle part. Measured effect: 1,380–1,834 tokens per nation served
+from cache from the second cycle of a run onward, roughly 55–60% of each
+request's input.
 
 ## Architecture
 
@@ -219,7 +286,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 |---|---|
 | Smart contracts + test suite (83/83) | ✅ Done, runs in CI (`.github/workflows/contracts-tests.yml`) |
 | Classic (fixed-rule) experiments, 4 pre-built scenarios | ✅ Done |
-| AI agent layer (Claude-driven nation decisions) | ✅ Done, verified live |
+| AI agent layer (Claude-driven nation decisions) | ✅ Done, verified live — `claude-opus-5`, adaptive thinking, structured outputs (see below) |
 | Quantum extension — entangled political layer | ✅ Done, verified live |
 | Quantum extension — economic field + speculation (Layer 2/3) | ✅ Done, verified live |
 | Retrograde feedback, Layer 2/3 → Layer 1 (Middle East only) | ✅ Done |
@@ -227,6 +294,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Instinct layer, Tier 1 (real ANU QRNG entropy) | ✅ Done, wired into the review UI, verified live |
 | Instinct layer, Tier 2 (real IBM quantum hardware) | ✅ Done — opt-in toggle, verified live end-to-end on real hardware (`ibm_marrakesh`), see `python-bridge/README.md` |
 | Political layer (Layer 1) + economic field (Layer 2/3), real entropy (Tier 1) | ✅ Done — the actual flagship collapse (not just the instinct veto's) now sources from real ANU QRNG at every live commit, verified live. `scripts/quantum-vs-classical-test.mjs`'s shared default is untouched on purpose (still `Math.random`, thousands of trials per validation run) |
+| Pre-registration (publish parameters, bind to a future NIST pulse, publish whatever comes back) | ✅ Done — `scripts/prereg.js`, verified end-to-end against the live beacon |
 | Political layer (Layer 1), real IBM quantum hardware (Tier 2) | ✅ Done — opt-in toggle, scoped to the entangled Iran/Israel pair only (standalone/peacekeeper stay Tier 1). Verified live end-to-end: real backend (`ibm_fez`), real job id, feeds the actual committed on-chain outcome, not a side display |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
@@ -314,6 +382,7 @@ contracts/          Solidity — WorldRegistry, NationDAO, CitizenToken, Metrics
 scenarios/           Scenario configs (nations, relationships, starting metrics, cited sources)
 scripts/             Deploy + experiment runners
 server.js            Express server proxying Claude API calls for the agent layer
+                     (AGENT_MODEL + DECISION_SCHEMAS + splitPrompt live here)
 frontend/
   src/lib/           quantum.js (engine), markets.js (Layer 2/3), agents.js (Layer 1 + Claude)
   src/components/    Step-by-step UI: Connect → Scenario → Deploy → Run → Results

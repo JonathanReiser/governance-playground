@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
  * @title NationDAO
@@ -252,8 +253,16 @@ contract NationDAO is Ownable {
         bytes calldata _callData
     ) external returns (uint256) {
 
-        // Check proposal threshold
-        uint256 voterBalance = _getVotingWeight(msg.sender);
+        // Check proposal threshold. Deliberately the RAW token balance,
+        // not _getVotingWeight() — proposalThreshold is documented as
+        // "how many tokens needed to submit a proposal", i.e. a stake
+        // requirement, not a measure of voting influence. Under QUADRATIC,
+        // _getVotingWeight() returns sqrt(balance); using it here would
+        // silently lower the real bar to propose (sqrt(x) < x for x > 1)
+        // every time this function's scaling changes, which is exactly
+        // the kind of unit mismatch _applyMechanism's introduction risked
+        // elsewhere in this file.
+        uint256 voterBalance = IERC20Votes(citizenToken).getVotes(msg.sender);
         require(
             voterBalance >= config.proposalThreshold,
             "NationDAO: insufficient tokens to propose"
@@ -352,14 +361,17 @@ contract NationDAO is Ownable {
             "NationDAO: already finalized"
         );
 
-        uint256 totalSupply = _getTotalSupplyAt(proposal.votingStart);
+        // Quorum's denominator must be in the same units as votesFor/
+        // Against/Abstain — raw token units normally, sqrt-of-token units
+        // under QUADRATIC (see _quorumDenominatorAt's doc comment).
+        uint256 quorumDenominator = _quorumDenominatorAt(proposal.votingStart);
         uint256 totalVotes  = proposal.votesFor
                             + proposal.votesAgainst
                             + proposal.votesAbstain;
 
         // Check quorum
-        bool quorumMet = totalSupply > 0 &&
-            (totalVotes * 100) / totalSupply >= config.quorumPercent;
+        bool quorumMet = quorumDenominator > 0 &&
+            (totalVotes * 100) / quorumDenominator >= config.quorumPercent;
 
         // Check majority
         bool majorityFor = proposal.votesFor > proposal.votesAgainst;
@@ -560,7 +572,7 @@ contract NationDAO is Ownable {
         view
         returns (uint256)
     {
-        return IERC20Votes(citizenToken).getVotes(voter);
+        return _applyMechanism(IERC20Votes(citizenToken).getVotes(voter));
     }
 
     /**
@@ -577,7 +589,33 @@ contract NationDAO is Ownable {
         view
         returns (uint256)
     {
-        return IERC20Votes(citizenToken).getPastVotes(voter, blockNumber);
+        return _applyMechanism(IERC20Votes(citizenToken).getPastVotes(voter, blockNumber));
+    }
+
+    /**
+     * @dev Turns a raw token balance into actual voting weight, per the
+     *      nation's configured VotingMechanism. ONE_TOKEN_ONE_VOTE and
+     *      DUAL_LAYER pass the balance through unchanged — dual-layer's
+     *      real differentiation is the guardian veto gate, not the vote
+     *      weighting itself. QUADRATIC takes sqrt(balance), so influence
+     *      grows with the SQUARE ROOT of tokens held rather than linearly:
+     *      a holder with 100x the tokens of another gets only 10x the
+     *      votes, which is the whole point of the mechanism — it blunts
+     *      whale concentration without removing token-weighting entirely.
+     *
+     *      COUNCIL_WEIGHTED is declared in NationConfig (see Saudi Arabia's
+     *      real config) but deliberately NOT implemented here. "A small
+     *      council decides" is not a different weighting curve over the
+     *      same token-holder population — it's a different set of voters
+     *      entirely, which needs its own membership list and voting path,
+     *      not a transform on castVote()'s existing one. Falling through
+     *      to raw token voting is a real, known gap, not a silent one.
+     */
+    function _applyMechanism(uint256 rawWeight) internal view returns (uint256) {
+        if (config.votingMechanism == VotingMechanism.QUADRATIC) {
+            return Math.sqrt(rawWeight);
+        }
+        return rawWeight;
     }
 
     function _getTotalSupply() internal view returns (uint256) {
@@ -587,6 +625,24 @@ contract NationDAO is Ownable {
     /// @dev Snapshotted total supply, for the same reason votes are snapshotted.
     function _getTotalSupplyAt(uint256 blockNumber) internal view returns (uint256) {
         return IERC20Votes(citizenToken).getPastTotalSupply(blockNumber);
+    }
+
+    /**
+     * @dev The denominator finalizeProposal() checks quorum against.
+     *      Under QUADRATIC, votesFor/Against/Abstain are accumulated in
+     *      SQRT-OF-TOKEN units (see _applyMechanism) — comparing that sum
+     *      against the raw token totalSupply would make quorum nearly
+     *      unreachable, since sqrt(x) << x for any x > 1. The denominator
+     *      has to be in the same units as what's being summed: sqrt of
+     *      total supply, an upper bound on total possible quadratic
+     *      weight (equality only if a single address held everything).
+     */
+    function _quorumDenominatorAt(uint256 blockNumber) internal view returns (uint256) {
+        uint256 supply = _getTotalSupplyAt(blockNumber);
+        if (config.votingMechanism == VotingMechanism.QUADRATIC) {
+            return Math.sqrt(supply);
+        }
+        return supply;
     }
 
     /**

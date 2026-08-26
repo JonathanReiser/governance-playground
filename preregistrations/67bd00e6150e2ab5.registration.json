@@ -1,0 +1,24 @@
+{
+  "kind": "governance-playground/preregistration",
+  "version": 1,
+  "createdAt": "2026-08-24T16:40:57.756Z",
+  "scenarioId": "middle-east-2026",
+  "cycles": 2,
+  "mode": "ai-quantum-tier1",
+  "agentModel": "claude-opus-5",
+  "doctrineHashes": {
+    "iran": "f68ec8fcba2e53c9161d9719a86c84a8f14e23fd8455b19da9dcd4406fc29550",
+    "israel": "50c2bfe2dc810cf61625f7bac5e55dbbff38ba8d24ed1240fd42c986c6488644",
+    "saudi_arabia": "1d1a336247494911cdfd479d5dda11bb84480a4326966f43baf1fbf23123ef6c",
+    "us": "17e88a4063f84b1bd3cb7489660d87f0cec528f215253a277176740512f51a22"
+  },
+  "schemaHashes": {
+    "iran": "d8d40f9e73d1dde1a22f440364002af7a24f5c242eb3cf354c8e1d4742145255",
+    "israel": "21a646ebd49a74fd65cda10554d952a9ebb2456dd06879f6a9a39d85ebfc347d",
+    "saudi_arabia": "d29cfda0822348fc73006d1bff49ab113e664aef1c38cb2440e679c728b26349",
+    "us": "5b1968c35ae14af784928b567221e4356221f4e1f1fa8e2121befa559f34d14f"
+  },
+  "drawAfter": "2026-08-24T16:41:57.756Z",
+  "beaconUri": "https://beacon.nist.gov/beacon/2.0/pulse/time/next/1787589717756",
+  "commitment": "One run will be executed at or after drawAfter, seeded from the NIST pulse at beaconUri, and its full per-cycle output published whatever it says."
+}

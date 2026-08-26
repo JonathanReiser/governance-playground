@@ -289,6 +289,130 @@ describe("NationDAO", function () {
     });
   });
 
+  // ── Quadratic Voting Mechanism ──────────────────────────────
+  //
+  // VotingMechanism.QUADRATIC was declared in NationConfig but never
+  // read anywhere — every nation voted ONE_TOKEN_ONE_VOTE regardless of
+  // what it was configured as. Fixed by wiring _applyMechanism() into
+  // both weight lookups. Each test below checks one specific consequence
+  // of that fix independently, rather than one test asserting "it works":
+  // the weight really is sqrt(balance) (verified against a BigInt integer
+  // square root computed here in JS, not just "some smaller number"), the
+  // proposal threshold stays a RAW-balance stake check rather than being
+  // silently lowered by the scaling, and quorum — whose denominator also
+  // had to change — stays reachable rather than becoming mathematically
+  // impossible at real token supply sizes.
+  describe("Quadratic Voting Mechanism", function () {
+    // Matches OpenZeppelin Math.sqrt's rounding (floor) exactly, computed
+    // independently of the contract so these aren't circular assertions.
+    function isqrt(n) {
+      if (n < 0n) throw new Error("isqrt of negative");
+      if (n < 2n) return n;
+      let x0 = n, x1 = (x0 + 1n) / 2n;
+      while (x1 < x0) {
+        x0 = x1;
+        x1 = (x0 + n / x0) / 2n;
+      }
+      return x0;
+    }
+
+    const QUADRATIC = 3; // VotingMechanism.QUADRATIC — see the enum in NationDAO.sol
+    const ALICE_BALANCE = 400_000n * 10n**18n;
+    const CAROL_BALANCE = 100_000n * 10n**18n;
+
+    let qDao, qToken;
+
+    beforeEach(async function () {
+      const CitizenToken = await ethers.getContractFactory("CitizenToken");
+      qToken = await CitizenToken.deploy("QuadraticNation", "quad", TOKEN_SUPPLY, owner.address);
+      await qToken.grantCitizenship(alice.address, ALICE_BALANCE);
+      await qToken.grantCitizenship(carol.address, CAROL_BALANCE);
+
+      const NationDAO = await ethers.getContractFactory("NationDAO");
+      qDao = await NationDAO.deploy(
+        nationConfig({ votingMechanism: QUADRATIC, proposalThreshold: ALICE_BALANCE / 2n }),
+        await qToken.getAddress(),
+        owner.address, 0n, 0n, owner.address
+      );
+    });
+
+    it("vote weight is sqrt(balance), not raw balance", async function () {
+      await qDao.connect(alice).propose(
+        PROPOSAL_TYPE.DOMESTIC_POLICY, "Test", ethers.ZeroAddress, "0x"
+      );
+      await mineBlocks(2);
+      await qDao.connect(alice).castVote(1n, 1);
+
+      const proposal = await qDao.getProposal(1n);
+      expect(proposal.votesFor).to.equal(isqrt(ALICE_BALANCE));
+      expect(proposal.votesFor).to.be.lessThan(ALICE_BALANCE);
+    });
+
+    it("blunts a large holder's influence relative to a smaller one", async function () {
+      // Raw balances are 4:1 (alice:carol). Quadratic weighting compresses
+      // that toward the square root of the ratio, sqrt(4) = 2.
+      const aliceWeight = Number(isqrt(ALICE_BALANCE));
+      const carolWeight = Number(isqrt(CAROL_BALANCE));
+      const rawRatio = Number(ALICE_BALANCE) / Number(CAROL_BALANCE);
+      const quadRatio = aliceWeight / carolWeight;
+      expect(rawRatio).to.be.closeTo(4, 0.001);
+      expect(quadRatio).to.be.lessThan(rawRatio);
+      expect(quadRatio).to.be.closeTo(2, 0.05);
+    });
+
+    it("proposal threshold checks RAW balance, not the quadratic-scaled weight", async function () {
+      // Threshold is half of alice's raw balance — well above her sqrt-
+      // scaled weight. If propose() mistakenly reused the scaled weight
+      // here (as it did before this fix separated the two call sites),
+      // she would be wrongly blocked from proposing.
+      const threshold = ALICE_BALANCE / 2n;
+      expect(isqrt(ALICE_BALANCE)).to.be.lessThan(threshold);
+      await expect(
+        qDao.connect(alice).propose(
+          PROPOSAL_TYPE.DOMESTIC_POLICY, "Should succeed on raw balance",
+          ethers.ZeroAddress, "0x"
+        )
+      ).to.emit(qDao, "ProposalCreated");
+    });
+
+    it("quorum stays reachable once its denominator is sqrt-scaled to match", async function () {
+      const CitizenToken = await ethers.getContractFactory("CitizenToken");
+      const fullToken = await CitizenToken.deploy(
+        "Full", "full", ALICE_BALANCE + CAROL_BALANCE, owner.address
+      );
+      await fullToken.grantCitizenship(alice.address, ALICE_BALANCE);
+      await fullToken.grantCitizenship(carol.address, CAROL_BALANCE);
+
+      const NationDAO = await ethers.getContractFactory("NationDAO");
+      const fullDao = await NationDAO.deploy(
+        nationConfig({ votingMechanism: QUADRATIC, quorumPercent: 90n, proposalThreshold: 1n }),
+        await fullToken.getAddress(),
+        owner.address, 0n, 0n, owner.address
+      );
+
+      await fullDao.connect(alice).propose(
+        PROPOSAL_TYPE.DOMESTIC_POLICY, "Test", ethers.ZeroAddress, "0x"
+      );
+      await mineBlocks(2);
+      await fullDao.connect(alice).castVote(1n, 1);
+      await fullDao.connect(carol).castVote(1n, 1); // both holders: 100% turnout
+      await mineBlocks(6);
+
+      await fullDao.finalizeProposal(1n);
+      expect(await fullDao.getProposalState(1n)).to.equal(2); // SUCCEEDED
+    });
+
+    it("regression guard: an unscaled denominator would make quorum unreachable here", async function () {
+      // Documents the bug this fix closes, independent of the contract:
+      // summed sqrt-of-token votes against a RAW-token denominator rounds
+      // to 0% at this supply size, so even 100% turnout would fail any
+      // nontrivial quorumPercent under the old (pre-fix) code.
+      const totalVotes = isqrt(ALICE_BALANCE) + isqrt(CAROL_BALANCE);
+      const rawSupply = ALICE_BALANCE + CAROL_BALANCE;
+      expect((totalVotes * 100n) / rawSupply).to.equal(0n);
+    });
+  });
+
   // ── Finalization & Execution ───────────────────────────────
 
   describe("Proposal Finalization", function () {

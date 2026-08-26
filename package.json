@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "server": "node server.js",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "prereg": "node -r dotenv/config scripts/prereg.js"
   },
   "keywords": [],
   "author": "",
