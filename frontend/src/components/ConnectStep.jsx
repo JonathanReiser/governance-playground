@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { connectWallet, connectDirect, switchToSepolia } from "../lib/contracts";
 import { LiveDemoPanel } from "./LiveDemoPanel";
+import { listRuns, removeRun } from "../lib/runHistory";
 
 export function ConnectStep({ onConnect }) {
   const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(null); // "direct" | "metamask" | "switching" | null
   const [showLiveDemo, setShowLiveDemo] = useState(false);
+  const [showMyRuns, setShowMyRuns] = useState(false);
+  const [myRuns, setMyRuns] = useState(() => listRuns());
 
   async function handle(mode) {
     setError("");
@@ -49,7 +52,7 @@ export function ConnectStep({ onConnect }) {
         </p>
       </div>
 
-      {!showLiveDemo && (
+      {!showLiveDemo && !showMyRuns && (
         <div className="connect-card">
           <h2>Connect</h2>
           <p className="muted" style={{ fontSize: 12 }}>
@@ -113,6 +116,14 @@ export function ConnectStep({ onConnect }) {
               )}
             </div>
           )}
+
+          <button
+            className="btn-secondary"
+            style={{ marginTop: "0.75rem", fontSize: 12 }}
+            onClick={() => { setMyRuns(listRuns()); setShowMyRuns(true); }}
+          >
+            📁 My Runs {myRuns.length > 0 ? `(${myRuns.length})` : ""}
+          </button>
         </div>
       )}
 
@@ -121,6 +132,58 @@ export function ConnectStep({ onConnect }) {
           onBack={() => setShowLiveDemo(false)}
           onWantWallet={() => setShowLiveDemo(false)}
         />
+      )}
+
+      {showMyRuns && (
+        <div className="connect-card">
+          <h2>My Runs</h2>
+          <p className="muted" style={{ fontSize: 12 }}>
+            Deploys you've made from this browser, on the no-wallet demo path — remembered locally,
+            not tied to an account. Each link reads that run's real, current state straight from
+            Sepolia, so it works for anyone you share it with too.
+          </p>
+
+          {myRuns.length === 0 && <p className="muted" style={{ fontSize: 13 }}>No runs saved on this browser yet.</p>}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }}>
+            {myRuns.map((run) => (
+              <div
+                key={run.registryAddress}
+                className="muted"
+                style={{ fontSize: 12, border: "1px solid currentColor", borderRadius: 4, padding: "0.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem" }}
+              >
+                <div>
+                  <strong>{run.scenarioName}</strong> — {run.startingConditionName}
+                  <div style={{ fontFamily: "monospace", fontSize: 11 }}>
+                    {run.registryAddress.slice(0, 10)}… · {new Date(run.savedAt).toLocaleString()}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
+                  <a
+                    className="btn-secondary"
+                    style={{ fontSize: 11, padding: "0.3rem 0.6rem" }}
+                    href={`${window.location.pathname}?view=${run.registryAddress}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View →
+                  </a>
+                  <button
+                    className="btn-secondary"
+                    style={{ fontSize: 11, padding: "0.3rem 0.6rem" }}
+                    onClick={() => { removeRun(run.registryAddress); setMyRuns(listRuns()); }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setShowMyRuns(false)}>
+            ← Back
+          </button>
+        </div>
       )}
 
       <div className="feature-row">

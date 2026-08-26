@@ -6,6 +6,7 @@ import { ExperimentStep } from "./components/ExperimentStep";
 import { AICycleStep }    from "./components/AICycleStep";
 import { ResultsStep }    from "./components/ResultsStep";
 import { AIResultsStep }  from "./components/AIResultsStep";
+import { ViewRunPage }    from "./components/ViewRunPage";
 import "./App.css";
 
 const STEPS = ["Connect", "Scenario", "Deploy", "Run", "Results"];
@@ -17,6 +18,34 @@ export default function App() {
   const [deployment, setDeployment] = useState(null);
   const [results,    setResults]    = useState(null);
   const [mode,       setMode]       = useState(null); // "classic" | "ai"
+
+  // A shareable permalink — ?view=<registryAddress> — bypasses the whole
+  // Connect→Scenario→Deploy flow entirely and just reads that run's real
+  // state straight from Sepolia. Read once at mount (not on every
+  // render): this app has no client-side router, so leaving the view is
+  // a real navigation (see ViewRunPage's onBack), not a state change.
+  const [viewRegistryAddress] = useState(() => new URLSearchParams(window.location.search).get("view"));
+
+  if (viewRegistryAddress) {
+    return (
+      <div className="app">
+        <header className="app-header">
+          <div className="header-inner">
+            <div className="logo">
+              <span className="logo-icon">⬡</span>
+              <span className="logo-text">Governance Playground</span>
+            </div>
+          </div>
+        </header>
+        <main className="app-main">
+          <ViewRunPage
+            registryAddress={viewRegistryAddress}
+            onBack={() => { window.location.href = window.location.pathname; }}
+          />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
