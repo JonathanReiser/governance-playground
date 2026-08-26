@@ -57,6 +57,16 @@ contract WorldRegistry is Ownable {
         uint256 updatedAt;
     }
 
+    // Calldata-only shape for commitCycleWithNarrative below — never
+    // written to storage, only ever read out of calldata and re-emitted
+    // as a DecisionRecorded event per nation.
+    struct DecisionRecord {
+        string nationId;
+        string primaryAction;
+        string reasoning;
+        string researchNote;
+    }
+
     // ─────────────────────────────────────────
     // ENUMS
     // ─────────────────────────────────────────
@@ -138,6 +148,24 @@ contract WorldRegistry is Ownable {
     event CycleAdvanced(uint256 cycle);
     event SimulationStarted(uint256 totalCycles);
     event SimulationEnded(uint256 finalCycle);
+
+    // A decision/narrative record is never stored in contract storage —
+    // only emitted as an event. Events are far cheaper than storage and
+    // are permanently queryable via any RPC's getLogs, which is exactly
+    // what a "replay this run's reasoning" viewer needs and nothing more:
+    // this is the mechanism, not a place to add on-chain business logic.
+    event DecisionRecorded(
+        uint256 indexed cycle,
+        string nationId,
+        string primaryAction,
+        string reasoning,
+        string researchNote
+    );
+    event CycleNarrativeRecorded(
+        uint256 indexed cycle,
+        string quantumSummary,
+        string marketSummary
+    );
 
     // ─────────────────────────────────────────
     // CONSTRUCTOR
@@ -411,6 +439,56 @@ contract WorldRegistry is Ownable {
             _proxyActivity,
             _dealIntegrity
         );
+        _advanceCycle();
+    }
+
+    /**
+     * @notice Same as commitCycle, but also permanently records why: each
+     *         nation's decision this cycle, plus a quantum-collapse and
+     *         market narrative summary — all as event logs, not storage.
+     * @dev A separate function, not a new commitCycle overload/signature
+     *      change: the existing wallet-connected AI Agent Cycle call site
+     *      (contracts.js -> registry.commitCycle(5 args)) keeps working
+     *      unmodified. This is purely additive. Decisions/narrative are
+     *      never written to storage or read back on-chain by this
+     *      contract — they only ever need to be queryable later via
+     *      getLogs, which events already give you for free and far more
+     *      cheaply than storage would.
+     */
+    function commitCycleWithNarrative(
+        uint256 _stabilityIndex,
+        uint256 _conflictEvents,
+        uint256 _tradeVolume,
+        uint256 _proxyActivity,
+        uint256 _dealIntegrity,
+        DecisionRecord[] calldata _decisions,
+        string calldata _quantumSummary,
+        string calldata _marketSummary
+    ) external onlyOwner {
+        require(metricsOracle != address(0), "WorldRegistry: oracle not wired");
+        IMetricsOracle(metricsOracle).updateMetrics(
+            _stabilityIndex,
+            _conflictEvents,
+            _tradeVolume,
+            _proxyActivity,
+            _dealIntegrity
+        );
+
+        // currentCycle hasn't incremented yet at this point — _advanceCycle()
+        // below is what bumps it — so the cycle these decisions belong to
+        // is currentCycle + 1, matching the CycleAdvanced event it emits.
+        uint256 recordedCycle = currentCycle + 1;
+        for (uint256 i = 0; i < _decisions.length; i++) {
+            emit DecisionRecorded(
+                recordedCycle,
+                _decisions[i].nationId,
+                _decisions[i].primaryAction,
+                _decisions[i].reasoning,
+                _decisions[i].researchNote
+            );
+        }
+        emit CycleNarrativeRecorded(recordedCycle, _quantumSummary, _marketSummary);
+
         _advanceCycle();
     }
 

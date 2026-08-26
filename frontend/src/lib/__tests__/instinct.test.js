@@ -101,7 +101,13 @@ describe("readInstinct", () => {
     const reading = await readInstinct(c);
     expect(["VETO", "ALLOW"]).toContain(reading.outcome);
     expect(["anu-qrng", "math-random-fallback"]).toContain(reading.entropySource);
-  });
+    // quantumRandomFloat's own internal timeout (see quantumRng.js) is
+    // 5000ms — the same value as vitest's default per-test timeout, so an
+    // offline/slow CI runner can race the two and fail on timing alone
+    // rather than on this test's actual assertions. Same fix as the
+    // equivalent case in instinctWiring.test.js: give the test real room
+    // above that internal timeout.
+  }, 10_000);
 });
 
 describe("entanglement", () => {

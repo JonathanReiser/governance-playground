@@ -413,22 +413,33 @@ function clampMetric(key, value) {
 }
 
 /**
- * Signs and sends exactly one WorldRegistry.commitCycle() transaction —
- * the entire on-chain footprint of one AI cycle (updateMetrics +
- * advanceCycle, atomically; the same call the wallet-connected flow
- * uses). Everything upstream of this — agent decisions, quantum
- * collapse, market resolution — already runs client-side with no wallet
- * involved (see frontend/src/lib/cycleRunner.js's runAutonomousCycle),
- * so this is the ONLY piece a no-wallet visitor's browser can't do
- * itself. `metrics` is defensively clamped to the same ranges the
- * contract and the client's own formula already enforce, but not
- * independently re-derived or verified — same trust boundary the
- * wallet flow already has (MetaMask signs whatever the client computed
- * too; the demo wallet signing on the client's behalf doesn't move that
- * boundary, it only relocates whose key does the signing). What IS
- * protected is which contract gets signed against — see sealState.
+ * Signs and sends exactly one WorldRegistry commit transaction — the
+ * entire on-chain footprint of one AI cycle (updateMetrics + advanceCycle,
+ * atomically; the same call the wallet-connected flow uses). Everything
+ * upstream of this — agent decisions, quantum collapse, market
+ * resolution — already runs client-side with no wallet involved (see
+ * frontend/src/lib/cycleRunner.js's runAutonomousCycle), so this is the
+ * ONLY piece a no-wallet visitor's browser can't do itself. `metrics` is
+ * defensively clamped to the same ranges the contract and the client's
+ * own formula already enforce, but not independently re-derived or
+ * verified — same trust boundary the wallet flow already has (MetaMask
+ * signs whatever the client computed too; the demo wallet signing on the
+ * client's behalf doesn't move that boundary, it only relocates whose
+ * key does the signing). What IS protected is which contract gets signed
+ * against — see sealState.
+ *
+ * `narrative` (optional) is `{decisions, quantumSummary, marketSummary}` —
+ * when given, this calls commitCycleWithNarrative() instead of plain
+ * commitCycle(), which additionally emits DecisionRecorded/
+ * CycleNarrativeRecorded events so the run's actual reasoning is
+ * permanently, cheaply, and publicly queryable later (see
+ * ViewRunPage.jsx) — not just the five final metrics. It's optional
+ * (rather than a required 3rd arg) so the existing plain-metrics tests
+ * and any other caller that has no narrative to record keep working
+ * unchanged; every request this server's own /api/demo/commit-cycle
+ * route makes today always supplies one.
  */
-async function commitDemoCycle(registryAddress, metrics, signer = getDemoSigner()) {
+async function commitDemoCycle(registryAddress, metrics, narrative, signer = getDemoSigner()) {
   const registry = new ethers.Contract(registryAddress, WorldRegistryABI.abi, signer);
   const m = {
     stability: clampMetric("stability", metrics?.stability),
@@ -438,9 +449,17 @@ async function commitDemoCycle(registryAddress, metrics, signer = getDemoSigner(
     dealIntegrity: clampMetric("dealIntegrity", metrics?.dealIntegrity),
   };
   const receipt = await withNonceRetry(signer, async () => {
-    const tx = await registry.commitCycle(
-      BigInt(m.stability), BigInt(m.conflicts), BigInt(m.trade), BigInt(m.proxy), BigInt(m.dealIntegrity)
-    );
+    let tx;
+    if (narrative) {
+      tx = await registry.commitCycleWithNarrative(
+        BigInt(m.stability), BigInt(m.conflicts), BigInt(m.trade), BigInt(m.proxy), BigInt(m.dealIntegrity),
+        narrative.decisions, narrative.quantumSummary, narrative.marketSummary
+      );
+    } else {
+      tx = await registry.commitCycle(
+        BigInt(m.stability), BigInt(m.conflicts), BigInt(m.trade), BigInt(m.proxy), BigInt(m.dealIntegrity)
+      );
+    }
     return tx.wait();
   });
   const currentCycle = await registry.currentCycle();
