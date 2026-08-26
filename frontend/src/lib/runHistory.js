@@ -71,3 +71,72 @@ export function clearRuns() {
     // see saveRun
   }
 }
+
+/**
+ * "Continue this run" — lets a visitor resume running agent cycles on a
+ * run saved earlier, from THIS browser, picking up the exact quantum/
+ * market state a cycle left off at rather than starting a fresh quantum
+ * trajectory. Deliberately separate from the `runs` list above: this is
+ * the (larger, and only sometimes present) state a run needs to keep
+ * going, not the lightweight summary "My Runs" displays for every run
+ * whether or not it's resumable.
+ *
+ * Why this can only ever work in the browser that ran it: only the
+ * classical, already-collapsed metrics and the reasoning text get
+ * written on-chain (see WorldRegistry.sol's commitCycleWithNarrative) —
+ * the quantum belief qubits and market instrument state that actually
+ * drive each cycle's decisions are never persisted anywhere else. A run
+ * opened via a shared `?view=` link, or on a different browser, or after
+ * this browser's storage was cleared, genuinely has no way to recover
+ * that state — there's no "Continue" to offer for it, not a missing
+ * feature.
+ *
+ * Keyed by registryAddress (object map, not the `runs` array) for direct
+ * lookup; capped and LRU-evicted the same way `saveRun` caps `runs`.
+ */
+const CONTINUATIONS_KEY = "governance-playground:continuations";
+const MAX_CONTINUATIONS = 50;
+
+function readContinuations() {
+  try {
+    const raw = window.localStorage.getItem(CONTINUATIONS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export function getContinuation(registryAddress) {
+  return readContinuations()[registryAddress] || null;
+}
+
+export function saveContinuation(registryAddress, continuation) {
+  try {
+    const all = readContinuations();
+    all[registryAddress] = { ...continuation, updatedAt: new Date().toISOString() };
+    const entries = Object.entries(all);
+    if (entries.length > MAX_CONTINUATIONS) {
+      entries.sort((a, b) => new Date(b[1].updatedAt) - new Date(a[1].updatedAt));
+      window.localStorage.setItem(CONTINUATIONS_KEY, JSON.stringify(Object.fromEntries(entries.slice(0, MAX_CONTINUATIONS))));
+    } else {
+      window.localStorage.setItem(CONTINUATIONS_KEY, JSON.stringify(all));
+    }
+  } catch {
+    // Storage unavailable, or this run's state happens to be too large
+    // for whatever quota is left — the cycle itself already committed on
+    // -chain either way; failing to remember how to resume it locally
+    // isn't worth surfacing as an error (same reasoning as saveRun's).
+  }
+}
+
+export function clearContinuation(registryAddress) {
+  try {
+    const all = readContinuations();
+    delete all[registryAddress];
+    window.localStorage.setItem(CONTINUATIONS_KEY, JSON.stringify(all));
+  } catch {
+    // see saveRun
+  }
+}

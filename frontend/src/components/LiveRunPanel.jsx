@@ -6,6 +6,7 @@ import {
 import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 import { estimateRemainingMs, formatDuration } from "../lib/eta";
+import { saveContinuation, clearContinuation } from "../lib/runHistory";
 
 const SERVER_URL = "/api";
 
@@ -30,16 +31,50 @@ function actionLabel(id) {
  * /api/demo/commit-cycle. See that route's and commitDemoCycle's own
  * comments for why the in-flight state is HMAC-sealed rather than trusted
  * outright.
+ *
+ * Reachable two ways: fresh, right after a deploy (LiveDemoPanel.jsx
+ * passes `sealedState`/`sealedMac` from cycle 0), or resuming a saved run
+ * from "My Runs" (ConnectStep.jsx passes `initialCheckpoint`, the state
+ * this component itself persisted — via runHistory.js's
+ * saveContinuation — the last time cycles ran on this registry, possibly
+ * in an earlier session). Either way the actual cycle loop below is
+ * identical; only where checkpoint.current starts from differs.
  */
-export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedState, sealedMac, onExit }) {
+export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedState, sealedMac, initialCheckpoint, onExit }) {
   const nationMeta = buildNationMeta(scenario);
   const nationIds = scenario.nations.map((n) => n.id);
+  const resuming = !!initialCheckpoint && initialCheckpoint.cycleIndex > 0;
+  // Both derived from props, not from checkpoint.current — React
+  // disallows reading a ref's value during render (checkpoint is a ref
+  // specifically so driveLoop/runAll can read and mutate it synchronously
+  // without forcing a re-render on every intermediate step; the render
+  // body needs its own, React-visible source for the same numbers).
+  // startCycleIndex is stable for the whole session; reachedCycleIndex
+  // (below, computed where it's used) tracks it forward as `history`
+  // grows — one state update per real committed cycle, so it's always in
+  // sync with what's actually rendered, unlike a stale ref read would be.
+  const startCycleIndex = initialCheckpoint?.cycleIndex ?? 0;
+  // Stability at the moment THIS session started — the resumed
+  // checkpoint's value when continuing a saved run, the scenario's true
+  // starting value otherwise. Deliberately not read from the `simState`
+  // state variable: that gets overwritten as cycles commit, so by the
+  // time the "finished" screen renders it no longer reflects where this
+  // session began.
+  const sessionStartStability = (initialCheckpoint?.simState ?? initSimState(scenario)).stability;
+  // The contract's own real cap (set once at deploy — see
+  // scenario.simulation.defaultCycles), not this session's chosen count —
+  // bounds how many MORE cycles are actually possible. Picking past it
+  // would just get rejected once the contract's own _advanceCycle()
+  // refuses ("simulation complete"), so it's filtered out of the
+  // "picking" screen's options below instead of offered as a dead end.
+  const maxAdditionalCycles = scenario.simulation.defaultCycles - startCycleIndex;
+  const cycleOptions = CYCLE_COUNT_OPTIONS.filter((n) => n <= maxAdditionalCycles);
 
   const [phase, setPhase] = useState("picking"); // picking | thinking | committing | finished | error
   const [totalCycles, setTotalCycles] = useState(3);
-  const [cycleIndex, setCycleIndex] = useState(0);
-  const [simState, setSimState] = useState(() => initSimState(scenario));
-  const [agentMemory, setAgentMemory] = useState(() => ({
+  const [cycleIndex, setCycleIndex] = useState(initialCheckpoint?.cycleIndex ?? 0);
+  const [simState, setSimState] = useState(() => initialCheckpoint?.simState ?? initSimState(scenario));
+  const [agentMemory, setAgentMemory] = useState(() => initialCheckpoint?.agentMemory ?? ({
     quantum: initQuantumBeliefs(scenario),
     markets: initMarketBeliefs(scenario),
   }));
@@ -54,8 +89,12 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
   // half-applied. A full run is several real minutes (Claude decisions +
   // a Sepolia confirmation, per cycle) — long enough for the same "Failed
   // to fetch" mid-run network drop the deploy loop was hardened against
-  // (LiveDemoPanel.jsx) to hit here too.
-  const checkpoint = useRef({ cycleIndex: 0, state: sealedState, mac: sealedMac, simState, agentMemory });
+  // (LiveDemoPanel.jsx) to hit here too. Starts from `initialCheckpoint`
+  // when resuming a saved run, from cycle 0's freshly-sealed state
+  // otherwise — see this component's own header comment.
+  const checkpoint = useRef(
+    initialCheckpoint || { cycleIndex: 0, state: sealedState, mac: sealedMac, simState, agentMemory }
+  );
 
   // Same live elapsed/ETA pattern as LiveDemoPanel.jsx's deploy phase —
   // see estimateRemainingMs's own header comment for why this is a real,
@@ -74,8 +113,16 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
   }, [phase]);
 
   async function driveLoop(count) {
+    // Captured once, before the loop can advance checkpoint.current — the
+    // server's rate limiter (demoRunLimiter) needs to know which request
+    // is "the start of a run action" a visitor actually clicked, distinct
+    // from every later cycle in the same drive-loop invocation. Cycle 0
+    // isn't a reliable signal for that once resuming exists (a resumed
+    // run's first request is never cycle 0) — see server.js's own comment
+    // on why `runStart` replaced that check.
+    const loopStartIndex = checkpoint.current.cycleIndex;
     try {
-      for (let i = checkpoint.current.cycleIndex; i < count; i++) {
+      for (let i = loopStartIndex; i < count; i++) {
         setCycleIndex(i);
         setPhase("thinking");
 
@@ -92,6 +139,7 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
             scenarioId,
             cycleIndex: i,
             totalCycles: count,
+            runStart: i === loopStartIndex,
             state: checkpoint.current.state,
             mac: checkpoint.current.mac,
             metrics: {
@@ -123,6 +171,22 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
           cycleIndex: i + 1, state: data.state, mac: data.mac, simState: committed, agentMemory: newAgentMemory,
         };
 
+        // Persisted after every real commit, not just at the end — so
+        // "Continue this run" from My Runs can pick up from the exact
+        // cycle just committed even if the tab closes right here. Cleared
+        // once the contract itself reports the simulation over
+        // (out.simulationActive: false, from commitDemoCycle reading the
+        // real on-chain state): _advanceCycle() then refuses any further
+        // cycle for this registry, so there is nothing left to resume.
+        if (data.simulationActive) {
+          saveContinuation(registryAddress, {
+            scenarioId, cycleIndex: checkpoint.current.cycleIndex, state: data.state, mac: data.mac,
+            simState: committed, agentMemory: newAgentMemory, simulationActive: true,
+          });
+        } else {
+          clearContinuation(registryAddress);
+        }
+
         const snapshot = { cycle: cycleNumber, committed, decisions, quantum, market, txHash: data.txHash };
         setHistory((h) => [...h, snapshot]);
         setSimState(committed);
@@ -136,16 +200,29 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
     }
   }
 
-  function runAll(count) {
-    setTotalCycles(count);
+  // `additionalCount` is what the picker actually offers ("3 more
+  // cycles"), not an absolute target — fresh runs start from cycle 0
+  // (checkpoint.current already is {cycleIndex: 0, ...} from the useRef
+  // initializer above) so the two are the same number there, but resuming
+  // a saved run needs the real absolute target: cycle 3 + "5 more" = 8,
+  // not 5. checkpoint.current is deliberately left alone here — it
+  // already holds the right starting point for either case.
+  function runAll(additionalCount) {
+    // startCycleIndex, not checkpoint.current.cycleIndex: runAll only
+    // ever runs from the "picking" screen, before any cycle in this
+    // session has committed, so the two are always equal here — using
+    // the prop-derived value instead of the ref keeps this function (and
+    // everything that references it, including the JSX below) free of
+    // ref reads, which React's render rules disallow.
+    const target = startCycleIndex + additionalCount;
+    setTotalCycles(target);
     setError("");
-    checkpoint.current = { cycleIndex: 0, state: sealedState, mac: sealedMac, simState, agentMemory };
     // Only ever runs from this onClick-triggered function, never during
     // render; see the identical case in LiveDemoPanel.jsx's startDeploy.
     // eslint-disable-next-line react-hooks/purity
     runStartRef.current = Date.now();
     setElapsedMs(0);
-    driveLoop(count);
+    driveLoop(target);
   }
 
   function retryRun() {
@@ -162,23 +239,30 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
       {phase === "picking" && (
         <>
           <p className="muted" style={{ fontSize: 13 }}>
-            Runs the scenario autonomously — real Claude Opus 5 decisions for every nation, real
-            quantum collapse, real commits to the deployment you just watched go live. No pausing
-            for review or edits; this is the AI's reasoning unedited, which is why it's read-only.
-            Each cycle is several real API calls plus a real Sepolia confirmation — expect roughly
-            a minute per cycle.
+            {resuming
+              ? `Continuing from cycle ${startCycleIndex} — the exact quantum/market state this run had, picked up right where it left off, on this browser. Real Claude Opus 5 decisions, real quantum collapse, real commits, same as before.`
+              : "Runs the scenario autonomously — real Claude Opus 5 decisions for every nation, real quantum collapse, real commits to the deployment you just watched go live. No pausing for review or edits; this is the AI's reasoning unedited, which is why it's read-only."}
+            {" "}Each cycle is several real API calls plus a real Sepolia confirmation — expect
+            roughly a minute per cycle.
           </p>
-          <div className="connect-options">
-            {CYCLE_COUNT_OPTIONS.map((n) => (
-              <button key={n} className="connect-option secondary" onClick={() => runAll(n)}>
-                <span className="connect-option-icon">▶</span>
-                <div className="connect-option-text">
-                  <strong>{n} cycle{n === 1 ? "" : "s"}</strong>
-                  <span>~{n} minute{n === 1 ? "" : "s"}</span>
-                </div>
-              </button>
-            ))}
-          </div>
+          {maxAdditionalCycles <= 0 ? (
+            <p className="muted" style={{ fontSize: 13 }}>
+              This scenario's on-chain simulation has already reached its full
+              {" "}{scenario.simulation.defaultCycles}-cycle run — there's nothing left to advance.
+            </p>
+          ) : (
+            <div className="connect-options">
+              {cycleOptions.map((n) => (
+                <button key={n} className="connect-option secondary" onClick={() => runAll(n)}>
+                  <span className="connect-option-icon">▶</span>
+                  <div className="connect-option-text">
+                    <strong>{n} {resuming ? "more " : ""}cycle{n === 1 ? "" : "s"}</strong>
+                    <span>~{n} minute{n === 1 ? "" : "s"}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
           <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={onExit}>
             ← Back
           </button>
@@ -273,24 +357,40 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
         </div>
       )}
 
-      {phase === "finished" && (
-        <div style={{ marginTop: "1rem" }}>
-          <p style={{ color: "#4ade80", fontWeight: 600 }}>
-            ✓ {totalCycles} cycle{totalCycles === 1 ? "" : "s"} committed for real, on Sepolia.
-          </p>
-          <p className="muted" style={{ fontSize: 12 }}>
-            Stability moved from {initSimState(scenario).stability} to {latest?.committed.stability} over
-            {" "}{totalCycles} cycle{totalCycles === 1 ? "" : "s"}, unedited AI reasoning throughout. Every
-            transaction above is independently checkable on Etherscan — this wasn't curated for the demo.
-          </p>
-          <p className="muted" style={{ fontSize: 12, marginTop: "0.5rem" }}>
-            Registry: <a href={`https://sepolia.etherscan.io/address/${registryAddress}`} target="_blank" rel="noopener noreferrer">{registryAddress}</a>
-          </p>
-          <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={onExit}>
-            ← Back
-          </button>
-        </div>
-      )}
+      {phase === "finished" && (() => {
+        // Derived from `history` (state) rather than checkpoint.current
+        // (a ref) — see startCycleIndex's own comment above for why:
+        // this stays correct across re-renders instead of risking a
+        // stale read.
+        const reachedCycleIndex = startCycleIndex + history.length;
+        const remaining = scenario.simulation.defaultCycles - reachedCycleIndex;
+        return (
+          <div style={{ marginTop: "1rem" }}>
+            <p style={{ color: "#4ade80", fontWeight: 600 }}>
+              ✓ {history.length} cycle{history.length === 1 ? "" : "s"} committed for real, on Sepolia
+              {resuming ? ` — this registry is now at cycle ${reachedCycleIndex} overall` : ""}.
+            </p>
+            <p className="muted" style={{ fontSize: 12 }}>
+              Stability moved from {sessionStartStability} to {latest?.committed.stability} over
+              {" "}{history.length} cycle{history.length === 1 ? "" : "s"}{resuming ? " this session" : ""}, unedited
+              AI reasoning throughout. Every transaction above is independently checkable on Etherscan — this
+              wasn't curated for the demo.
+            </p>
+            {remaining > 0 && (
+              <p className="muted" style={{ fontSize: 12, marginTop: "0.5rem" }}>
+                This run isn't finished — {remaining} more cycle{remaining === 1 ? "" : "s"} are still possible.
+                Come back to "My Runs" any time on this browser to continue it.
+              </p>
+            )}
+            <p className="muted" style={{ fontSize: 12, marginTop: "0.5rem" }}>
+              Registry: <a href={`https://sepolia.etherscan.io/address/${registryAddress}`} target="_blank" rel="noopener noreferrer">{registryAddress}</a>
+            </p>
+            <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={onExit}>
+              ← Back
+            </button>
+          </div>
+        );
+      })()}
     </div>
   );
 }
