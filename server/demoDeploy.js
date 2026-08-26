@@ -127,30 +127,37 @@ function getDeploySteps(scenarioId) {
 }
 
 /**
- * Seals {scenarioId, stepIndex, state} with an HMAC keyed by
+ * Seals {namespace, scenarioId, stepIndex, state} with an HMAC keyed by
  * DEMO_PRIVATE_KEY (never sent to the client) so the caller can hold and
- * echo back deploy-in-progress state — contract addresses, nation registry
- * — between separate HTTP requests with no server-side session, while
- * being unable to forge or redirect it. Without this, a step-at-a-time API
- * would let a client point "registryAddress" at an arbitrary contract and
- * get the demo signer to sign a transaction against it — the exact class
- * of risk this module's header comment already flags for bytecode/calldata,
+ * echo back in-progress state — contract addresses, nation registry —
+ * between separate HTTP requests with no server-side session, while being
+ * unable to forge or redirect it. Without this, a step-at-a-time API would
+ * let a client point "registryAddress" at an arbitrary contract and get
+ * the demo signer to sign a transaction against it — the exact class of
+ * risk this module's header comment already flags for bytecode/calldata,
  * just via a different field. Same hash-sealing idea as prereg.js, applied
- * to short-lived deploy state instead of a research run.
+ * to short-lived state instead of a research run.
+ *
+ * `namespace` keeps a deploy-phase seal (stepIndex = which of ~21 deploy
+ * transactions) from ever being accepted where a run-phase seal
+ * (cycleIndex = which of N cycle commits) is expected, or vice versa —
+ * two counters that would otherwise collide (both start at 0) if sealed
+ * under the same key. Defaults to "deploy" so every existing deploy-step
+ * caller is unaffected; run-phase callers pass "run" explicitly.
  */
-function sealState(scenarioId, stepIndex, state) {
+function sealState(scenarioId, stepIndex, state, namespace = "deploy") {
   const mac = crypto
     .createHmac("sha256", process.env.DEMO_PRIVATE_KEY || "")
-    .update(canonicalStringify({ scenarioId, stepIndex, state }))
+    .update(canonicalStringify({ namespace, scenarioId, stepIndex, state }))
     .digest("hex");
   return { state, mac };
 }
 
-function verifySealedState(scenarioId, stepIndex, state, mac) {
+function verifySealedState(scenarioId, stepIndex, state, mac, namespace = "deploy") {
   if (!process.env.DEMO_PRIVATE_KEY) return false;
   const expected = crypto
     .createHmac("sha256", process.env.DEMO_PRIVATE_KEY)
-    .update(canonicalStringify({ scenarioId, stepIndex, state }))
+    .update(canonicalStringify({ namespace, scenarioId, stepIndex, state }))
     .digest("hex");
   const a = Buffer.from(expected, "hex");
   const b = Buffer.from(typeof mac === "string" ? mac : "", "hex");
@@ -347,6 +354,54 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
   return { stepIndex, totalSteps: steps.length, label: step.label, txHash, done, state: next, result };
 }
 
+const METRIC_BOUNDS = {
+  stability: [0, 100],
+  conflicts: [0, 999],
+  trade: [0, 500],
+  proxy: [0, 100],
+  dealIntegrity: [0, 100],
+};
+
+function clampMetric(key, value) {
+  const [min, max] = METRIC_BOUNDS[key];
+  const n = Number(value);
+  if (!Number.isFinite(n)) return min;
+  return Math.min(max, Math.max(min, Math.round(n)));
+}
+
+/**
+ * Signs and sends exactly one WorldRegistry.commitCycle() transaction —
+ * the entire on-chain footprint of one AI cycle (updateMetrics +
+ * advanceCycle, atomically; the same call the wallet-connected flow
+ * uses). Everything upstream of this — agent decisions, quantum
+ * collapse, market resolution — already runs client-side with no wallet
+ * involved (see frontend/src/lib/cycleRunner.js's runAutonomousCycle),
+ * so this is the ONLY piece a no-wallet visitor's browser can't do
+ * itself. `metrics` is defensively clamped to the same ranges the
+ * contract and the client's own formula already enforce, but not
+ * independently re-derived or verified — same trust boundary the
+ * wallet flow already has (MetaMask signs whatever the client computed
+ * too; the demo wallet signing on the client's behalf doesn't move that
+ * boundary, it only relocates whose key does the signing). What IS
+ * protected is which contract gets signed against — see sealState.
+ */
+async function commitDemoCycle(registryAddress, metrics, signer = getDemoSigner()) {
+  const registry = new ethers.Contract(registryAddress, WorldRegistryABI.abi, signer);
+  const m = {
+    stability: clampMetric("stability", metrics?.stability),
+    conflicts: clampMetric("conflicts", metrics?.conflicts),
+    trade: clampMetric("trade", metrics?.trade),
+    proxy: clampMetric("proxy", metrics?.proxy),
+    dealIntegrity: clampMetric("dealIntegrity", metrics?.dealIntegrity),
+  };
+  const receipt = await (await registry.commitCycle(
+    BigInt(m.stability), BigInt(m.conflicts), BigInt(m.trade), BigInt(m.proxy), BigInt(m.dealIntegrity)
+  )).wait();
+  const currentCycle = await registry.currentCycle();
+  const simulationActive = await registry.simulationActive();
+  return { txHash: receipt.hash, metrics: m, currentCycle: Number(currentCycle), simulationActive };
+}
+
 /**
  * Convenience single-call wrapper, kept for scripts/tests that want the
  * old one-shot shape — implemented as a plain in-process loop over
@@ -370,6 +425,7 @@ module.exports = {
   getDemoStatus,
   getDeploySteps,
   runDeployStep,
+  commitDemoCycle,
   deployDemoScenario,
   sealState,
   verifySealedState,

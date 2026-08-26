@@ -1214,7 +1214,14 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 // trusted outright.
 // ─────────────────────────────────────────────────────────────
 
-const { getDemoStatus, runDeployStep, sealState, verifySealedState } = require("./server/demoDeploy");
+const { getDemoStatus, runDeployStep, commitDemoCycle, sealState, verifySealedState } = require("./server/demoDeploy");
+
+// Keep in sync with frontend/src/lib/cycleRunner.js's CYCLE_COUNT_OPTIONS —
+// duplicated rather than shared for the same reason demoDeploy.js's own
+// header comment gives for its ABI/deploy-logic duplication: this file is
+// CommonJS, the frontend is ESM, and a 3-element array isn't worth a
+// module-system workaround.
+const CYCLE_COUNT_OPTIONS = [3, 5, 10];
 
 // Each deploy run is ~15-20 transactions split across that many step
 // requests now (see /api/demo/deploy/step below) — this caps DEPLOY RUNS,
@@ -1266,6 +1273,14 @@ app.post("/api/demo/deploy/step", demoDeployLimiter, async (req, res) => {
   try {
     const out = await runDeployStep(scenarioId, stepIndex, state);
     const sealed = sealState(scenarioId, out.stepIndex + 1, out.state);
+    // On the final deploy step, also mint a run-phase seal (cycleIndex 0,
+    // its own namespace) bound to the registry that just came out of
+    // deployment — the bridge into /api/demo/commit-cycle below, so the
+    // client can go straight from "deployed" to "watch it play out"
+    // without a second round trip just to get a starting seal.
+    const run = out.done
+      ? sealState(scenarioId, 0, { registryAddress: out.state.registryAddress }, "run")
+      : null;
     res.json({
       stepIndex: out.stepIndex,
       totalSteps: out.totalSteps,
@@ -1275,9 +1290,68 @@ app.post("/api/demo/deploy/step", demoDeployLimiter, async (req, res) => {
       state: sealed.state,
       mac: sealed.mac,
       result: out.result,
+      runState: run?.state,
+      runMac: run?.mac,
     });
   } catch (err) {
     console.error("[demo/deploy/step] error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Each deploy comes with its own fresh, isolated on-chain instance, so
+// this caps how many full RUNS a visitor can start, same shape as
+// demoDeployLimiter above — `skip` only counts cycleIndex 0.
+const demoRunLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => (req.body?.cycleIndex ?? 0) !== 0,
+  message: { error: "Demo run rate limit reached (5/hour). Try again later, or connect your own wallet for unlimited use." },
+});
+
+// Signs and sends ONE cycle's commitCycle() transaction. Everything that
+// produces the metrics being committed — agent decisions, quantum
+// collapse, market resolution — already happened in the visitor's own
+// browser with no wallet involved (frontend/src/lib/cycleRunner.js's
+// runAutonomousCycle, which calls the already-walletless /api/agent/decide
+// under the hood); this is only the one piece a no-wallet visitor's
+// browser structurally cannot do itself. See commitDemoCycle's own header
+// comment on why `metrics` is clamped but not independently re-verified —
+// same trust boundary MetaMask already has in the wallet-connected flow.
+app.post("/api/demo/commit-cycle", demoRunLimiter, async (req, res) => {
+  const { scenarioId, cycleIndex, totalCycles, mac, metrics } = req.body || {};
+  if (!scenarioId || !Number.isInteger(cycleIndex) || !CYCLE_COUNT_OPTIONS.includes(totalCycles)) {
+    return res.status(400).json({ error: `scenarioId, integer cycleIndex, and totalCycles in [${CYCLE_COUNT_OPTIONS.join(", ")}] required` });
+  }
+  if (cycleIndex < 0 || cycleIndex >= totalCycles) {
+    return res.status(400).json({ error: "cycleIndex out of range for totalCycles" });
+  }
+  const state = req.body?.state || {};
+  if (JSON.stringify(state).length > 2_000) {
+    return res.status(400).json({ error: "state payload too large" });
+  }
+  if (!verifySealedState(scenarioId, cycleIndex, state, mac, "run")) {
+    return res.status(400).json({ error: "Invalid or tampered run state — start a new deploy." });
+  }
+  try {
+    const out = await commitDemoCycle(state.registryAddress, metrics);
+    const done = cycleIndex === totalCycles - 1;
+    const sealed = sealState(scenarioId, cycleIndex + 1, state, "run");
+    res.json({
+      cycleIndex,
+      totalCycles,
+      txHash: out.txHash,
+      metrics: out.metrics,
+      currentCycleOnChain: out.currentCycle,
+      simulationActive: out.simulationActive,
+      done,
+      state: sealed.state,
+      mac: sealed.mac,
+    });
+  } catch (err) {
+    console.error("[demo/commit-cycle] error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });

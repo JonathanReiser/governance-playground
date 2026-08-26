@@ -2,115 +2,13 @@ import { useState, useCallback } from "react";
 import { NationAgent, buildWorldState, applyDecisions, initQuantumBeliefs, initMarketBeliefs, proposeInstinctReadings, proposeInstinctReadingsViaQPU, createRealEntropyPool, evolveAndCollapseQuantumStateViaQPU } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 import { nationActionMenu } from "../lib/nationActions";
+import {
+  CYCLE_COUNT_OPTIONS, buildMetricLabels, buildNationMeta, buildWorldStateKeyMap,
+  joinWithAnd, NON_STATUS_DECISION_KEYS, humanizeKey, initSimState, simStateToMetrics,
+  aggregateDeltas, deltaColor, sign, computeCommittedMetrics,
+} from "../lib/cycleRunner";
 
 const DEFAULT_MAX_CYCLES = 10;
-const CYCLE_COUNT_OPTIONS = [3, 5, 10];
-
-// Metric config ids (shared across every scenario, see simulation.metrics
-// in each scenario config) -> the camelCase keys used throughout
-// simState/metricDeltas. Only the *display name* varies by scenario
-// (e.g. "Deal Integrity" vs. "Status Quo Integrity") — read from the
-// scenario's own metric.name, not hardcoded here.
-const METRIC_ID_TO_KEY = {
-  stability_index: "stability",
-  proxy_activity:  "proxyActivity",
-  trade_volume:    "tradeVolume",
-  conflict_events: "conflictEvents",
-  deal_integrity:  "dealIntegrity",
-};
-
-function buildMetricLabels(scenario) {
-  const labels = {};
-  for (const m of scenario.simulation.metrics) {
-    const key = METRIC_ID_TO_KEY[m.id];
-    if (key) labels[key] = m.name;
-  }
-  return labels;
-}
-
-function buildNationMeta(scenario) {
-  return Object.fromEntries(scenario.nations.map(n => [n.id, { label: n.name, flag: n.flag, color: n.color }]));
-}
-
-// nationId (as used in decisions/agents) -> key in the worldState object
-// built by buildWorldState() — sourced from the scenario's own aiAgents
-// config, not hardcoded per scenario.
-function buildWorldStateKeyMap(scenario) {
-  const { entangled, standalone, peacekeeper } = scenario.aiAgents;
-  const map = {
-    [entangled.aId]: entangled.aWorldKey,
-    [entangled.bId]: entangled.bWorldKey,
-    [standalone.id]: standalone.worldKey,
-  };
-  if (peacekeeper) map[peacekeeper.id] = peacekeeper.worldKey;
-  return map;
-}
-
-function joinWithAnd(items) {
-  if (items.length <= 1) return items.join("");
-  if (items.length === 2) return `${items[0]} and ${items[1]}`;
-  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
-}
-
-// Decision fields that are NOT scenario-specific status flags — every other
-// string field on a decision is rendered generically as a status flag, so
-// a new scenario's bespoke vocabulary (blockadeStatus, chipExportControlStance,
-// ...) shows up automatically with no frontend changes needed.
-const NON_STATUS_DECISION_KEYS = new Set([
-  "primaryAction", "supportingActions", "reasoning", "metricDeltas",
-  "coalitionSignal", "coalitionStatus", "researchNote", "existentialFrameActive",
-]);
-
-function humanizeKey(key) {
-  return key.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()).trim();
-}
-
-// ─────────────────────────────────────────────
-// Starting sim state from scenario config
-// ─────────────────────────────────────────────
-function initSimState(scenario) {
-  const m = scenario.simulation.metrics;
-  return {
-    stability:    m.find(x => x.id === "stability_index").startingValue,
-    conflicts:    m.find(x => x.id === "conflict_events").startingValue,
-    trade:        m.find(x => x.id === "trade_volume").startingValue,
-    proxy:        m.find(x => x.id === "proxy_activity").startingValue,
-    dealIntegrity:m.find(x => x.id === "deal_integrity").startingValue,
-    // Layer 2 economic field — index values, 100 = baseline at scenario start.
-    market: { primary: 100, currencyA: 100, currencyB: 100, global: 100 },
-  };
-}
-
-// Map simState field names → METRIC_LABELS keys
-function simStateToMetrics(s) {
-  return {
-    stability:     s.stability,
-    proxyActivity: s.proxy,
-    tradeVolume:   s.trade,
-    conflictEvents:s.conflicts,
-    dealIntegrity: s.dealIntegrity,
-  };
-}
-
-// Aggregate every nation's metricDeltas into one object
-function aggregateDeltas(decisions) {
-  const agg = { stability: 0, proxyActivity: 0, tradeVolume: 0, conflictEvents: 0, dealIntegrity: 0 };
-  for (const result of Object.values(decisions)) {
-    if (result.error || !result.decision?.metricDeltas) continue;
-    for (const [k, v] of Object.entries(result.decision.metricDeltas)) {
-      if (k in agg) agg[k] = (agg[k] || 0) + (v || 0);
-    }
-  }
-  return agg;
-}
-
-function deltaColor(v) {
-  if (v > 0) return "#22c55e";
-  if (v < 0) return "#ef4444";
-  return "#666";
-}
-
-function sign(v) { return v > 0 ? `+${v}` : String(v); }
 
 
 // ─────────────────────────────────────────────
@@ -556,25 +454,15 @@ export function AICycleStep({ scenario, deployment, onResults }) {
     const quantum = newAgentMemory.quantum.lastEvent;
     const market  = newAgentMemory.markets.lastEvent;
 
-    const clamp = (v, min, max) => Math.min(max, Math.max(min, Math.round(v)));
-
     // Override with researcher's edits, then layer the quantum measurement's
     // own effect on top (not something the researcher pre-edited). The
     // economic field is entirely Layer 2/3 output — nothing for the
     // researcher to pre-edit — so it's taken straight from newSimState.
-    const committed = {
-      stability:     clamp(proposed.stability     + (quantum.entangledEffect?.stability      ?? 0), 0, 100),
-      proxy:         clamp(proposed.proxyActivity, 0, 100),
-      trade:         clamp(proposed.tradeVolume,   0, 500),
-      conflicts:     clamp(proposed.conflictEvents + (quantum.entangledEffect?.conflictEvents ?? 0), 0, 999),
-      dealIntegrity: clamp(proposed.dealIntegrity  + (quantum.entangledEffect?.dealIntegrity  ?? 0), 0, 100),
-      market: {
-        primary:   clamp(newSimState.market.primary,   0, 300),
-        currencyA: clamp(newSimState.market.currencyA, 0, 300),
-        currencyB: clamp(newSimState.market.currencyB, 0, 300),
-        global:    clamp(newSimState.market.global,    0, 300),
-      },
-    };
+    // Same formula the no-wallet autonomous runner uses (see
+    // lib/cycleRunner.js's computeCommittedMetrics) — shared, not
+    // reimplemented, since "proposed + entangled effect, clamped" has to
+    // mean the same thing in both places.
+    const committed = computeCommittedMetrics(proposed, quantum, newSimState);
 
     setQuantumEvent(quantum);
     setMarketEvent(market);
