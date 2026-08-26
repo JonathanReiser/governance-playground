@@ -7,6 +7,7 @@ import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
 import { estimateRemainingMs, formatDuration } from "../lib/eta";
 import { saveContinuation, clearContinuation } from "../lib/runHistory";
+import { ExperimentBanner } from "./ExperimentBanner";
 
 const SERVER_URL = "/api";
 
@@ -40,7 +41,7 @@ function actionLabel(id) {
  * in an earlier session). Either way the actual cycle loop below is
  * identical; only where checkpoint.current starts from differs.
  */
-export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedState, sealedMac, initialCheckpoint, onExit }) {
+export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedState, sealedMac, initialCheckpoint, startingCondition, onExit }) {
   const nationMeta = buildNationMeta(scenario);
   const nationIds = scenario.nations.map((n) => n.id);
   const resuming = !!initialCheckpoint && initialCheckpoint.cycleIndex > 0;
@@ -235,6 +236,7 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
   return (
     <div className="connect-card" style={{ marginTop: "1.25rem" }}>
       <h2>Watching It Play Out</h2>
+      <ExperimentBanner scenarioName={scenario.meta.name} startingCondition={startingCondition} />
 
       {phase === "picking" && (
         <>
