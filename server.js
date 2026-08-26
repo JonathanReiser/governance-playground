@@ -1298,8 +1298,26 @@ const { getDemoStatus, runDeployStep, commitDemoCycle, sealState, verifySealedSt
 // duplicated rather than shared for the same reason demoDeploy.js's own
 // header comment gives for its ABI/deploy-logic duplication: this file is
 // CommonJS, the frontend is ESM, and a 4-element array isn't worth a
-// module-system workaround.
+// module-system workaround. Only used here to size the rate-limit skip
+// check below and to word the error message for the request-shape check;
+// the request-shape check itself accepts any totalCycles up to
+// MAX_TOTAL_CYCLES, not just these four values — see that check's own
+// comment for why.
 const CYCLE_COUNT_OPTIONS = [1, 3, 5, 10];
+
+// "Continue this run" (ConnectStep.jsx / LiveRunPanel.jsx's
+// initialCheckpoint) resumes from whatever cycle a run left off at and
+// asks the server to advance to `checkpoint.cycleIndex + <however many
+// more the visitor picks>` — a value that isn't necessarily one of
+// CYCLE_COUNT_OPTIONS (e.g. resuming from cycle 3 and picking "+5 more"
+// asks the server for totalCycles: 8). totalCycles here was never a
+// meaningful protocol constraint in the first place — the contract's own
+// _advanceCycle() independently enforces the real limit against its own
+// stored totalCycles, set once at deploy — so this is just a sanity
+// bound on the request shape, generous enough to cover any realistic
+// resume (comfortably above both scenarios' current 20-cycle default)
+// without being unbounded.
+const MAX_TOTAL_CYCLES = 50;
 
 // Each deploy run is ~10-12 transactions split across that many step
 // requests now (see /api/demo/deploy/step below) — this caps DEPLOY RUNS,
@@ -1391,7 +1409,14 @@ const demoRunLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => (req.body?.cycleIndex ?? 0) !== 0,
+  // `runStart` (set by LiveRunPanel.jsx) marks the one request per drive-
+  // loop invocation that corresponds to a visitor actually clicking "run
+  // N cycles" — every other request in that same loop is a continuation
+  // of an action already counted, not a new one. This used to check
+  // cycleIndex === 0, which broke the moment "Continue this run" shipped:
+  // a resumed run's first request is never cycle 0, so every resumed
+  // cycle would have skipped the rate limit entirely.
+  skip: (req) => !req.body?.runStart,
   message: { error: "Demo run rate limit reached (5/hour). Try again later, or connect your own wallet for unlimited use." },
 });
 
@@ -1445,8 +1470,8 @@ function sanitizeNarrative(body) {
 
 app.post("/api/demo/commit-cycle", demoRunLimiter, async (req, res) => {
   const { scenarioId, cycleIndex, totalCycles, mac, metrics } = req.body || {};
-  if (!scenarioId || !Number.isInteger(cycleIndex) || !CYCLE_COUNT_OPTIONS.includes(totalCycles)) {
-    return res.status(400).json({ error: `scenarioId, integer cycleIndex, and totalCycles in [${CYCLE_COUNT_OPTIONS.join(", ")}] required` });
+  if (!scenarioId || !Number.isInteger(cycleIndex) || !Number.isInteger(totalCycles) || totalCycles < 1 || totalCycles > MAX_TOTAL_CYCLES) {
+    return res.status(400).json({ error: `scenarioId, integer cycleIndex, and integer totalCycles in [1, ${MAX_TOTAL_CYCLES}] required` });
   }
   if (cycleIndex < 0 || cycleIndex >= totalCycles) {
     return res.status(400).json({ error: "cycleIndex out of range for totalCycles" });

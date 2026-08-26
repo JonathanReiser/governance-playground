@@ -1,16 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { LiveRunPanel } from "./LiveRunPanel";
-import { saveRun, viewUrlFor } from "../lib/runHistory";
+import { saveRun, saveContinuation, viewUrlFor } from "../lib/runHistory";
 import { estimateRemainingMs, formatDuration } from "../lib/eta";
-import MIDDLE_EAST_2026 from "../scenarios/middle-east-2026.json";
-import TAIWAN_STRAIT_2026 from "../scenarios/taiwan-strait-2026.json";
+import { SCENARIOS } from "../lib/scenarios";
+import { initSimState } from "../lib/cycleRunner";
+import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
 
 const SERVER_URL = "/api";
-
-const SCENARIOS = [
-  { id: "middle-east-2026", name: "Middle East 2026", blurb: "Israel, Iran, Saudi Arabia, United States", data: MIDDLE_EAST_2026 },
-  { id: "taiwan-strait-2026", name: "Taiwan Strait", blurb: "China, Taiwan, Japan", data: TAIWAN_STRAIT_2026 },
-];
 
 const FIELD_LABELS = {
   hardlinerPressure: "hardliner pressure", reformPressure: "reform pressure",
@@ -170,6 +166,26 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
             startingConditionId: data.state?.overrideId || "as_researched",
             startingConditionName: proposal?.name || "Deploy as researched (default)",
           });
+          // Seeds a resumable checkpoint at cycle 0 for every deployed run,
+          // not just ones the visitor happens to click "Watch it play out"
+          // on in this same session — so "My Runs" can offer a real
+          // "Continue" button on ANY saved run later, from this browser,
+          // even one nobody ran a single cycle on yet. LiveRunPanel.jsx
+          // updates this same record after every cycle it actually commits.
+          if (scenarioMeta) {
+            saveContinuation(data.result.registryAddress, {
+              scenarioId: id,
+              cycleIndex: 0,
+              state: data.runState,
+              mac: data.runMac,
+              simState: initSimState(scenarioMeta.data),
+              agentMemory: {
+                quantum: initQuantumBeliefs(scenarioMeta.data),
+                markets: initMarketBeliefs(scenarioMeta.data),
+              },
+              simulationActive: true,
+            });
+          }
           return;
         }
 

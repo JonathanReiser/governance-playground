@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { connectWallet, connectDirect, switchToSepolia } from "../lib/contracts";
 import { LiveDemoPanel } from "./LiveDemoPanel";
-import { listRuns, removeRun, viewUrlFor } from "../lib/runHistory";
+import { LiveRunPanel } from "./LiveRunPanel";
+import { listRuns, removeRun, viewUrlFor, getContinuation } from "../lib/runHistory";
+import { SCENARIOS } from "../lib/scenarios";
 
 export function ConnectStep({ onConnect }) {
   const [error,   setError]   = useState("");
@@ -9,6 +11,13 @@ export function ConnectStep({ onConnect }) {
   const [showLiveDemo, setShowLiveDemo] = useState(false);
   const [showMyRuns, setShowMyRuns] = useState(false);
   const [myRuns, setMyRuns] = useState(() => listRuns());
+  // Set when a visitor clicks "Continue" on a saved run — holds exactly
+  // what LiveRunPanel needs to pick up from there: which run, and the
+  // quantum/market checkpoint this browser saved the last time cycles
+  // ran on it (see runHistory.js's saveContinuation/getContinuation and
+  // LiveRunPanel.jsx's `initialCheckpoint` prop / header comment for why
+  // this can only ever work on the browser that ran it).
+  const [continuingRun, setContinuingRun] = useState(null); // { run, continuation } | null
 
   async function handle(mode) {
     setError("");
@@ -37,6 +46,38 @@ export function ConnectStep({ onConnect }) {
     } finally {
       setLoading(null);
     }
+  }
+
+  if (continuingRun) {
+    const scenarioMeta = SCENARIOS.find((s) => s.id === continuingRun.continuation.scenarioId);
+    if (!scenarioMeta) {
+      // Only possible if a scenario id gets renamed/removed after a
+      // continuation was saved for it — fail visibly rather than crash.
+      return (
+        <div className="step-panel center-panel">
+          <div className="connect-card">
+            <div className="error-box">
+              Can't continue this run: scenario "{continuingRun.continuation.scenarioId}" isn't
+              recognized anymore.
+            </div>
+            <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setContinuingRun(null)}>
+              ← Back
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="step-panel center-panel">
+        <LiveRunPanel
+          scenario={scenarioMeta.data}
+          scenarioId={continuingRun.continuation.scenarioId}
+          registryAddress={continuingRun.run.registryAddress}
+          initialCheckpoint={continuingRun.continuation}
+          onExit={() => { setMyRuns(listRuns()); setContinuingRun(null); setShowMyRuns(true); }}
+        />
+      </div>
+    );
   }
 
   return (
@@ -140,13 +181,17 @@ export function ConnectStep({ onConnect }) {
           <p className="muted" style={{ fontSize: 12 }}>
             Deploys you've made from this browser, on the no-wallet demo path — remembered locally,
             not tied to an account. Each link reads that run's real, current state straight from
-            Sepolia, so it works for anyone you share it with too.
+            Sepolia, so it works for anyone you share it with too. A run that hasn't reached its
+            full cycle count yet can be continued right here, on this browser — it picks up the
+            exact quantum/market state where it left off, not a fresh restart.
           </p>
 
           {myRuns.length === 0 && <p className="muted" style={{ fontSize: 13 }}>No runs saved on this browser yet.</p>}
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }}>
-            {myRuns.map((run) => (
+            {myRuns.map((run) => {
+              const continuation = getContinuation(run.registryAddress);
+              return (
               <div
                 key={run.registryAddress}
                 className="muted"
@@ -157,8 +202,22 @@ export function ConnectStep({ onConnect }) {
                   <div style={{ fontFamily: "monospace", fontSize: 11 }}>
                     {run.registryAddress.slice(0, 10)}… · {new Date(run.savedAt).toLocaleString()}
                   </div>
+                  {continuation && (
+                    <div style={{ fontSize: 11, marginTop: "0.2rem" }}>
+                      At cycle {continuation.cycleIndex} — agent cycles can still run on this
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
+                  {continuation && (
+                    <button
+                      className="btn-primary"
+                      style={{ fontSize: 11, padding: "0.3rem 0.6rem" }}
+                      onClick={() => setContinuingRun({ run, continuation })}
+                    >
+                      ▶ Continue
+                    </button>
+                  )}
                   <a
                     className="btn-secondary"
                     style={{ fontSize: 11, padding: "0.3rem 0.6rem" }}
@@ -177,7 +236,8 @@ export function ConnectStep({ onConnect }) {
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setShowMyRuns(false)}>
