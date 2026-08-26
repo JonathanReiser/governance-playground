@@ -186,7 +186,7 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
                   <strong>{nationMeta[id]?.flag} {nationMeta[id]?.label}:</strong>{" "}
                   {r.error ? `(error: ${r.error})` : actionLabel(r.decision?.primaryAction)}
                   {r.decision?.reasoning && !r.error && (
-                    <span> — {r.decision.reasoning.slice(0, 140)}{r.decision.reasoning.length > 140 ? "…" : ""}</span>
+                    <span> — {r.decision.reasoning}</span>
                   )}
                 </div>
               ))}

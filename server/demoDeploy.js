@@ -54,6 +54,37 @@ function getDemoProvider() {
   return _provider;
 }
 
+/**
+ * Vercel gives every request its own serverless instance — possibly a
+ * different one each time — and each cold start builds a fresh
+ * NonceManager with its own in-memory nonce cache (see getDemoSigner
+ * below). Two instances handling concurrent demo-wallet transactions
+ * (two visitors deploying at once, or heavy verification traffic) can
+ * each believe they hold the next nonce, and the second one to actually
+ * broadcast gets rejected outright — confirmed live: "nonce too low:
+ * next nonce 126, tx nonce 125". The transaction that fails this way was
+ * never accepted into the mempool, so retrying with a freshly-fetched
+ * nonce is safe, not a double-send — see the retry loop around each
+ * step's switch statement below and in commitDemoCycle.
+ */
+function isNonceError(err) {
+  const text = `${err?.code || ""} ${err?.message || ""} ${err?.shortMessage || ""}`.toLowerCase();
+  return err?.code === "NONCE_EXPIRED" || text.includes("nonce");
+}
+
+async function withNonceRetry(signer, fn, retries = 2) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= retries || !isNonceError(err)) throw err;
+      console.warn(`[demoDeploy] nonce conflict (attempt ${attempt + 1}/${retries}), resetting and retrying:`, err.message);
+      if (typeof signer.reset === "function") signer.reset();
+      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
+    }
+  }
+}
+
 /** NonceManager, same as Dev Mode's HARDHAT_PRIVATE_KEY wallet in
  * contracts.js — several visitors could hit /api/demo/deploy close
  * together, and without this the wallet's nonce tracking races. */
@@ -203,6 +234,11 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
   const registry = () => attach(s.registryAddress, WorldRegistryABI.abi);
   const oracle = () => attach(s.oracleAddress, MetricsOracleABI.abi);
 
+  // Each case below either mutates `next`/`txHash` only after its await
+  // resolves, or not at all before throwing — so re-running the whole
+  // switch body on a nonce conflict is safe: a rejected transaction was
+  // never broadcast, and nothing here has a visible side effect yet.
+  await withNonceRetry(signer, async () => {
   switch (step.type) {
     case "deployRegistry": {
       const RegistryFactory = new ethers.ContractFactory(WorldRegistryABI.abi, WorldRegistryABI.bytecode, signer);
@@ -344,6 +380,7 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
     default:
       throw new Error(`Unknown step type: ${step.type}`);
   }
+  });
 
   const done = stepIndex === steps.length - 1;
   const result = done
@@ -400,9 +437,12 @@ async function commitDemoCycle(registryAddress, metrics, signer = getDemoSigner(
     proxy: clampMetric("proxy", metrics?.proxy),
     dealIntegrity: clampMetric("dealIntegrity", metrics?.dealIntegrity),
   };
-  const receipt = await (await registry.commitCycle(
-    BigInt(m.stability), BigInt(m.conflicts), BigInt(m.trade), BigInt(m.proxy), BigInt(m.dealIntegrity)
-  )).wait();
+  const receipt = await withNonceRetry(signer, async () => {
+    const tx = await registry.commitCycle(
+      BigInt(m.stability), BigInt(m.conflicts), BigInt(m.trade), BigInt(m.proxy), BigInt(m.dealIntegrity)
+    );
+    return tx.wait();
+  });
   const currentCycle = await registry.currentCycle();
   const simulationActive = await registry.simulationActive();
   return { txHash: receipt.hash, metrics: m, currentCycle: Number(currentCycle), simulationActive };
@@ -436,4 +476,6 @@ module.exports = {
   sealState,
   verifySealedState,
   SCENARIOS,
+  isNonceError,
+  withNonceRetry,
 };
