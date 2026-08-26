@@ -57,6 +57,28 @@ contract WorldRegistry is Ownable {
         uint256 updatedAt;
     }
 
+    // Calldata-only input shapes for the batched setRelationships /
+    // createGlobalEvents below — same fields as setRelationship's /
+    // createGlobalEvent's own parameter lists, just packaged as one
+    // struct per item so a deploy can pass N of them in a single
+    // transaction instead of N separate ones.
+    struct RelationshipInput {
+        string fromId;
+        string toId;
+        RelationshipType relType;
+        uint256 stabilityScore;
+        bool treatyActive;
+        string treatyName;
+    }
+
+    struct GlobalEventInput {
+        string id;
+        string name;
+        EventType eventType;
+        string[] parties;
+        string description;
+    }
+
     // Calldata-only shape for commitCycleWithNarrative below — never
     // written to storage, only ever read out of calldata and re-emitted
     // as a DecisionRecorded event per nation.
@@ -184,6 +206,43 @@ contract WorldRegistry is Ownable {
         nationDAOFactory    = NationDAOFactory(_daoFactory);
     }
 
+    /**
+     * @notice Wire the oracle and factories, and initialize the
+     *         scenario, all in ONE transaction.
+     * @dev Ergonomics-only addition, same reasoning as commitCycle's own
+     *      doc comment: setMetricsOracle, setNationFactories, and
+     *      initializeScenario were always called back-to-back by the
+     *      same deploy signer, immediately after the registry, oracle,
+     *      and both factories finish deploying (which — unlike this —
+     *      genuinely can't be merged: each is a separate large contract
+     *      whose creation bytecode can't be embedded into a wrapper
+     *      without blowing past EIP-170's 24,576-byte limit). This one
+     *      combines three plain storage writes with no such limit.
+     *      setMetricsOracle/setNationFactories/initializeScenario all
+     *      remain independently available for any caller that wants
+     *      finer-grained control (e.g. re-wiring just one piece later).
+     */
+    function bootstrapConfig(
+        address _oracle,
+        address _tokenFactory,
+        address _daoFactory,
+        string calldata _name,
+        string calldata _version,
+        uint256 _totalCycles
+    ) external onlyOwner {
+        metricsOracle = _oracle;
+        citizenTokenFactory = CitizenTokenFactory(_tokenFactory);
+        nationDAOFactory    = NationDAOFactory(_daoFactory);
+
+        scenarioName    = _name;
+        scenarioVersion = _version;
+        totalCycles     = _totalCycles;
+        currentCycle    = 0;
+        simulationActive = false;
+
+        emit ScenarioLoaded(_name, _version);
+    }
+
     // ─────────────────────────────────────────
     // SCENARIO SETUP
     // ─────────────────────────────────────────
@@ -278,6 +337,68 @@ contract WorldRegistry is Ownable {
         }
     }
 
+    /**
+     * @notice Deploy, register, AND distribute citizenship for one
+     *         nation, in ONE transaction.
+     * @dev Ergonomics-only addition — registerNation() and
+     *      distributeCitizenship() were always called back-to-back for
+     *      the same nation by the same deploy signer, and the latter
+     *      needs nothing distributeCitizenship() itself doesn't already
+     *      have (it just needs THIS nation's token address, which this
+     *      function already has fresh from the deploy above — no new
+     *      capability, just fewer round trips). Both remain
+     *      independently available; this doesn't touch either.
+     */
+    function registerNationAndDistributeCitizenship(
+        NationDAO.NationConfig calldata _config,
+        uint256 _tokenSupply,
+        uint256 _initialTreasury,
+        uint256 _initialMilitaryPower,
+        address[] calldata _citizens,
+        uint256[] calldata _amounts
+    ) external onlyOwner returns (address daoAddress, address tokenAddress) {
+        require(
+            address(citizenTokenFactory) != address(0) && address(nationDAOFactory) != address(0),
+            "WorldRegistry: factories not set"
+        );
+        require(_citizens.length == _amounts.length, "WorldRegistry: length mismatch");
+
+        address token = citizenTokenFactory.deployToken(
+            _config.name,
+            _config.nationId,
+            _tokenSupply,
+            address(this)
+        );
+
+        address dao = nationDAOFactory.deployDAO(
+            _config,
+            token,
+            address(this),
+            _initialTreasury,
+            _initialMilitaryPower
+        );
+
+        nations[_config.nationId] = Nation({
+            id:            _config.nationId,
+            name:          _config.name,
+            daoAddress:    dao,
+            tokenAddress:  token,
+            active:        true,
+            registeredAt:  block.timestamp
+        });
+
+        nationIds.push(_config.nationId);
+
+        emit NationRegistered(_config.nationId, dao, token);
+
+        CitizenToken tokenContract = CitizenToken(token);
+        for (uint256 i = 0; i < _citizens.length; i++) {
+            tokenContract.grantCitizenship(_citizens[i], _amounts[i]);
+        }
+
+        return (dao, token);
+    }
+
     // ─────────────────────────────────────────
     // RELATIONSHIPS
     // ─────────────────────────────────────────
@@ -319,6 +440,45 @@ contract WorldRegistry is Ownable {
         toDao.setRelationship(_fromId, _relTypeToString(_relType));
 
         emit RelationshipSet(_fromId, _toId, _relType);
+    }
+
+    /**
+     * @notice Set several relationships in ONE transaction.
+     * @dev Ergonomics-only addition — a deploy's relationships are
+     *      always known in full up front and set back-to-back by the
+     *      same signer, with no dependency between them, so there's no
+     *      reason each one needs its own transaction. setRelationship()
+     *      remains available for setting or updating just one later.
+     */
+    function setRelationships(RelationshipInput[] calldata _rels) external onlyOwner {
+        for (uint256 i = 0; i < _rels.length; i++) {
+            RelationshipInput calldata r = _rels[i];
+
+            bytes32 key = _relationshipKey(r.fromId, r.toId);
+
+            relationships[key] = Relationship({
+                fromNationId:   r.fromId,
+                toNationId:     r.toId,
+                relType:        r.relType,
+                stabilityScore: r.stabilityScore,
+                treatyActive:   r.treatyActive,
+                treatyName:     r.treatyName,
+                lastUpdated:    block.timestamp
+            });
+
+            bytes32 mirrorKey = _relationshipKey(r.toId, r.fromId);
+            relationships[mirrorKey] = relationships[key];
+
+            relationshipKeys.push(key);
+
+            NationDAO fromDao = NationDAO(nations[r.fromId].daoAddress);
+            NationDAO toDao   = NationDAO(nations[r.toId].daoAddress);
+
+            fromDao.setRelationship(r.toId, _relTypeToString(r.relType));
+            toDao.setRelationship(r.fromId, _relTypeToString(r.relType));
+
+            emit RelationshipSet(r.fromId, r.toId, r.relType);
+        }
     }
 
     /**
@@ -371,6 +531,33 @@ contract WorldRegistry is Ownable {
     }
 
     /**
+     * @notice Create several global events in ONE transaction.
+     * @dev Ergonomics-only addition, same reasoning as setRelationships.
+     *      createGlobalEvent() remains available for adding one later
+     *      (e.g. a researcher-triggered experiment mid-run).
+     */
+    function createGlobalEvents(GlobalEventInput[] calldata _events) external onlyOwner {
+        for (uint256 i = 0; i < _events.length; i++) {
+            GlobalEventInput calldata e = _events[i];
+
+            globalEvents[e.id] = GlobalEvent({
+                id:          e.id,
+                name:        e.name,
+                eventType:   e.eventType,
+                status:      EventStatus.ACTIVE,
+                parties:     e.parties,
+                description: e.description,
+                createdAt:   block.timestamp,
+                updatedAt:   block.timestamp
+            });
+
+            eventIds.push(e.id);
+
+            emit GlobalEventCreated(e.id, e.eventType);
+        }
+    }
+
+    /**
      * @notice Update the status of a global event.
      * @dev This is how experiments are run — changing event status
      *      triggers cascading effects in the simulation.
@@ -398,6 +585,38 @@ contract WorldRegistry is Ownable {
      */
     function startSimulation() external onlyOwner {
         require(!simulationActive, "WorldRegistry: already running");
+        simulationActive = true;
+        emit SimulationStarted(totalCycles);
+    }
+
+    /**
+     * @notice Set the scenario's starting metrics AND start the
+     *         simulation, in ONE transaction.
+     * @dev Ergonomics-only addition, same reasoning as commitCycle's own
+     *      doc comment (which does the equivalent combination for every
+     *      cycle after the first) — a deploy always set the starting
+     *      metrics on the oracle immediately before calling
+     *      startSimulation(), from the same signer. Both remain
+     *      independently available.
+     */
+    function setInitialMetricsAndStart(
+        uint256 _stabilityIndex,
+        uint256 _conflictEvents,
+        uint256 _tradeVolume,
+        uint256 _proxyActivity,
+        uint256 _dealIntegrity
+    ) external onlyOwner {
+        require(metricsOracle != address(0), "WorldRegistry: oracle not wired");
+        require(!simulationActive, "WorldRegistry: already running");
+
+        IMetricsOracle(metricsOracle).updateMetrics(
+            _stabilityIndex,
+            _conflictEvents,
+            _tradeVolume,
+            _proxyActivity,
+            _dealIntegrity
+        );
+
         simulationActive = true;
         emit SimulationStarted(totalCycles);
     }

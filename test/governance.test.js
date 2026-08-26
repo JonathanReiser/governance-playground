@@ -1078,6 +1078,264 @@ describe("WorldRegistry", function () {
       ).to.emit(registry, "CycleAdvanced").withArgs(2n);
     });
   });
+
+  // ─────────────────────────────────────────────────────────────
+  // Batched deploy helpers — each combines what used to be several
+  // separate deploy-time transactions into one, to cut a live demo
+  // deploy's real wall-clock wait (each step is a real Sepolia
+  // confirmation). Every test below checks the batched call produces
+  // EXACTLY the same on-chain state as the equivalent sequence of
+  // original, still-independently-available calls would.
+  // ─────────────────────────────────────────────────────────────
+
+  describe("bootstrapConfig — combines setMetricsOracle + setNationFactories + initializeScenario", function () {
+    let freshRegistry, freshOracle, tokenFactory, daoFactory;
+
+    beforeEach(async function () {
+      const WorldRegistry = await ethers.getContractFactory("WorldRegistry");
+      freshRegistry = await WorldRegistry.deploy(owner.address);
+      const MetricsOracle = await ethers.getContractFactory("MetricsOracle");
+      freshOracle = await MetricsOracle.deploy(await freshRegistry.getAddress(), owner.address);
+      const CitizenTokenFactory = await ethers.getContractFactory("CitizenTokenFactory");
+      tokenFactory = await CitizenTokenFactory.deploy();
+      const NationDAOFactory = await ethers.getContractFactory("NationDAOFactory");
+      daoFactory = await NationDAOFactory.deploy();
+    });
+
+    it("wires the oracle, wires both factories, and initializes the scenario, all in one call", async function () {
+      await expect(
+        freshRegistry.bootstrapConfig(
+          await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
+          "Test Scenario", "1.0", 15n
+        )
+      ).to.emit(freshRegistry, "ScenarioLoaded").withArgs("Test Scenario", "1.0");
+
+      expect(await freshRegistry.metricsOracle()).to.equal(await freshOracle.getAddress());
+      expect(await freshRegistry.scenarioName()).to.equal("Test Scenario");
+      expect(await freshRegistry.totalCycles()).to.equal(15n);
+
+      // Proves the factories are actually wired, not just addresses
+      // recorded — registerNation only works if they are (see its own
+      // "factories not set" require).
+      await expect(
+        freshRegistry.registerNation(nationConfig({ name: "Test", nationId: "test" }), TOKEN_SUPPLY, 0n, 0n)
+      ).to.emit(freshRegistry, "NationRegistered");
+    });
+
+    it("produces the identical end state as the three separate calls it replaces", async function () {
+      await freshRegistry.bootstrapConfig(
+        await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
+        "Test", "2.0", 7n
+      );
+
+      const WorldRegistry = await ethers.getContractFactory("WorldRegistry");
+      const separateRegistry = await WorldRegistry.deploy(owner.address);
+      await separateRegistry.setMetricsOracle(await freshOracle.getAddress());
+      await separateRegistry.setNationFactories(await tokenFactory.getAddress(), await daoFactory.getAddress());
+      await separateRegistry.initializeScenario("Test", "2.0", 7n);
+
+      expect(await freshRegistry.metricsOracle()).to.equal(await separateRegistry.metricsOracle());
+      expect(await freshRegistry.scenarioName()).to.equal(await separateRegistry.scenarioName());
+      expect(await freshRegistry.totalCycles()).to.equal(await separateRegistry.totalCycles());
+    });
+
+    it("still respects onlyOwner", async function () {
+      await expect(
+        freshRegistry.connect(alice).bootstrapConfig(
+          await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
+          "Test", "1.0", 5n
+        )
+      ).to.be.revertedWithCustomError(freshRegistry, "OwnableUnauthorizedAccount");
+    });
+  });
+
+  describe("registerNationAndDistributeCitizenship — combines registerNation + distributeCitizenship", function () {
+    beforeEach(async function () {
+      await registry.initializeScenario("Test", "1.0", 10n);
+    });
+
+    it("registers the nation AND distributes citizenship in one call", async function () {
+      const [, , bob, carol] = await ethers.getSigners();
+      await expect(
+        registry.registerNationAndDistributeCitizenship(
+          nationConfig({ name: "Israel", nationId: "israel" }),
+          TOKEN_SUPPLY, 8500n, 850n,
+          [bob.address, carol.address], [1000n, 2000n]
+        )
+      ).to.emit(registry, "NationRegistered");
+
+      const nation = await registry.getNation("israel");
+      const CitizenToken = await ethers.getContractFactory("CitizenToken");
+      const token = CitizenToken.attach(nation.tokenAddress);
+      expect(await token.balanceOf(bob.address)).to.equal(1000n);
+      expect(await token.balanceOf(carol.address)).to.equal(2000n);
+    });
+
+    it("produces the identical DAO/token config as the two separate calls it replaces", async function () {
+      const [, , bob] = await ethers.getSigners();
+      await registry.registerNationAndDistributeCitizenship(
+        nationConfig({ name: "Israel", nationId: "israel" }),
+        TOKEN_SUPPLY, 8500n, 850n, [bob.address], [500n]
+      );
+      const nation = await registry.getNation("israel");
+      const NationDAO = await ethers.getContractFactory("NationDAO");
+      const dao = NationDAO.attach(nation.daoAddress);
+      expect(await dao.treasury()).to.equal(8500n);
+      expect(await dao.militaryPower()).to.equal(850n);
+    });
+
+    it("reverts on citizens/amounts length mismatch, same as distributeCitizenship", async function () {
+      const [, , bob] = await ethers.getSigners();
+      await expect(
+        registry.registerNationAndDistributeCitizenship(
+          nationConfig({ name: "Israel", nationId: "israel" }),
+          TOKEN_SUPPLY, 0n, 0n, [bob.address], [1n, 2n]
+        )
+      ).to.be.revertedWith("WorldRegistry: length mismatch");
+    });
+
+    it("reverts if factories aren't set, same as registerNation", async function () {
+      const WorldRegistry = await ethers.getContractFactory("WorldRegistry");
+      const bareRegistry = await WorldRegistry.deploy(owner.address);
+      await bareRegistry.initializeScenario("Test", "1.0", 10n);
+      await expect(
+        bareRegistry.registerNationAndDistributeCitizenship(
+          nationConfig({ name: "Israel", nationId: "israel" }), TOKEN_SUPPLY, 0n, 0n, [], []
+        )
+      ).to.be.revertedWith("WorldRegistry: factories not set");
+    });
+
+    it("works with zero citizens (an empty array is valid calldata)", async function () {
+      await expect(
+        registry.registerNationAndDistributeCitizenship(
+          nationConfig({ name: "Israel", nationId: "israel" }), TOKEN_SUPPLY, 0n, 0n, [], []
+        )
+      ).to.emit(registry, "NationRegistered");
+    });
+
+    it("still respects onlyOwner", async function () {
+      await expect(
+        registry.connect(alice).registerNationAndDistributeCitizenship(
+          nationConfig({ name: "Israel", nationId: "israel" }), TOKEN_SUPPLY, 0n, 0n, [], []
+        )
+      ).to.be.revertedWithCustomError(registry, "OwnableUnauthorizedAccount");
+    });
+  });
+
+  describe("setRelationships — batches setRelationship", function () {
+    beforeEach(async function () {
+      await registry.initializeScenario("Test", "1.0", 10n);
+      await registry.registerNation(nationConfig({ name: "Israel", nationId: "israel" }), TOKEN_SUPPLY, 0n, 0n);
+      await registry.registerNation(nationConfig({ name: "Iran", nationId: "iran" }), TOKEN_SUPPLY, 0n, 0n);
+      await registry.registerNation(nationConfig({ name: "Saudi Arabia", nationId: "saudi_arabia" }), TOKEN_SUPPLY, 0n, 0n);
+    });
+
+    it("sets every relationship in the batch, each emitting its own RelationshipSet", async function () {
+      const tx = await registry.setRelationships([
+        { fromId: "israel", toId: "iran", relType: 6, stabilityScore: 28n, treatyActive: false, treatyName: "" },
+        { fromId: "israel", toId: "saudi_arabia", relType: 2, stabilityScore: 60n, treatyActive: true, treatyName: "Abraham Accords" },
+      ]);
+      await expect(tx).to.emit(registry, "RelationshipSet").withArgs("israel", "iran", 6);
+      await expect(tx).to.emit(registry, "RelationshipSet").withArgs("israel", "saudi_arabia", 2);
+    });
+
+    it("produces the identical stored relationship as the separate calls it replaces", async function () {
+      await registry.setRelationships([
+        { fromId: "israel", toId: "iran", relType: 3, stabilityScore: 28n, treatyActive: true, treatyName: "Test Treaty" },
+      ]);
+      const rel1 = await registry.getRelationship("israel", "iran");
+      const rel2 = await registry.getRelationship("iran", "israel");
+      expect(rel1.relType).to.equal(3n);
+      expect(rel1.treatyName).to.equal("Test Treaty");
+      expect(rel1.relType).to.equal(rel2.relType); // still mirrored A<->B
+    });
+
+    it("works with an empty batch (valid calldata, no-op)", async function () {
+      await expect(registry.setRelationships([])).to.not.be.reverted;
+    });
+
+    it("still respects onlyOwner", async function () {
+      await expect(
+        registry.connect(alice).setRelationships([
+          { fromId: "israel", toId: "iran", relType: 6, stabilityScore: 28n, treatyActive: false, treatyName: "" },
+        ])
+      ).to.be.revertedWithCustomError(registry, "OwnableUnauthorizedAccount");
+    });
+  });
+
+  describe("createGlobalEvents — batches createGlobalEvent", function () {
+    beforeEach(async function () {
+      await registry.initializeScenario("Test", "1.0", 10n);
+    });
+
+    it("creates every event in the batch, each emitting its own GlobalEventCreated", async function () {
+      const tx = await registry.createGlobalEvents([
+        { id: "peace_deal_1", name: "US-Israel-Iran Peace Deal", eventType: 0, parties: ["israel", "iran"], description: "Post-war agreement" },
+        { id: "sanctions_1", name: "Sanctions Snapback", eventType: 6, parties: ["iran"], description: "Snapback triggered" },
+      ]);
+      await expect(tx).to.emit(registry, "GlobalEventCreated").withArgs("peace_deal_1", 0);
+      await expect(tx).to.emit(registry, "GlobalEventCreated").withArgs("sanctions_1", 6);
+    });
+
+    it("produces the identical stored event as the separate call it replaces", async function () {
+      await registry.createGlobalEvents([
+        { id: "peace_deal_1", name: "Peace Deal", eventType: 0, parties: ["israel", "iran"], description: "desc" },
+      ]);
+      const evt = await registry.getGlobalEvent("peace_deal_1");
+      expect(evt.name).to.equal("Peace Deal");
+      expect(evt.parties).to.deep.equal(["israel", "iran"]);
+    });
+
+    it("works with an empty batch (valid calldata, no-op)", async function () {
+      await expect(registry.createGlobalEvents([])).to.not.be.reverted;
+    });
+
+    it("still respects onlyOwner", async function () {
+      await expect(
+        registry.connect(alice).createGlobalEvents([
+          { id: "e1", name: "E1", eventType: 0, parties: [], description: "" },
+        ])
+      ).to.be.revertedWithCustomError(registry, "OwnableUnauthorizedAccount");
+    });
+  });
+
+  describe("setInitialMetricsAndStart — combines the oracle's first updateMetrics + startSimulation", function () {
+    beforeEach(async function () {
+      await registry.initializeScenario("Test", "1.0", 5n);
+    });
+
+    it("sets the starting metrics on the oracle AND starts the simulation, in one call", async function () {
+      await expect(
+        registry.setInitialMetricsAndStart(50n, 2n, 100n, 30n, 60n)
+      ).to.emit(registry, "SimulationStarted").withArgs(5n);
+
+      expect(await oracle.regionalStabilityIndex()).to.equal(50n);
+      expect(await oracle.totalConflictEvents()).to.equal(2n);
+      expect(await registry.simulationActive()).to.equal(true);
+    });
+
+    it("reverts if the oracle isn't wired, same as commitCycle", async function () {
+      const WorldRegistry = await ethers.getContractFactory("WorldRegistry");
+      const bareRegistry = await WorldRegistry.deploy(owner.address);
+      await bareRegistry.initializeScenario("Test", "1.0", 5n);
+      await expect(
+        bareRegistry.setInitialMetricsAndStart(50n, 0n, 0n, 0n, 50n)
+      ).to.be.revertedWith("WorldRegistry: oracle not wired");
+    });
+
+    it("reverts if the simulation is already running, same as startSimulation", async function () {
+      await registry.setInitialMetricsAndStart(50n, 0n, 0n, 0n, 50n);
+      await expect(
+        registry.setInitialMetricsAndStart(55n, 0n, 0n, 0n, 55n)
+      ).to.be.revertedWith("WorldRegistry: already running");
+    });
+
+    it("still respects onlyOwner", async function () {
+      await expect(
+        registry.connect(alice).setInitialMetricsAndStart(50n, 0n, 0n, 0n, 50n)
+      ).to.be.revertedWithCustomError(registry, "OwnableUnauthorizedAccount");
+    });
+  });
 });
 
 // ─────────────────────────────────────────────────────────────

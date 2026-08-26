@@ -33,16 +33,15 @@ const taiwanStrait = require("../frontend/src/scenarios/taiwan-strait-2026.json"
 const SCENARIOS = { "middle-east-2026": middleEast, "taiwan-strait-2026": taiwanStrait };
 
 function expectedStepTypes(scenario) {
+  const qualifyingEvents = scenario.activeEvents.filter(
+    (e) => e.type === "PEACE_DEAL" || e.type === "RESOURCE_EVENT"
+  );
   return [
-    "deployRegistry", "deployOracle", "wireOracle", "deployTokenFactory",
-    "deployDaoFactory", "wireFactories", "initScenario",
+    "deployRegistry", "deployOracle", "deployTokenFactory", "deployDaoFactory", "bootstrapConfig",
     ...scenario.nations.map(() => "registerNation"),
-    ...Object.keys(scenario.citizenDistribution || {}).map(() => "distributeCitizenship"),
-    ...scenario.relationships.map(() => "setRelationship"),
-    ...scenario.activeEvents
-      .filter((e) => e.type === "PEACE_DEAL" || e.type === "RESOURCE_EVENT")
-      .map(() => "registerEvent"),
-    "setMetrics", "startSimulation",
+    ...(scenario.relationships.length > 0 ? ["setRelationships"] : []),
+    ...(qualifyingEvents.length > 0 ? ["createGlobalEvents"] : []),
+    "setMetricsAndStart",
   ];
 }
 
@@ -122,7 +121,7 @@ describe("demo deploy — step machine", function () {
       const result = await deployDemoScenario("middle-east-2026", (m) => messages.push(m), signer);
 
       expect(messages[0]).to.equal("Deploying WorldRegistry…");
-      expect(messages[messages.length - 1]).to.equal("Starting simulation…");
+      expect(messages[messages.length - 1]).to.equal("Setting initial metrics and starting simulation…");
       expect(result.scenarioId).to.equal("middle-east-2026");
       expect(ethers.isAddress(result.registryAddress)).to.equal(true);
       expect(ethers.isAddress(result.oracleAddress)).to.equal(true);
