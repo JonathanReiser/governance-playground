@@ -67,6 +67,15 @@ export function ConnectStep({ onConnect }) {
         </div>
       );
     }
+    // "My Runs" only ever saved the id/name (see saveRun in
+    // LiveDemoPanel.jsx), not the full proposal — recovered here from the
+    // scenario's own current proposal list so the banner can show its
+    // description too, same as a fresh deploy does. Falls back to just
+    // the saved name if the proposal list has since changed underneath
+    // it, rather than showing nothing.
+    const startingCondition =
+      scenarioMeta.data.startingConditionProposals?.find((p) => p.id === continuingRun.run.startingConditionId)
+      || { name: continuingRun.run.startingConditionName };
     return (
       <div className="step-panel center-panel">
         <LiveRunPanel
@@ -74,6 +83,7 @@ export function ConnectStep({ onConnect }) {
           scenarioId={continuingRun.continuation.scenarioId}
           registryAddress={continuingRun.run.registryAddress}
           initialCheckpoint={continuingRun.continuation}
+          startingCondition={startingCondition}
           onExit={() => { setMyRuns(listRuns()); setContinuingRun(null); setShowMyRuns(true); }}
         />
       </div>

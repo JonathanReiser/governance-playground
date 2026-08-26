@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { LiveRunPanel } from "./LiveRunPanel";
+import { ExperimentBanner } from "./ExperimentBanner";
 import { saveRun, saveContinuation, viewUrlFor } from "../lib/runHistory";
 import { estimateRemainingMs, formatDuration } from "../lib/eta";
 import { SCENARIOS } from "../lib/scenarios";
@@ -69,6 +70,11 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   const [status, setStatus] = useState("idle"); // idle | background | picking-condition | deploying | done | running | error
   const [result, setResult] = useState(null);
   const [runSeed, setRunSeed] = useState(null); // { state, mac } — bridges deploy's last step into commit-cycle's first
+  // The starting-condition proposal this deploy is actually using — set
+  // the moment it's picked (not just once the deploy finishes) so
+  // "deploying…" and every screen after it can say what's running,
+  // instead of only the picker screen itself ever mentioning it.
+  const [startingCondition, setStartingCondition] = useState(null); // { id, name, description } | null
   const [error, setError] = useState("");
   const [retryable, setRetryable] = useState(false);
   const [progress, setProgress] = useState({ stepIndex: 0, totalSteps: null, label: "", txHashes: [] });
@@ -211,11 +217,12 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
     setStatus("background");
   }
 
-  function startDeploy(overrideId) {
+  function startDeploy(proposal) {
     setStatus("deploying");
     setError("");
     setProgress({ stepIndex: 0, totalSteps: null, label: "Starting…", txHashes: [] });
-    checkpoint.current = { stepIndex: 0, state: {}, mac: undefined, overrideId };
+    checkpoint.current = { stepIndex: 0, state: {}, mac: undefined, overrideId: proposal.id };
+    setStartingCondition(proposal);
     // Only ever runs from this onClick-triggered function, never during
     // render; the lint rule can't distinguish that statically for a
     // function this deep in the component body, but Date.now() here has
@@ -240,6 +247,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
         registryAddress={result.registryAddress}
         sealedState={runSeed.state}
         sealedMac={runSeed.mac}
+        startingCondition={startingCondition}
         onExit={() => setStatus("done")}
       />
     );
@@ -341,7 +349,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
             {(() => {
               const scenarioData = SCENARIOS.find((s) => s.id === scenarioId)?.data;
               return (scenarioData?.startingConditionProposals || []).map((p) => (
-                <button key={p.id} className="connect-option secondary" onClick={() => startDeploy(p.id)}>
+                <button key={p.id} className="connect-option secondary" onClick={() => startDeploy(p)}>
                   <span className="connect-option-icon">{p.id === "as_researched" ? "📌" : "📰"}</span>
                   <div className="connect-option-text">
                     <strong>{p.name}</strong>
@@ -361,6 +369,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
 
       {status === "deploying" && (
         <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
+          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingCondition={startingCondition} />
           <p>Deploying {SCENARIOS.find((s) => s.id === scenarioId)?.name} to Sepolia…</p>
           <p style={{ fontSize: 13, fontWeight: 600 }}>{progress.label}</p>
           <p className="muted" style={{ fontSize: 12 }}>
@@ -424,6 +433,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
 
       {status === "done" && result && (
         <div>
+          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingCondition={startingCondition} />
           <p style={{ color: "#4ade80", fontWeight: 600 }}>✓ Deployed for real, on Sepolia.</p>
           <div className="muted" style={{ fontSize: 12, fontFamily: "monospace", lineHeight: 1.8 }}>
             <div>
