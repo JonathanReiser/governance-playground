@@ -70,7 +70,7 @@ function describeStartingCondition(scenarioData, proposal) {
  */
 export function LiveDemoPanel({ onBack, onWantWallet }) {
   const [scenarioId, setScenarioId] = useState(null);
-  const [status, setStatus] = useState("idle"); // idle | picking-condition | deploying | done | running | error
+  const [status, setStatus] = useState("idle"); // idle | background | picking-condition | deploying | done | running | error
   const [result, setResult] = useState(null);
   const [runSeed, setRunSeed] = useState(null); // { state, mac } — bridges deploy's last step into commit-cycle's first
   const [error, setError] = useState("");
@@ -192,7 +192,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
 
   function pickScenario(id) {
     setScenarioId(id);
-    setStatus("picking-condition");
+    setStatus("background");
   }
 
   function startDeploy(overrideId) {
@@ -257,6 +257,62 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
         </>
       )}
 
+      {status === "background" && (() => {
+        const scenarioData = SCENARIOS.find((s) => s.id === scenarioId)?.data;
+        // The main real-world flashpoint each scenario is built around —
+        // the peace deal / MOU / conflict-status event, not the secondary
+        // resource-status one. Falls back to the first event if a
+        // scenario's ordering ever changes, rather than showing nothing.
+        const mainEvent =
+          scenarioData.activeEvents.find((e) => e.type === "PEACE_DEAL") || scenarioData.activeEvents[0];
+        return (
+          <>
+            <p className="muted" style={{ fontSize: 13 }}>{scenarioData.meta.description}</p>
+
+            {mainEvent && (
+              <div
+                className="muted"
+                style={{ fontSize: 12, margin: "0.75rem 0", padding: "0.6rem", border: "1px solid currentColor", borderRadius: 4 }}
+              >
+                <strong style={{ opacity: 0.95 }}>{mainEvent.name}</strong>
+                <p style={{ margin: "0.35rem 0" }}>{mainEvent.description}</p>
+                {mainEvent.source && <span style={{ fontStyle: "italic", opacity: 0.75 }}>Source: {mainEvent.source}</span>}
+              </div>
+            )}
+
+            <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {scenarioData.nations.map((n) => (
+                <div key={n.id} className="muted" style={{ fontSize: 12, borderTop: "1px solid currentColor", paddingTop: "0.5rem" }}>
+                  <strong>{n.flag} {n.name}</strong>
+                  <p style={{ margin: "0.25rem 0" }}>{n.governance.description}</p>
+                  {n.governance.source && <span style={{ fontStyle: "italic", opacity: 0.7 }}>Source: {n.governance.source}</span>}
+                </div>
+              ))}
+            </div>
+
+            {scenarioData.meta.suggestedExperiments?.length > 0 && (
+              <div style={{ marginTop: "0.75rem" }}>
+                <p className="muted" style={{ fontSize: 12, fontWeight: 600, marginBottom: "0.3rem" }}>
+                  What's actually contested right now:
+                </p>
+                <ul className="muted" style={{ fontSize: 12, margin: 0, paddingLeft: "1.2rem" }}>
+                  {scenarioData.meta.suggestedExperiments.map((q) => <li key={q}>{q}</li>)}
+                </ul>
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+              <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => setStatus("picking-condition")}>
+                Continue →
+              </button>
+              <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setStatus("idle")}>
+                ← Back
+              </button>
+            </div>
+          </>
+        );
+      })()}
+
       {status === "picking-condition" && (
         <>
           <p className="muted" style={{ fontSize: 13 }}>
@@ -281,7 +337,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
               ));
             })()}
           </div>
-          <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setStatus("idle")}>
+          <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setStatus("background")}>
             ← Back
           </button>
         </>
