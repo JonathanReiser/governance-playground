@@ -1208,19 +1208,26 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 // key behind the "real" citable Sepolia deployment) and signs on the
 // visitor's behalf. See server/demoDeploy.js for why this is safe to
 // expose publicly: it only ever runs one fixed sequence per known
-// scenario id, never client-supplied bytecode/calldata.
+// scenario id, never client-supplied bytecode/calldata — and, since the
+// sequence runs one step per request now (below), why the in-flight
+// state the client holds between requests is HMAC-sealed rather than
+// trusted outright.
 // ─────────────────────────────────────────────────────────────
 
-const { getDemoStatus, deployDemoScenario } = require("./server/demoDeploy");
+const { getDemoStatus, runDeployStep, sealState, verifySealedState } = require("./server/demoDeploy");
 
-// Each deploy is ~15-20 transactions — a low per-IP cap still allows
-// several real demo runs/hour while bounding how fast the funded demo
-// wallet can be drained by one abusive IP.
+// Each deploy run is ~15-20 transactions split across that many step
+// requests now (see /api/demo/deploy/step below) — this caps DEPLOY RUNS,
+// not requests, so it still bounds how fast the funded demo wallet can be
+// drained by one abusive IP without also making a single full run
+// impossible. `skip` only counts stepIndex 0 (the start of a run); every
+// continuation request for a run already in progress passes through free.
 const demoDeployLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => (req.body?.stepIndex ?? 0) !== 0,
   message: { error: "Demo deploy rate limit reached (5/hour). Try again later, or connect your own wallet for unlimited use." },
 });
 
@@ -1232,16 +1239,45 @@ app.get("/api/demo/status", async (_req, res) => {
   }
 });
 
-app.post("/api/demo/deploy", demoDeployLimiter, async (req, res) => {
-  const { scenarioId } = req.body || {};
-  if (!scenarioId) {
-    return res.status(400).json({ error: "scenarioId required" });
+// One confirmed transaction per request, not the whole deploy — a full
+// run is ~15-20 on-chain transactions over several minutes, and running
+// that synchronously inside one Vercel serverless invocation is exactly
+// what broke this originally: the platform kills the function long before
+// it finishes and returns its own non-JSON timeout page, which is what
+// produced the "Unexpected token 'A'..." error. The client drives the
+// loop; each request here does one step and hands back HMAC-sealed state
+// (see demoDeploy.js's sealState) for the client to echo back on the next
+// one — no server-side session, so it works the same regardless of which
+// Vercel instance picks up the next request.
+app.post("/api/demo/deploy/step", demoDeployLimiter, async (req, res) => {
+  const { scenarioId, stepIndex, mac } = req.body || {};
+  if (!scenarioId || !Number.isInteger(stepIndex)) {
+    return res.status(400).json({ error: "scenarioId and integer stepIndex required" });
+  }
+  // Step 0 starts a fresh run — any state the client sent is ignored, not
+  // just unverified, so there's nothing to forge yet.
+  const state = stepIndex === 0 ? {} : req.body?.state || {};
+  if (JSON.stringify(state).length > 20_000) {
+    return res.status(400).json({ error: "state payload too large" });
+  }
+  if (stepIndex > 0 && !verifySealedState(scenarioId, stepIndex, state, mac)) {
+    return res.status(400).json({ error: "Invalid or tampered deploy state — start a new deploy." });
   }
   try {
-    const result = await deployDemoScenario(scenarioId);
-    res.json(result);
+    const out = await runDeployStep(scenarioId, stepIndex, state);
+    const sealed = sealState(scenarioId, out.stepIndex + 1, out.state);
+    res.json({
+      stepIndex: out.stepIndex,
+      totalSteps: out.totalSteps,
+      label: out.label,
+      txHash: out.txHash,
+      done: out.done,
+      state: sealed.state,
+      mac: sealed.mac,
+      result: out.result,
+    });
   } catch (err) {
-    console.error("[demo/deploy] error:", err.message);
+    console.error("[demo/deploy/step] error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });

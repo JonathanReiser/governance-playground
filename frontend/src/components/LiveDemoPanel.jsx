@@ -25,21 +25,65 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   const [status, setStatus] = useState("idle"); // idle | deploying | done | error
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState({ stepIndex: 0, totalSteps: null, label: "", txHashes: [] });
 
+  /**
+   * A full deploy is ~15-20 confirmed on-chain transactions over several
+   * minutes — too long for one serverless request (that mismatch is what
+   * used to break this: the platform killed the request and returned a
+   * non-JSON timeout page, which is the "Unexpected token 'A'..." error).
+   * So this drives it as a loop instead: one step per request, each one
+   * a single transaction, with the server handing back sealed state to
+   * echo into the next call. See server.js's /api/demo/deploy/step.
+   */
   async function runDemo(id) {
     setScenarioId(id);
     setStatus("deploying");
     setError("");
+    setProgress({ stepIndex: 0, totalSteps: null, label: "Starting…", txHashes: [] });
+
+    let state = {};
+    let mac;
+    let stepIndex = 0;
+
     try {
-      const res = await fetch(`${SERVER_URL}/demo/deploy`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenarioId: id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Demo deploy failed");
-      setResult(data);
-      setStatus("done");
+      while (true) {
+        const res = await fetch(`${SERVER_URL}/demo/deploy/step`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scenarioId: id, stepIndex, state, mac }),
+        });
+
+        // A dead/misconfigured serverless function, a proxy error, or a
+        // platform timeout page all come back as HTML or plain text, not
+        // JSON — this is what actually threw before. Fail with a legible
+        // message instead of handing a SyntaxError to the catch block.
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          const text = await res.text();
+          throw new Error(`Server returned a non-JSON response (HTTP ${res.status}): ${text.slice(0, 200)}`);
+        }
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Demo deploy step failed");
+
+        setProgress((p) => ({
+          stepIndex: data.stepIndex,
+          totalSteps: data.totalSteps,
+          label: data.label,
+          txHashes: data.txHash ? [...p.txHashes, data.txHash] : p.txHashes,
+        }));
+
+        if (data.done) {
+          setResult(data.result);
+          setStatus("done");
+          return;
+        }
+
+        state = data.state;
+        mac = data.mac;
+        stepIndex = data.stepIndex + 1;
+      }
     } catch (e) {
       setError(e.message);
       setStatus("error");
@@ -77,12 +121,30 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
       {status === "deploying" && (
         <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
           <p>Deploying {SCENARIOS.find((s) => s.id === scenarioId)?.name} to Sepolia…</p>
+          <p style={{ fontSize: 13, fontWeight: 600 }}>{progress.label}</p>
           <p className="muted" style={{ fontSize: 12 }}>
-            This is ~15-20 real on-chain transactions, each waiting for a real Sepolia
-            block — measured at ~6 minutes end to end. Not stuck, just honest about
-            testnet block times: this is slower than most demos, on purpose, because
-            it's not faking anything.
+            {progress.totalSteps ? `Step ${progress.stepIndex + 1} of ${progress.totalSteps}` : "Starting…"}
+            {" — each step is a real, separately confirmed Sepolia transaction (~6 minutes"}
+            {" end to end, on purpose: this isn't faking testnet block times)."}
           </p>
+          {progress.txHashes.length > 0 && (
+            <div
+              className="muted"
+              style={{
+                fontSize: 11, fontFamily: "monospace", textAlign: "left", maxHeight: 120,
+                overflowY: "auto", marginTop: "0.75rem", padding: "0.5rem", border: "1px solid currentColor",
+                borderRadius: 4, opacity: 0.8,
+              }}
+            >
+              {progress.txHashes.map((hash) => (
+                <div key={hash}>
+                  <a href={`https://sepolia.etherscan.io/tx/${hash}`} target="_blank" rel="noopener noreferrer">
+                    {hash}
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
