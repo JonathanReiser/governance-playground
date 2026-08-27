@@ -73,6 +73,22 @@ describe("server/scenarioOverrides.js — applyStartingConditionOverride", funct
     expect(out.nations.find((n) => n.id === "taiwan").governance.hardlinerPressure).to.equal(32);
     expect(out.simulation.metrics.find((m) => m.id === "deal_integrity").startingValue).to.equal(32);
   });
+
+  it("eisenkot_wins_election shifts Israel's public sentiment without touching Palestinian-statehood-adjacent fields", function () {
+    // Deliberately narrow proposal (see its own description/source in the
+    // scenario config): Eisenkot's real, cited position on Palestinian
+    // statehood matches Netanyahu's, so this override must NOT move
+    // anything that would misrepresent that — only publicSentiment/
+    // population.sentiment, reflecting the real cited polling momentum.
+    const out = applyStartingConditionOverride(middleEast, "eisenkot_wins_election");
+    const israel = out.nations.find((n) => n.id === "israel");
+    expect(israel.governance.publicSentiment).to.equal(60);
+    expect(israel.population.sentiment).to.equal(60);
+    // Unrelated fields, including Iran's, stay exactly at baseline
+    expect(israel.governance.guardianVeto).to.equal(middleEast.nations.find((n) => n.id === "israel").governance.guardianVeto);
+    expect(out.nations.find((n) => n.id === "iran").governance.hardlinerPressure)
+      .to.equal(middleEast.nations.find((n) => n.id === "iran").governance.hardlinerPressure);
+  });
 });
 
 describe("server/scenarioOverrides.js — applyStartingConditionOverrides (multiple at once)", function () {
