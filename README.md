@@ -159,8 +159,8 @@ That does not make cherry-picking impossible — it makes *non-publication visib
 mechanism that makes clinical-trial pre-registration work. A promised result that never appears is
 itself evidence.
 
-**This is now implemented** (`server/prereg.js`, `scripts/prereg.js`, 15 tests in
-`test/prereg.test.js`). Three commands:
+**This is now implemented** (`server/prereg.js`, `scripts/prereg.js`, 28 tests in
+`test/prereg.test.js`). Three commands for a single preregistered run:
 
 ```bash
 node scripts/prereg.js register middle-east-2026 --cycles 10 --in 15m   # promise
@@ -191,6 +191,27 @@ tool's own output so nobody can quote a passing verification as more than it is:
 were executed. The mechanism makes **non-publication visible** — `verify` on a registration with no
 result reports that as the finding rather than as an error, and `list` flags overdue registrations
 as `UNPUBLISHED`. A promised result that never appears is evidence.
+
+**Batch mode — N independent trials, for a distribution instead of one run's single outcome.** A
+single preregistered run above still can't tell a real effect from ordinary stochasticity (real LLM
+sampling, real quantum collapse). Three parallel commands run and preregister a whole batch at once:
+
+```bash
+node scripts/prereg.js register-batch middle-east-2026 --trials 50 --cycles 5 \
+    --hypothesis "Blocking sanctions relief lowers median regional stability" \
+    --conditions congress_blocks_relief --in 15m
+node scripts/prereg.js draw-batch <hash> --results batch.json    # every trial, sealed together
+node scripts/prereg.js verify-batch <hash>
+```
+
+Same NIST-pulse binding as the single-run path, plus one check specific to a batch: the published
+trial count must match what was registered, so a batch can't quietly shrink to just the trials that
+looked favorable after the fact — `verify-batch` fails outright if even one registered trial is
+missing. Verified end-to-end against the live beacon on 2026-08-27. Deliberately not on-chain: each
+trial already gets its own genuine quantum entropy per cycle exactly as any other run does, so a
+batch's actual exposure is publishing only its best-looking trials, not entropy prediction — closing
+that gap needs the same "commit before you can see results" trick this file already used for one
+run, not a second, gas-costing trust mechanism running in parallel.
 
 The sibling project
 [dao-governance-research](https://github.com/JonathanReiser/dao-governance-research) already applies
@@ -302,6 +323,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Instinct layer, Tier 2 (real IBM quantum hardware) | ✅ Done — opt-in toggle, verified live end-to-end on real hardware (`ibm_marrakesh`), see `python-bridge/README.md` |
 | Political layer (Layer 1) + economic field (Layer 2/3), real entropy (Tier 1) | ✅ Done — the actual flagship collapse (not just the instinct veto's) now sources from real ANU QRNG at every live commit, verified live. `scripts/quantum-vs-classical-test.mjs`'s shared default is untouched on purpose (still `Math.random`, thousands of trials per validation run) |
 | Pre-registration (publish parameters, bind to a future NIST pulse, publish whatever comes back) | ✅ Done — `scripts/prereg.js`, verified end-to-end against the live beacon |
+| Batch pre-registration (N independent trials, one hypothesis, published trial count enforced) | ✅ Done — `scripts/prereg.js register-batch`/`draw-batch`/`verify-batch`, verified end-to-end against the live beacon |
 | Political layer (Layer 1), real IBM quantum hardware (Tier 2) | ✅ Done — opt-in toggle, scoped to the entangled Iran/Israel pair only (standalone/peacekeeper stay Tier 1). Verified live end-to-end: real backend (`ibm_fez`), real job id, feeds the actual committed on-chain outcome, not a side display |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |

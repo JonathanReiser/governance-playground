@@ -231,9 +231,167 @@ async function verifyRun({ registration, result, liveBeaconCheck = true, fetchIm
   };
 }
 
+// ─────────────────────────────────────────────────────────────
+// Batch variant — N independent trials of the same scenario + starting
+// condition, preregistered together.
+//
+// WHAT PROBLEM THIS SOLVES, DISTINCT FROM THE SINGLE-RUN MECHANISM ABOVE.
+// createRegistration/sealRun defend against knowing the entropy in advance
+// and picking favorable *parameters* before running — binding to a NIST
+// pulse that doesn't exist yet closes that gap for one run. A batch has a
+// different exposure: each individual trial already gets its own genuine
+// quantum entropy per cycle (same as any other run — nothing new needed
+// there), but nothing stops someone from running the WHOLE BATCH multiple
+// times and only publishing the batch whose distribution looked favorable.
+// That's a run-level cherry-picking risk, not an entropy-prediction one, and
+// the fix is the same shape as above: commit the hypothesis and exact trial
+// count *before* any trial runs, then publish every trial's result, with the
+// trial count itself checked at verify time so a batch can't quietly shrink
+// to just its best-looking trials after the fact.
+//
+// Still bound to one NIST pulse (same beaconUri mechanism) so the whole
+// batch can't be launched retroactively once its own favorability is known
+// either — belt and suspenders, not strictly required by the argument above,
+// but free to keep and consistent with the single-run mechanism.
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * @param {object} o
+ * @param {string} o.scenarioId
+ * @param {string[]} [o.startingConditionIds]  which real proposal(s), if any — see scenarioOverrides.js
+ * @param {string} o.hypothesis                 stated in plain language, before any trial runs
+ * @param {number} o.trialCount                 how many independent trials this batch declares it will run
+ * @param {number} o.cyclesPerTrial              cycles run per trial (same for every trial in the batch)
+ * @param {string} o.mode
+ * @param {string} o.agentModel
+ * @param {string} [o.agentEffort]
+ * @param {Record<string,string>} o.doctrine
+ * @param {Record<string,object>} o.schemas
+ * @param {number} o.drawAfterMs
+ */
+function createBatchRegistration({
+  scenarioId, startingConditionIds, hypothesis, trialCount, cyclesPerTrial,
+  mode, agentModel, agentEffort, doctrine, schemas, drawAfterMs, now = Date.now(),
+}) {
+  if (!Number.isFinite(drawAfterMs) || drawAfterMs <= now) {
+    throw new Error("drawAfterMs must be in the future — the point is to bind to entropy that does not exist yet");
+  }
+  if (!Number.isInteger(trialCount) || trialCount <= 0) {
+    throw new Error("trialCount must be a positive integer");
+  }
+  if (!Number.isInteger(cyclesPerTrial) || cyclesPerTrial <= 0) {
+    throw new Error("cyclesPerTrial must be a positive integer");
+  }
+  const record = {
+    kind: "governance-playground/batch-preregistration",
+    version: 1,
+    createdAt: new Date(now).toISOString(),
+    scenarioId,
+    startingConditionIds: [...(startingConditionIds ?? [])].sort(),
+    hypothesis,
+    trialCount,
+    cyclesPerTrial,
+    mode,
+    agentModel,
+    agentEffort: agentEffort ?? null,
+    doctrineHashes: Object.fromEntries(
+      Object.entries(doctrine).sort().map(([n, text]) => [n, sha256(text)]),
+    ),
+    schemaHashes: Object.fromEntries(
+      Object.entries(schemas).sort().map(([n, s]) => [n, hashRecord(s)]),
+    ),
+    drawAfter: new Date(drawAfterMs).toISOString(),
+    beaconUri: `${BEACON_BASE}/time/next/${drawAfterMs}`,
+    commitment:
+      `${trialCount} independent trials of ${cyclesPerTrial} cycles each will be run at or after drawAfter, ` +
+      "the first seeded from the NIST pulse at beaconUri, and every trial's full per-cycle output published " +
+      "whatever it says — not a selection of the trials that came out a particular way.",
+  };
+  return { record, hash: hashRecord(record) };
+}
+
+/**
+ * @param {object} o
+ * @param {string} o.registrationHash
+ * @param {object} o.beacon
+ * @param {Array<{trialIndex: number, cycles: object[]}>} o.trials  every trial, in trialIndex order
+ * @param {string[]} o.servedModels
+ */
+function sealBatch({ registrationHash, beacon, trials, servedModels, now = Date.now() }) {
+  const record = {
+    kind: "governance-playground/batch-result",
+    version: 1,
+    registrationHash,
+    beacon,
+    completedAt: new Date(now).toISOString(),
+    servedModels: [...new Set(servedModels)].sort(),
+    trialCount: trials.length,
+    trials,
+  };
+  const chain = sha256(registrationHash + beacon.outputValue + canonicalStringify(trials));
+  return { record: { ...record, chain }, hash: hashRecord({ ...record, chain }) };
+}
+
+/**
+ * Same shape as verifyRun, plus the one check specific to a batch: the
+ * published trial count matches what was registered, so a batch can't
+ * quietly publish only the trials it liked.
+ */
+async function verifyBatch({ registration, result, liveBeaconCheck = true, fetchImpl = fetch }) {
+  const checks = [];
+  const add = (name, ok, detail) => checks.push({ name, ok, detail });
+
+  const regHash = hashRecord(registration);
+  add("registration hash recomputes", regHash === result.registrationHash,
+    `${regHash.slice(0, 16)}… vs ${String(result.registrationHash).slice(0, 16)}…`);
+
+  const drawAfter = Date.parse(registration.drawAfter);
+  const pulseTime = Date.parse(result.beacon.timeStamp);
+  add("pulse is at or after the registered time", pulseTime >= drawAfter,
+    `pulse ${result.beacon.timeStamp} vs drawAfter ${registration.drawAfter}`);
+
+  const { chain, ...unchained } = result;
+  const expectedChain = sha256(result.registrationHash + result.beacon.outputValue + canonicalStringify(result.trials));
+  add("result chains to registration and entropy", expectedChain === chain,
+    `${expectedChain.slice(0, 16)}… vs ${String(chain).slice(0, 16)}…`);
+  void unchained;
+
+  add("every registered trial was published — none dropped after seeing results",
+    result.trials.length === registration.trialCount,
+    `published ${result.trials.length} of ${registration.trialCount} registered trials`);
+
+  add("run used the registered model only",
+    result.servedModels.length === 1 && result.servedModels[0] === registration.agentModel,
+    `served: ${result.servedModels.join(", ")} | registered: ${registration.agentModel}`);
+
+  if (liveBeaconCheck) {
+    try {
+      const live = await fetchBeaconAtOrAfter(drawAfter, { fetchImpl });
+      add("NIST independently returns the same pulse", live.outputValue === result.beacon.outputValue,
+        `pulse #${live.pulseIndex}`);
+    } catch (err) {
+      add("NIST independently returns the same pulse", false, `could not reach NIST: ${err.message}`);
+    }
+  }
+
+  return {
+    ok: checks.every((c) => c.ok),
+    checks,
+    proves:
+      "The hypothesis, starting condition(s), and trial count were fixed before any trial ran or the entropy " +
+      "existed; the entropy is genuine and third-party; every registered trial's result was published, not a " +
+      "subset chosen after seeing outcomes.",
+    doesNotProve:
+      "That this exact batch was the only batch run. An LLM is in the loop, so a trial is not reproducible " +
+      "from its seed and cannot be independently re-derived. What this makes visible is non-publication: a " +
+      "registration with no matching result, or a result short of its declared trial count, is a public fact.",
+  };
+}
+
 module.exports = {
   canonicalStringify, sha256, hashRecord,
   fetchBeaconAtOrAfter,
   createRegistration, sealRun, verifyRun,
+  createBatchRegistration, sealBatch, verifyBatch,
   BEACON_BASE,
 };
