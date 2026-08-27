@@ -1082,6 +1082,41 @@ function generateMockHeadlines(scenarioId, worldState) {
   return gen(worldState);
 }
 
+// Opus 5 rate card (per Anthropic's published pricing — update this if it
+// changes; this is the only place it's hardcoded). Cache write/read
+// multipliers (1.25x / 0.1x of the base input rate) are Anthropic's standard
+// published ratios, not something specific to this model — Anthropic's own
+// Console usage/billing page is the authority if these ever drift from what's
+// coded here.
+const OPUS5_PRICE_PER_MTOK = { input: 5, output: 25, cacheWrite: 5 * 1.25, cacheRead: 5 * 0.1 };
+
+/**
+ * There was no visibility into what a cycle actually costs before this —
+ * `message.usage` was already threaded back to the client (see the
+ * /api/agent/decide handler below) but nothing durable ever recorded it, so
+ * "what does this cost to run" had no real answer, only a guess. This logs
+ * one line per decision with the actual token counts and an estimated
+ * dollar cost, so real cost-per-cycle can be read straight out of server
+ * logs (`vercel logs` in production) instead of estimated from first
+ * principles. Deliberately just a log line, not a database — this is a
+ * measurement tool to inform a later real decision (rate limits, BYOK for
+ * batch runs, etc.), not production cost-accounting infrastructure.
+ */
+function logAgentUsage(nation, scenarioId, cycle, model, usage) {
+  if (!usage) return; // a fallback response or a shape we don't recognize — don't fabricate a number
+  const { input_tokens = 0, output_tokens = 0, cache_creation_input_tokens = 0, cache_read_input_tokens = 0 } = usage;
+  const price = model === AGENT_MODEL ? OPUS5_PRICE_PER_MTOK : null;
+  const costUsd = price
+    ? (input_tokens * price.input + output_tokens * price.output
+        + cache_creation_input_tokens * price.cacheWrite + cache_read_input_tokens * price.cacheRead) / 1_000_000
+    : null;
+  console.log(
+    `[usage] ${scenarioId}/${nation} cycle ${cycle} model=${model} ` +
+    `in=${input_tokens} out=${output_tokens} cacheWrite=${cache_creation_input_tokens} cacheRead=${cache_read_input_tokens}` +
+    (costUsd != null ? ` est=$${costUsd.toFixed(4)}` : model !== AGENT_MODEL ? " (fallback model — no price on file)" : "")
+  );
+}
+
 /**
  * Real news first (server/news.js — GDELT, no key required, current
  * real-world Iran/Israel or China/Taiwan coverage); honest mock fallback
@@ -1167,6 +1202,7 @@ app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
     // Structured outputs guarantee schema-valid JSON — no fence-stripping or
     // number-repair needed the way it was when this ran on a smaller model.
     const decision = JSON.parse(textBlock.text);
+    logAgentUsage(nation, scenarioId, worldState.cycle, message.model, message.usage);
 
     res.json({
       nation,
