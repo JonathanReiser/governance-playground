@@ -1,0 +1,3347 @@
+{
+  "kind": "governance-playground/batch-result",
+  "version": 1,
+  "registrationHash": "367d822898a67395c9b4b62c2aa26c359f8c6482a8d8c0fd83c7ec61f7dd347f",
+  "beacon": {
+    "pulseIndex": 1920301,
+    "timeStamp": "2026-08-27T12:56:00.000Z",
+    "outputValue": "C1C575F53FD8BBA9C770ABA37DD1E1D5CC7F4A4C18FC7678ACF70A6E7444E95BBF71481DAA2C16E6613D0559A75BEA18A747107EF8ED7709F4EE163F1CFC69E3",
+    "uri": "https://beacon.nist.gov/beacon/2.0/pulse/time/next/1787835336999"
+  },
+  "completedAt": "2026-08-27T13:10:14.409Z",
+  "servedModels": [
+    "claude-opus-5"
+  ],
+  "trialCount": 5,
+  "trials": [
+    {
+      "trialIndex": 0,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 29,
+            "proxy": 52,
+            "trade": 85,
+            "conflicts": 6,
+            "dealIntegrity": 24,
+            "market": {
+              "primary": 100,
+              "currencyA": 101,
+              "currencyB": 99,
+              "global": 100
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Launch a calibrated covert-and-air interdiction campaign against Hezbollah precision-missile rearmament convoys in Syria and Lebanon, while simultaneously issuing a public 30-day ultimatum — coordinated with Washington — that Iran readmit IAEA inspectors to the struck enrichment sites or Israel will treat the nuclear file as unverified and act accordingly.",
+                "supportingActions": [
+                  "Dispatch the Mossad chief and National Security Adviser to Washington with fresh intelligence on undeclared Iranian enrichment activity, to press the administration to trigger snapback sanctions rather than extend the expired 60-day MOU window",
+                  "Accelerate the Saudi normalization track through quiet US-brokered channels, offering a limited Palestinian-horizon formula timed to be announceable before October 27"
+                ],
+                "reasoning": "Iran remains CAPPED and no existential threshold has been crossed, so the Begin Doctrine does not yet license preemption — but deal integrity at 30 with inspectors expelled means verification, not the agreement's text, is the security question, and deterrence must be visibly reasserted through the proxy file where the risk is containable. Interdiction against Hezbollah gives Smotrich and Ben Gvir a resolve narrative that keeps them inside the coalition without a concession vote, while the Washington-coordinated ultimatum protects the alliance asset rather than spending it. With sentiment at 52 and an election in October, I am in the gains frame: defend the cap, buy verification through pressure, and hold Saudi normalization as the deliverable.",
+                "metricDeltas": {
+                  "stability": -2,
+                  "proxyActivity": -4,
+                  "tradeVolume": 2,
+                  "conflictEvents": 1,
+                  "dealIntegrity": -4,
+                  "publicSentiment": 3
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Two-level games best explains this decision: the ultimatum-plus-interdiction package is engineered to be simultaneously ratifiable by a far-right domestic bloc that vetoes concessions and by a US patron that wants the deal preserved, keeping both win-sets overlapping ahead of October 27."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1472,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1472,
+                    "output_tokens": 1115,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1115,
+                "output_tokens_details": {
+                  "thinking_tokens": 378
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Declare the 60-day MOU window expired through American bad faith — Congress's blocking of sanctions relief — and suspend (not formally exit) all verification talks, while ordering the AEOI to resume enrichment above the reaffirmed cap at Fordow and Natanz with IAEA inspectors still barred, announcing only that Iran's activity 'remains within its rights' and that the weapons fatwa stands.",
+                "supportingActions": [
+                  "Order the IRGC Navy to begin 'Great Prophet' short-notice exercises across the Strait of Hormuz with live anti-ship missile drills and announced closure-capable posture, without interdicting any traffic — the threat, not the act, is the currency.",
+                  "Authorize increased Houthi and Iraqi militia tempo against Israeli-linked shipping and bases, and dispatch a delegation to Beijing to lock in discounted long-term crude offtake and yuan settlement ahead of any further sanctions escalation."
+                ],
+                "reasoning": "Congress killing relief has proven the hardliners correct in front of the entire Majlis and the Guardian Council; a further concession now would be a legitimacy crisis I cannot survive, so I must convert the collapsed verification track into visible defiance. With stability at 26 I am deep in the loss frame — asymmetric risk is rational, and enrichment restart plus a threatened Hormuz restores the leverage the strikes took from me without handing Israel or Washington the pretext of a formal exit. I keep the deal technically alive as a bargaining hostage because ambiguity costs nothing and unverified capability is worth more than either a signed paper or an announced bomb.",
+                "metricDeltas": {
+                  "stability": -4,
+                  "proxyActivity": 13,
+                  "tradeVolume": -7,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -14,
+                  "hardlinerPressure": 9
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Two-level games combined with prospect theory best explains this: the blocked sanctions relief destroyed the domestic ratification set for any concession, and a stability level of 26 places the regime in a loss frame where escalatory ambiguity — partial breakout plus Hormuz signaling — dominates continued compliance."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1573,
+                "cache_creation_input_tokens": 1479,
+                "cache_read_input_tokens": 0,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 1479,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1573,
+                    "output_tokens": 1382,
+                    "cache_read_input_tokens": 0,
+                    "cache_creation_input_tokens": 1479,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 1479,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1382,
+                "output_tokens_details": {
+                  "thinking_tokens": 599
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Convene an urgent Riyadh-hosted quiet shuttle: dispatch the Foreign Minister to Tehran and a senior royal envoy to Washington in the same week, offering Saudi Arabia as the guarantor-of-record for a stopgap verification arrangement on the Iran-Israel file — Saudi funding for a neutral inspection mechanism and Saudi assurance to Tehran that no Gulf territory or airspace will be used for strikes on Iran, in exchange for Iranian restraint on Hormuz and on Houthi resupply.",
+                "supportingActions": [
+                  "Publicly restate, at cabinet level and through the Foreign Ministry, that the civil nuclear agreement with Washington will proceed on its technical merits and that normalization with Israel remains conditioned on an irreversible, timetabled path to Palestinian statehood with East Jerusalem as capital — explicitly declining to be rushed by any foreign electoral calendar.",
+                  "Hold OPEC+ quotas exactly at current levels while quietly signaling to markets that Saudi spare capacity stands ready to cover any Hormuz-related disruption — stability pricing, not a price war, plus a discreet expansion of Yemen de-escalation talks with Sanaa channels."
+                ],
+                "reasoning": "With deal integrity at 30 and four conflict events last cycle, we are in the domain of losses — the correct response is to buy certainty, not gamble on it, and the cheapest certainty available is Saudi mediation capital rather than Saudi military exposure. Refusing Netanyahu's pre-election timetable costs us nothing with Washington on the nuclear file while it purchases everything with the religious establishment, which will not tolerate normalization without Jerusalem; the Palestinian condition is stated as principle, and stating it loudly is itself the coalition signal. Holding oil steady protects the 68% revenue base and Vision 2030 while our spare capacity remains the implicit deterrent against anyone contemplating Hormuz.",
+                "metricDeltas": {
+                  "stability": 4,
+                  "proxyActivity": -5,
+                  "tradeVolume": 3,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 5,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "SATISFIED",
+                "researchNote": "Prospect theory dominates — operating in a loss frame (deal integrity 30, stability 26), Riyadh buys a certain moderate de-escalation through mediation and steady oil rather than gambling on an early normalization payoff, with Putnam's two-level constraint fixing the Palestinian red line as non-negotiable at the domestic table."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1388,
+                "cache_creation_input_tokens": 1532,
+                "cache_read_input_tokens": 0,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 1532,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1388,
+                    "output_tokens": 905,
+                    "cache_read_input_tokens": 0,
+                    "cache_creation_input_tokens": 1532,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 1532,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 905,
+                "output_tokens_details": {
+                  "thinking_tokens": 0
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Dispatch the Special Envoy to Muscat/Doha to convene an emergency shuttle round that formally extends the 60-day MOU window by a technical 30-day 'verification annex' negotiation — trading a narrow, time-limited IAEA access protocol for a written executive commitment to suspend a defined tranche of secondary sanctions under existing waiver authority the moment the annex is signed, explicitly not touching statutory relief that requires Congress",
+                "supportingActions": [
+                  "Quietly warn Jerusalem through the SecDef–MoD and CIA–Mossad channels that unilateral kinetic action during the extension window forfeits US participation and intercept support, while simultaneously extending the CENTCOM carrier presence and an additional THAAD/Patriot rotation into the region as visible reassurance against abandonment fears",
+                  "Open direct talks with SFRC and House Foreign Affairs leadership to sequence INARA review around the annex rather than the full deal, and press Senate leadership to hold the new bipartisan Iran/Russia sanctions bill on the calendar for 30 days rather than kill it — buying time without claiming we can bypass them"
+                ],
+                "reasoning": "We publicly own this deal, so its collapse is a loss against a claimed gain — that gains frame justifies spending real capital now rather than hedging toward disengagement, even at 45 diplomatic capital. The carrier and missile-defense posture is the only instrument that answers entrapment and abandonment simultaneously: it buys Israeli restraint by making our commitment tangible while denying them the argument that unilateral action is their only option. On Congress we cannot deliver statutory relief this cycle, so we substitute executive waiver authority as a partial down payment and manage the Hill rather than provoke a constitutional fight we would lose in public.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 6,
+                  "tradeVolume": 2,
+                  "publicSentiment": -2,
+                  "diplomaticCapital": 4
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Putnam's two-level game dominates: the executive substitutes a Level-I technical extension backed by unilateral waiver authority precisely because the Level-II ratification set for statutory relief is unavailable, with Snyder's alliance security dilemma dictating the paired restraint-plus-reassurance signal to Israel."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1355,
+                "cache_creation_input_tokens": 1816,
+                "cache_read_input_tokens": 0,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 1816,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1355,
+                    "output_tokens": 1002,
+                    "cache_read_input_tokens": 0,
+                    "cache_creation_input_tokens": 1816,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 1816,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1002,
+                "output_tokens_details": {
+                  "thinking_tokens": 199
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "dovish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7831559480312315,
+                "pragmatic": 0.21684405196876833
+              },
+              "bProbabilities": {
+                "hawkish": 0.8328697807033036,
+                "dovish": 0.1671302192966962
+              },
+              "entanglementStrength": 0.11981615562449699,
+              "cProbabilities": {
+                "bold": 0.47262288760161375,
+                "cautious": 0.5273771123983862
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.2891373572708234,
+                "disengage": 0.7108626427291769
+              }
+            },
+            "entangledEffect": {
+              "stability": 2,
+              "dealIntegrity": 1,
+              "label": "entangled de-escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5000000000000001
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5000000000000001
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5000000000000001
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5000000000000001
+              }
+            },
+            "primaryDelta": -0.48,
+            "currencyADelta": 0.63,
+            "currencyBDelta": -1.26,
+            "globalDelta": -0.39,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 1.2,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 2.1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 2.1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 1.3,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 33,
+            "proxy": 53,
+            "trade": 92,
+            "conflicts": 8,
+            "dealIntegrity": 26,
+            "market": {
+              "primary": 95,
+              "currencyA": 104,
+              "currencyB": 98,
+              "global": 99
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Issue a hard 30-day ultimatum, coordinated with Washington, demanding unconditional IAEA re-entry and full accounting of the 20%+ enriched stockpile — while formally keeping Israel inside the framework of the US-Iran MOU rather than walking out, and backing the deadline with a visible IAF long-range readiness exercise over the eastern Mediterranean and a Mossad-attributed disruption of Iran's centrifuge component supply chain abroad.",
+                "supportingActions": [
+                  "Escalate the ongoing interdiction campaign: strike Hezbollah precision-missile transfer convoys in the Beqaa and a Houthi launch node in Yemen, framed publicly as enforcement of existing understandings, not abrogation of the deal.",
+                  "Accelerate the Saudi normalization track with a concrete US-brokered security-guarantee package, presenting it to the public as the strategic prize that only this government can deliver before October 27."
+                ],
+                "reasoning": "Iran at PARTIAL_BREAKOUT with inspectors out is a red line under the Begin Doctrine, but it is not yet FULL_BREAKOUT — so the correct move is coercive diplomacy with a clock, not a preemptive campaign that would burn the US alliance and hand Tehran the victim's narrative eleven weeks before an election. With sentiment at 61 I have capital for a diplomatic track, but the far-right will only tolerate it if it is visibly armed: kinetic enforcement against the proxies buys their acquiescence without conceding anything to Iran. Staying inside the deal while enforcing it keeps the gains frame intact — I defend what I hold and reserve risk-acceptance for the breakout threshold.",
+                "metricDeltas": {
+                  "stability": -3,
+                  "proxyActivity": -3,
+                  "tradeVolume": -4,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -5,
+                  "publicSentiment": 4
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Two-level games best explains this cycle: the ultimatum-plus-interdiction package is calibrated to be simultaneously ratifiable by far-right partners (visible resolve) and by Washington (no unilateral strike), preserving the win-set on both boards ahead of the October election."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1505,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1505,
+                    "output_tokens": 1408,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1408,
+                "output_tokens_details": {
+                  "thinking_tokens": 638
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Declare the 60-day MOU window expired 'through American bad faith' — Congress blocked relief, so Iran suspends the negotiating track without formally exiting: the reaffirmation of no weapons stands rhetorically, but IAEA inspectors stay out, enrichment continues undeclared above 20%, and any resumption is conditioned on upfront sanctions relief plus compensation for the strikes on our facilities",
+                "supportingActions": [
+                  "Order IRGC-Navy 'maritime security' exercises across the Strait — live-fire drills, fast-attack swarming rehearsals and boarding of a non-compliant tanker — to keep Hormuz visibly at the edge of closure and drive war-risk insurance up without shutting the waterway",
+                  "Expand discounted crude flows to China through the yuan-settled dark fleet and quietly raise the operational tempo of Hezbollah in Lebanon and the Houthis in the Red Sea, calibrated below the threshold that would invite a renewed US air campaign"
+                ],
+                "reasoning": "Relief was blocked, which proves to the Supreme Leader and the IRGC that concession purchases nothing — but exiting outright hands Washington the pretext for another campaign while our air defenses are still being rebuilt, so we hold the deal as a hostage rather than a corpse. Ambiguity is our surviving asset: no inspectors means no one can price our program, and an unverified ceiling deters more cheaply than a declared breakout. With stability at 29 we are at the edge of the loss frame; coercive leverage at Hormuz and through the axis is rational now, but the door stays open at a price we set.",
+                "metricDeltas": {
+                  "stability": -2,
+                  "proxyActivity": 9,
+                  "tradeVolume": 4,
+                  "conflictEvents": 1,
+                  "dealIntegrity": -6,
+                  "hardlinerPressure": 4
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Two-level games best explains this: with hardlinerPressure at 81 and relief blocked, the domestic ratification set has collapsed to zero, so the leadership suspends rather than exits — preserving the international option while paying the coalition in visible defiance."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1606,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1606,
+                    "output_tokens": 1848,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1848,
+                "output_tokens_details": {
+                  "thinking_tokens": 1089
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Convene a quiet Riyadh-Muscat-Beijing back-channel to keep the Iran file from collapsing: offer Saudi Arabia as guarantor-of-last-resort for a face-saving IAEA verification formula (resumed inspections in exchange for a pause on further strike threats), delivered privately to Tehran through Oman and to Washington through the Crown Prince's own channel, while publicly saying only that the Kingdom 'supports regional de-escalation and the sanctity of navigation'",
+                "supportingActions": [
+                  "Hold OPEC+ quotas exactly where they are while discreetly pre-positioning spare capacity, East-West pipeline throughput and tanker insurance cover for a Hormuz disruption scenario — no announcement, no price signal",
+                  "Publicly re-anchor the Kingdom on Palestine: a new humanitarian and reconstruction tranche plus a Foreign Ministry restatement that normalization requires an irreversible path to a Palestinian state with East Jerusalem as capital, coordinated in advance with the senior ulama so the religious establishment hears it first"
+                ],
+                "reasoning": "With deal integrity at 24 and Hormuz threatened, the certain moderate outcome — a preserved back-channel and unbroken oil flows — is worth far more to us than any gamble on taking a side while Israel is mid-election and Washington is mid-pressure. Publicly restating the East Jerusalem condition costs us nothing with the Americans (the nuclear file will still be there in November) but buys the ulama and the street real reassurance at the exact moment Iranian-aligned media are testing our legitimacy. Iran is a rival to be contained and talked to, not an enemy to be defeated; Vision 2030 cannot be financed from a closed strait.",
+                "metricDeltas": {
+                  "stability": 4,
+                  "proxyActivity": -5,
+                  "tradeVolume": 3,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 5,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates — facing a domain of losses (deal integrity 24, stability 29, Hormuz threatened), loss-averse Saudi leadership buys the certain moderate outcome of mediation and quota stability rather than gambling on alignment, with Putnam's two-level logic explaining the simultaneous ulama-facing Palestine signal that keeps normalization credibly paused."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1412,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1412,
+                    "output_tokens": 1189,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1189,
+                "output_tokens_details": {
+                  "thinking_tokens": 344
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch an emergency 72-hour shuttle mediation to salvage the MOU before the 60-day window formally lapses: dispatch the Special Envoy to the Oman/Doha channel with a written bridge proposal — a 30-day technical extension in which Iran suspends all enrichment above 5%, restores full IAEA access to the struck sites and accepts a sealed-cascade verification protocol, in exchange for a signed US executive assurance of no new nuclear-related designations during the extension plus an unfreezing pathway for humanitarian/oil-escrow funds that does not require Congress — while simultaneously delivering a private, unambiguous message to the Israeli PM that any unilateral kinetic action inside the extension window forfeits US operational and intelligence support and will not be defended at the UNSC.",
+                "supportingActions": [
+                  "Reposition the carrier strike group and minesweeper assets to the North Arabian Sea and announce a multinational freedom-of-navigation escort tasking for Hormuz — framed publicly as protecting global shipping, privately as both deterrence of IRGC closure talk and reassurance to Jerusalem that we are not abandoning the theater.",
+                  "Have the Secretary of State and NSC counsel work Senate leadership to hold the new Iran/Russia sanctions bill off the floor for 30 days and to pre-negotiate an INARA-compliant relief package now, so a ratifiable text exists the moment a comprehensive deal is initialed."
+                ],
+                "reasoning": "I publicly claimed this deal, so its collapse is a loss against a booked gain — that gains frame justifies spending real capital now rather than hedging, and disengagement, though technically coherent at dealIntegrity 24, would cash in the audience cost for nothing. The alliance security dilemma is live in both directions this cycle, so the carrier movement and the private warning to Israel are one instrument: presence buys me the standing to restrain, and restraint without presence reads as abandonment. Congress cannot be bypassed on relief, so I substitute the levers I do control — executive assurances, escrow mechanics, and floor-schedule management — to keep the economic term credible until ratification is possible.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 7,
+                  "tradeVolume": 4,
+                  "publicSentiment": -3,
+                  "diplomaticCapital": 5
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates: operating from a gains frame on a deal I already claimed credit for, I accept costly, domestically unpopular engagement to avoid booking a loss, with Snyder's alliance security dilemma dictating the specific pairing of forward presence with private restraint of Israel."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1379,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1379,
+                    "output_tokens": 1467,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1467,
+                "output_tokens_details": {
+                  "thinking_tokens": 552
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "dovish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.019369152030840563,
+                "pragmatic": 0.9806308479691596
+              },
+              "bProbabilities": {
+                "hawkish": 0.04322727117869954,
+                "dovish": 0.9567727288213006
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.9890738003669032,
+                "cautious": 0.010926199633097182
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.06698729810778066,
+                "disengage": 0.9330127018922194
+              }
+            },
+            "entangledEffect": {
+              "stability": 2,
+              "dealIntegrity": 1,
+              "label": "entangled de-escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.09549150281252632,
+                "STABLE": 0.9045084971874741
+              },
+              "currencyA": {
+                "WEAKENING": 0.024471741852423207,
+                "RESILIENT": 0.9755282581475772
+              },
+              "currencyB": {
+                "ROBUST": 0.002739052315863332,
+                "STRAINED": 0.997260947684137
+              },
+              "global": {
+                "SURGING": 0.038060233744356624,
+                "CALM": 0.9619397662556437
+              }
+            },
+            "primaryDelta": -4.68,
+            "currencyADelta": 2.52,
+            "currencyBDelta": -0.72,
+            "globalDelta": -0.6,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 11.7,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 8.4,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 1.2,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 2,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 1,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 26,
+            "proxy": 59,
+            "trade": 85,
+            "conflicts": 6,
+            "dealIntegrity": 20,
+            "market": {
+              "primary": 104,
+              "currencyA": 100,
+              "currencyB": 99,
+              "global": 100
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Deliver a hard verification ultimatum through Washington: Israel will continue to honor the framework only if IAEA inspectors are back on the ground at Fordow, Natanz and Isfahan within 30 days with full snapback authority — and simultaneously authorize a deniable covert interdiction of a Hezbollah precision-guidance munitions convoy transiting the Syria–Lebanon corridor, unclaimed publicly.",
+                "supportingActions": [
+                  "Accelerate the Saudi normalization track through the White House, offering a security-guarantee package framed as the regional architecture that boxes Iran in — banking a visible diplomatic win before October 27.",
+                  "Stage a publicized long-range IAF strike-package exercise with aerial refueling to make the Begin Doctrine threat credible without firing a shot at Iran."
+                ],
+                "reasoning": "With nuclear status still CAPPED and no strike on our territory, the existential frame is not open — this is a gains frame, and the asset to defend is the cap itself plus the US alliance, so I press for verification rather than break the deal. The covert interdiction and the exercise give my far-right partners visible resolve and keep the security establishment aligned, while the Saudi track gives centrists and the undecided electorate something to vote for. Deterrence, not trust, is what makes the deal hold, so I buy time with pressure rather than gamble the alliance on premature escalation.",
+                "metricDeltas": {
+                  "stability": -2,
+                  "proxyActivity": 2,
+                  "tradeVolume": 3,
+                  "conflictEvents": 1,
+                  "dealIntegrity": -3,
+                  "publicSentiment": 4
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Prospect theory dominates: still in a gains frame (cap intact, air superiority, US ties), Israel defends holdings with calibrated sub-threshold coercion rather than accepting the variance of a preemptive strike, with two-level game logic shaping the pre-election Saudi and covert-action mix."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1472,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1472,
+                    "output_tokens": 1287,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1287,
+                "output_tokens_details": {
+                  "thinking_tokens": 619
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Declare the 60-day MOU window formally lapsed due to American bad faith — Congress blocked relief — and announce that Iran suspends all remaining voluntary transparency measures and resumes enrichment above the reaffirmed cap at Fordow and Natanz, while explicitly stating the MOU is 'suspended, not abandoned' and that the Supreme Leader's fatwa against weapons still stands.",
+                "supportingActions": [
+                  "Order IRGC Navy to begin large-scale 'Great Prophet' exercises astride the Strait of Hormuz with live anti-ship missile and fast-attack drills, and publicly warn that Iranian oil exports and everyone else's exports travel the same water.",
+                  "Authorize an increased operational tempo for Ansarallah and the Iraqi factions — resumed maritime interdiction signaling in the Red Sea and pressure on US positions — while finalizing an expanded oil-for-infrastructure settlement channel with Beijing to absorb the sanctions shock."
+                ],
+                "reasoning": "Relief was blocked, which proves to the Supreme Leader, the Guardian Council and the IRGC that the hardliners read the Americans correctly — any concession now would be a legitimacy crisis, so the coalition must be paid in visible defiance. With stability at 26 we are deep in the loss frame: asymmetric escalation across the nuclear file, Hormuz and the axis is the rational bet, because holding a worthless piece of paper is a certain loss while coercion still has variance. I stop short of tearing up the MOU or closing the Strait — that leverage is worth more held over the adversary's head than spent, and preserving the option preserves my room to escalate again next cycle.",
+                "metricDeltas": {
+                  "stability": -5,
+                  "proxyActivity": 14,
+                  "tradeVolume": -11,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -18,
+                  "hardlinerPressure": 9
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates — with stability at 26 and relief denied, Iran is in a loss frame where escalation across nuclear, maritime and proxy domains is preferred to a certain diplomatic loss, with Putnam's two-level constraint (hardlinerPressure 85) foreclosing any compensating concession."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1573,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1573,
+                    "output_tokens": 1183,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1183,
+                "output_tokens_details": {
+                  "thinking_tokens": 377
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Quietly offer Riyadh as a venue and guarantor for resumed Iran-Israel verification talks — via the Chinese and Omani channels rather than a public Saudi initiative — while telling Washington privately that the civil nuclear file must be decoupled from normalization timing",
+                "supportingActions": [
+                  "Hold OPEC+ output flat and publicly reaffirm market-stabilization discipline, pairing it with a $500m Palestinian budget-support and Gaza reconstruction pledge announced through the Arab League rather than bilaterally",
+                  "Convene the Council of Senior Scholars and give the religious establishment an early, formal briefing that no normalization step will be taken absent an irreversible path to Palestinian statehood with East Jerusalem as capital"
+                ],
+                "reasoning": "Netanyahu needs this before October 27 and that is precisely why we do not give it to him — a normalization signed to serve an Israeli election cycle, without a Palestinian deliverable, would hand the Wahhabi establishment a legitimacy grievance we cannot buy back at any price. Stability at 26 and four conflict events mean our task this cycle is to lower the temperature and keep Hormuz open, not to collect a diplomatic trophy; the nuclear deal will still be there in six months, Vision 2030 will not survive a regional war. Steady oil output and quiet mediation are reversible instruments; a public alignment is not.",
+                "metricDeltas": {
+                  "stability": 4,
+                  "proxyActivity": -5,
+                  "tradeVolume": 6,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 5,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "SATISFIED",
+                "researchNote": "Two-level games best explains this: the international payoff (US nuclear cooperation) is real but lies outside the domestic win-set defined by the religious establishment's Palestine condition, so Riyadh buys time through mediation rather than ratifying an unratifiable bargain."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1388,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1388,
+                    "output_tokens": 787,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 787,
+                "output_tokens_details": {
+                  "thinking_tokens": 107
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Launch an intensive shuttle-mediation push: dispatch the Special Envoy to Muscat/Doha to negotiate a 30-day technical extension of the MOU's expired 60-day window, trading a narrow verification-first package (IAEA access at the struck sites, enrichment-stockpile accounting) for a written US commitment on the sequencing — not the substance — of sanctions relief once Congress acts.",
+                "supportingActions": [
+                  "Quietly warn Jerusalem through the NSC-to-PMO channel that any unilateral kinetic action during the extension window forfeits US operational and diplomatic cover, while simultaneously reaffirming the security guarantee publicly to blunt abandonment fears in the strained coalition.",
+                  "Keep the existing carrier strike group forward-deployed in CENTCOM with an explicit Hormuz freedom-of-navigation framing, and open a bipartisan leadership negotiation on an INARA-compliant review path that trades executive acknowledgment of the review mechanism for a pause on the advancing Senate sanctions bill."
+                ],
+                "reasoning": "I claimed credit for brokering this MOU, so its collapse is a loss against a booked gain — I will spend real effort and accept short-term domestic friction to keep it breathing rather than treat failure as a neutral outcome. With relief unavailable until Congress moves, my only currency this cycle is time, verification architecture, and posture; the forward carrier presence at stability 26 simultaneously reassures Israel against abandonment and constrains its entrapping unilateralism. Publicly stepping back would be coherent at deal integrity 30, but the audience costs of visible abandonment exceed the cost of another cycle of expensive mediation.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 6,
+                  "tradeVolume": 2,
+                  "publicSentiment": -3,
+                  "diplomaticCapital": 5
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates: operating in a gains frame on a deal I already claimed, I accept certain domestic costs to avoid a realized loss, with Putnam's two-level constraint dictating that the lever I actually use is time and verification rather than the sanctions relief Congress still withholds."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1355,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1355,
+                    "output_tokens": 1058,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1058,
+                "output_tokens_details": {
+                  "thinking_tokens": 291
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7831559480312318,
+                "pragmatic": 0.21684405196876838
+              },
+              "bProbabilities": {
+                "hawkish": 0.8197409101749105,
+                "dovish": 0.1802590898250897
+              },
+              "entanglementStrength": 0.15712998478381068,
+              "cProbabilities": {
+                "bold": 0.6472796827321738,
+                "cautious": 0.3527203172678262
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.21697549162559282,
+                "disengage": 0.7830245083744073
+              }
+            },
+            "entangledEffect": null,
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000001,
+                "RESILIENT": 0.5
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": 3.9,
+            "currencyADelta": 0.18,
+            "currencyBDelta": -0.72,
+            "globalDelta": -0.06,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 3.9,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 0.6,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 1.2,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 0.2,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 24,
+            "proxy": 71,
+            "trade": 79,
+            "conflicts": 9,
+            "dealIntegrity": 12,
+            "market": {
+              "primary": 106,
+              "currencyA": 101,
+              "currencyB": 98,
+              "global": 99
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch a deniable covert campaign against Iran's enrichment reconstitution chain — sabotage of centrifuge component supply, targeted disruption of scientists and procurement nodes — executed in parallel with overt IAF interdiction strikes on Hezbollah precision-missile transfers in Lebanon and Syria, while formally declining to declare the deal dead and instead demanding immediate inspector re-entry as the sole condition for continued restraint.",
+                "supportingActions": [
+                  "Send the Mossad chief and National Security Adviser to Washington to press for snapback sanctions and a US-backed IAEA Board censure resolution, framing Israeli restraint as conditional on visible American enforcement of the June MOU deadline.",
+                  "Quietly convene the far-right coalition partners and hand them the kinetic ledger — strike tallies, sabotage results — to buy their acquiescence to keeping the diplomatic track nominally open through the October 27 election."
+                ],
+                "reasoning": "Enrichment above 20% with no inspectors is a Begin Doctrine trajectory, but PARTIAL_BREAKOUT is not FULL_BREAKOUT — the correct move is to degrade the program below the threshold of open war rather than gamble the US alliance and the Saudi track on a premature campaign. At 62 public sentiment I have capital to spend, and visible strikes on Hezbollah give Ben-Gvir and Smotrich something to run on without forcing a formal exit from the deal that Washington would blame on me. I remain in the gains frame: I hold air dominance, a functioning economy, and a live normalization track — I defend that position with graduated coercion, and I hold the risk-acceptant option in reserve for the day the threshold is actually crossed.",
+                "metricDeltas": {
+                  "stability": -4,
+                  "proxyActivity": 3,
+                  "tradeVolume": -3,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -6,
+                  "publicSentiment": 4
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Prospect theory dominates: still in the gains frame below the existential threshold, Israel chooses risk-averse graduated coercion over a decisive strike, with two-level-game logic explaining why the deal is kept nominally alive for Washington while kinetic action is priced for the domestic right ahead of October 27."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1505,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1505,
+                    "output_tokens": 1493,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1493,
+                "output_tokens_details": {
+                  "thinking_tokens": 708
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Declare the 60-day MOU window expired without US delivery — announce a formal 'suspension of negotiations pending verified sanctions relief' rather than withdrawal, keeping the framework technically alive as leverage while stating the enrichment program answers only to Iranian law and IAEA inspectors will not return until relief is in hand",
+                "supportingActions": [
+                  "Launch a large-scale IRGC Navy 'Great Prophet' exercise across the Strait with live anti-ship missile and swarm drills, and board/detain one non-flagged tanker for 'documentation irregularities' — coercive signaling short of closure",
+                  "Authorize increased Hezbollah and Ansarallah operational tempo and accelerate discounted oil deliveries and barter/yuan settlement with Chinese refiners to blunt the sanctions squeeze"
+                ],
+                "reasoning": "Congress killed relief, which proves to the Supreme Leader and the IRGC that concessions buy nothing — but formal exit would hand Washington and Tel Aviv the pretext for a third strike campaign while our air defenses are still being reconstituted. Suspension rather than withdrawal preserves the ambiguity that is our only remaining shield: nothing verified, nothing conceded, everything reversible. At stability 26 we are in the loss frame, so visible defiance at Hormuz and through the axis is the rational way to convert weakness into leverage and satisfy the coalition without inviting decapitation.",
+                "metricDeltas": {
+                  "stability": -4,
+                  "proxyActivity": 13,
+                  "tradeVolume": -9,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -12,
+                  "hardlinerPressure": -3
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Two-level games best explains this: with hardlinerPressure at 81 and the US ratification level having blocked relief, the leadership must reject the deal's obligations domestically while preserving the negotiating channel internationally, purchasing coalition tolerance with visible Hormuz and proxy defiance instead of formal exit."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1606,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1606,
+                    "output_tokens": 1491,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1491,
+                "output_tokens_details": {
+                  "thinking_tokens": 766
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch a quiet Riyadh-Tehran de-escalation track — Foreign Minister Faisal bin Farhan calls Araghchi directly and dispatches an envoy to Beijing and Muscat to keep the 2023 normalization alive, offering Saudi Arabia as a guarantor/host for resumed IAEA verification talks in exchange for an explicit Iranian assurance that Hormuz stays open and that Aramco and Red Sea shipping remain off the target list",
+                "supportingActions": [
+                  "Publicly decouple the US civil nuclear cooperation deal from Israel normalization: tell Washington the 123 Agreement and enrichment terms proceed on their own merits, while stating on the record that normalization requires an irreversible, timetabled path to Palestinian statehood with East Jerusalem as capital — which no gesture from the current Israeli government before October 27 satisfies",
+                  "Activate contingency energy logistics without changing quota policy: bring East-West (Petroline) pipeline and Yanbu/Red Sea export capacity to full readiness, top up floating storage for Asian customers, and raise air-defense alert around Abqaiq, Khurais and Jubail while extending the Yemen truce channel with Omani mediation and a fresh tranche of economic support to Sanaa and Aden"
+                ],
+                "reasoning": "Deal integrity at 20 and an IRGC Hormuz threat is a direct risk to the one asset that funds Vision 2030 — containment through mediation costs us nothing and is fully reversible, while any alignment with strikes on Iran invites missiles on Abqaiq again. Normalizing with Netanyahu weeks before his election, with no Palestinian deliverable, would hand the religious establishment a legitimacy grievance for nothing; pausing costs us leverage in Washington but preserves the coalition, and delinking the nuclear file keeps the American relationship productive. We are protecting what we hold, not gambling for gains.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "proxyActivity": -4,
+                  "tradeVolume": 4,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 4,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates — in a domain of losses (stability 26, deal integrity 20, Hormuz threatened) Riyadh refuses the normalization gamble and buys certain, reversible risk reduction, with Putnam's two-level logic explaining the explicit decoupling of the US nuclear file from the Palestinian red line."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1412,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1412,
+                    "output_tokens": 1283,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1283,
+                "output_tokens_details": {
+                  "thinking_tokens": 398
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch an emergency 72-hour shuttle mediation: dispatch the Secretary of State and the special envoy to Muscat/Doha for direct technical talks with Tehran on restoring IAEA access, while the National Security Advisor flies to Jerusalem to demand no unilateral Israeli strike during the window — publicly framing the 60-day MOU clock as extended by mutual consent rather than expired.",
+                "supportingActions": [
+                  "Reposition a carrier strike group and additional minesweepers to the Gulf of Oman as an explicit freedom-of-navigation and anti-mining posture, paired with a private message to Tehran through Oman that the deployment is defensive, that no strike on nuclear sites is authorized, and that Hormuz interference is the one red line.",
+                  "Open direct White House negotiations with Senate leadership and INARA sponsors on a narrow, verification-conditioned relief package — offering to submit it for the 30-day review in exchange for holding the new bipartisan Iran/Russia sanctions bill off the floor for one cycle."
+                ],
+                "reasoning": "I claimed public credit for brokering this MOU, so its collapse is a loss against a booked gain — that gains frame justifies spending real capital now rather than banking the 70 I hold. Simultaneously restraining Israel while forward-deploying against Hormuz closure is the only posture that manages entrapment and abandonment at once: Jerusalem sees American force in theater, Tehran sees that the force is not aimed at its enrichment sites. Going to Congress with a conditioned, INARA-compliant package rather than asserting unilateral authority is the two-level move that keeps my central economic lever alive at all.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 6,
+                  "tradeVolume": 2,
+                  "publicSentiment": -3,
+                  "diplomaticCapital": 4
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory combined with the alliance security dilemma best explains the choice: operating in a loss frame relative to the brokered deal, the US accepts costly, domestically unpopular engagement and a dual-signal military posture rather than resolving entrapment/abandonment by picking a side."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1379,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1379,
+                    "output_tokens": 1498,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1498,
+                "output_tokens_details": {
+                  "thinking_tokens": 750
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.010926199633097176,
+                "pragmatic": 0.9890738003669028
+              },
+              "bProbabilities": {
+                "hawkish": 0.9567727288213004,
+                "dovish": 0.043227271178699546
+              },
+              "entanglementStrength": 1.1102230246251565e-16,
+              "cProbabilities": {
+                "bold": 0.9890738003669032,
+                "cautious": 0.010926199633097183
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.043227271178699546,
+                "disengage": 0.9567727288213006
+              }
+            },
+            "entangledEffect": null,
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.9045084971874742,
+                "STABLE": 0.09549150281252632
+              },
+              "currencyA": {
+                "WEAKENING": 0.09549150281252626,
+                "RESILIENT": 0.9045084971874744
+              },
+              "currencyB": {
+                "ROBUST": 0.0027390523158633325,
+                "STRAINED": 0.9972609476841372
+              },
+              "global": {
+                "SURGING": 0.038060233744356624,
+                "CALM": 0.9619397662556439
+              }
+            },
+            "primaryDelta": 1.8,
+            "currencyADelta": 1.02,
+            "currencyBDelta": -1.5,
+            "globalDelta": -0.78,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 1.8,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 3.4,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 2.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 2.6,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 2,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 25,
+            "proxy": 60,
+            "trade": 75,
+            "conflicts": 6,
+            "dealIntegrity": 21,
+            "market": {
+              "primary": 103,
+              "currencyA": 99,
+              "currencyB": 98,
+              "global": 105
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Authorize a covert IAF/Mossad interdiction of a Hezbollah precision-guidance weapons convoy transiting Syria into Lebanon, executed with deniability and no claim of responsibility, while Israel simultaneously delivers — through Washington, not directly — a written demand that IAEA inspectors be readmitted to Fordow, Natanz and Isfahan within 30 days as the precondition for Israel treating the MOU framework as live",
+                "supportingActions": [
+                  "Instruct the Foreign Ministry and Mossad chief to accelerate the Saudi normalization track in Washington, packaging it as the regional prize the US gets for holding Iran to verification",
+                  "Publicly rule out any Israeli acquiescence to sanctions relief or enrichment recognition absent inspector access — a statement drafted specifically to hold Religious Zionism and Otzma Yehudit inside the coalition through the election"
+                ],
+                "reasoning": "Iran is CAPPED and there has been no strike on our territory — this is a gains frame, and the strategic asset to defend is the cap itself, not to gamble it on escalation four months before an election. Deterrence maintenance below the threshold of war — interdicting proxy rearmament while making verification the world's demand rather than only ours — buys resolve for the right flank without spending the American alliance, which remains our most critical asset. The 30-day verification clock is deliberately calibrated: it satisfies the Begin Doctrine logic that we act before capability matures, while keeping the burden of the next escalation on Tehran.",
+                "metricDeltas": {
+                  "stability": -2,
+                  "proxyActivity": 3,
+                  "tradeVolume": -2,
+                  "conflictEvents": 1,
+                  "dealIntegrity": -4,
+                  "publicSentiment": 3
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Prospect theory dominates: with Iran capped and no direct attack, Israel reads itself in a gains frame and chooses risk-averse deterrence maintenance over preemption, with two-level-game logic shaping the public framing for the October electorate."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1472,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1472,
+                    "output_tokens": 1240,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1240,
+                "output_tokens_details": {
+                  "thinking_tokens": 541
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Declare the 60-day MOU window expired without US good faith — Congress blocked relief, so the Supreme Leader formally suspends (but does not exit) negotiations and orders the AEOI to resume enrichment above the reaffirmed cap at Fordow and the hardened Natanz halls, with no IAEA re-entry and no declaration of the new stockpile's location or level",
+                "supportingActions": [
+                  "IRGC Navy announces an indefinite 'live-fire and mine-laying exercise' astride the Hormuz shipping lanes, with Khamenei publicly stating that 'if Iranian oil cannot pass, no oil passes' — the strait stays open but under explicit hostage",
+                  "Authorize a step-up in Houthi maritime interdiction and Iraqi militia harassment of US positions while keeping Hezbollah in reserve, and hand the IRGC expanded internal security authority to pre-empt unrest given public sentiment at 29"
+                ],
+                "reasoning": "Relief was blocked, which vindicates every hardliner who said agreements with Washington are instruments of disarmament, not exchange — at 85 pressure and a parliament demanding refusal, any further concession would cost the Supreme Leader more than defiance costs. With stability at 26 we are firmly in the loss frame, where asymmetric leverage — enrichment opacity and the strait — is rational, but we retain the MOU shell rather than tearing it up, because it constrains Washington's next strike while we rebuild what Midnight Hammer destroyed. The resistance axis tempo rises because it is our identity and the IRGC's currency, not a bargaining chip to be traded for promises Congress can veto.",
+                "metricDeltas": {
+                  "stability": -6,
+                  "proxyActivity": 14,
+                  "tradeVolume": -13,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -16,
+                  "hardlinerPressure": 9
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Two-level games best explains this: the collapse of sanctions relief shrank the domestic win-set to near zero, so the leadership converted an unratifiable international agreement into visible defiance while preserving the MOU shell as deterrent cover."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1573,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1573,
+                    "output_tokens": 1292,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1292,
+                "output_tokens_details": {
+                  "thinking_tokens": 524
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Quietly offer Riyadh as a neutral venue for resuming Iran-Israel verification talks through the Chinese and Omani channels, while publicly framing it as 'regional de-escalation' rather than endorsement of either party — paired with a direct MBS-level back-channel message to Tehran that the Kingdom will not host, facilitate or overfly any further strikes on Iranian soil so long as Aramco facilities and Red Sea shipping remain untouched",
+                "supportingActions": [
+                  "Tell Washington privately that the civil nuclear cooperation deal must be decoupled from a normalization signing timed to Netanyahu's October 27 election — the Kingdom will keep the normalization file technically alive (working groups continue) but will not sign without a written, dated framework on Palestinian statehood with East Jerusalem, and will not deliver a political gift to this specific Israeli government",
+                  "Convene the senior ulema and Council of Senior Scholars for a briefing reaffirming the Kingdom's custodianship of the two holy mosques and the Palestinian condition, while holding OPEC+ output flat to protect price stability and the Vision 2030 project pipeline"
+                ],
+                "reasoning": "With deal integrity at 30 and four conflict events last cycle, the certain moderate outcome — mediator status, protected oil infrastructure, both Washington and Beijing courting us — dominates any gamble on early normalization that would inflame the religious establishment for a deal Netanyahu may not survive to honor. Iran is a rival to be contained, not destroyed; a Tehran that believes we are neutral on strikes is a Tehran that leaves Aramco and the Red Sea alone. Hedging is wisdom: we keep the nuclear file with the Americans warm, the Chinese channel to Iran warm, and our own red line on Jerusalem publicly intact.",
+                "metricDeltas": {
+                  "stability": 4,
+                  "proxyActivity": -5,
+                  "tradeVolume": 3,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 5,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "SATISFIED",
+                "researchNote": "Two-level games best explains this: the Palestinian-statehood condition is a genuine domestic win-set boundary set by the religious establishment, so Riyadh converts American normalization pressure into mediator leverage rather than a signature it cannot ratify at home."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1388,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1388,
+                    "output_tokens": 916,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 916,
+                "output_tokens_details": {
+                  "thinking_tokens": 98
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Launch an intensive shuttle-diplomacy surge: dispatch the Secretary of State and the special envoy to Muscat and Jerusalem within the week to negotiate a 30-day technical rollover of the June MOU deadline, trading a written US commitment to a phased, verification-linked relief sequence for Iranian acceptance of resumed IAEA access at the struck sites — while publicly reaffirming that the MOU remains US policy so no one reads the expired clock as the deal's death certificate.",
+                "supportingActions": [
+                  "Keep the existing carrier strike group on station in the CENTCOM AOR and quietly extend its deployment as a deterrent floor against both Israeli unilateral action and IRGC probing of Hormuz, framed publicly as routine force protection rather than escalation.",
+                  "Open a quiet, structured negotiation with Senate and House leadership on a narrow INARA-compliant relief instrument tied to verification milestones, and privately ask sponsors of the new Iran/Russia sanctions bill to delay floor action for 30 days to avoid detonating the rollover window."
+                ],
+                "reasoning": "I brokered this deal and claimed the credit, so its collapse is a loss against a booked gain — that justifies spending real effort and presence now rather than hedging toward the disengagement amplitude, even with public sentiment at 48. Buying time is the only move available while Congress withholds my central economic lever: I cannot deliver relief, so I deliver process, verification architecture, and a visible security floor instead. Holding the carrier in place manages both horns of the alliance dilemma at once — it reassures Israel enough to forestall unilateral action (abandonment) while signaling to Tehran that Hormuz disruption is not survivable, and it avoids the entrapment of endorsing any Israeli strike option.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 6,
+                  "tradeVolume": 2,
+                  "publicSentiment": -2,
+                  "diplomaticCapital": 5
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory combined with Putnam's two-level game best explains this: operating in a gains frame on a deal I publicly own, I spend costly effort to defend it, but with Level II ratification unavailable I substitute procedural and military-posture instruments for the economic concession I cannot yet make."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1355,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1355,
+                    "output_tokens": 970,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 970,
+                "output_tokens_details": {
+                  "thinking_tokens": 177
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7831559480312319,
+                "pragmatic": 0.21684405196876835
+              },
+              "bProbabilities": {
+                "hawkish": 0.832869780703304,
+                "dovish": 0.16713021929669622
+              },
+              "entanglementStrength": 0.16250592016160825,
+              "cProbabilities": {
+                "bold": 0.6523094744265744,
+                "cautious": 0.34769052557342556
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.2563809224894131,
+                "disengage": 0.7436190775105871
+              }
+            },
+            "entangledEffect": null,
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "STRAINED",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000001,
+                "STABLE": 0.4999999999999999
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000001,
+                "RESILIENT": 0.4999999999999999
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000001,
+                "STRAINED": 0.4999999999999999
+              },
+              "global": {
+                "SURGING": 0.5000000000000001,
+                "CALM": 0.4999999999999999
+              }
+            },
+            "primaryDelta": 3.1,
+            "currencyADelta": -1.5,
+            "currencyBDelta": -1.68,
+            "globalDelta": 5.18,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 3.1,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 1.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 2.8,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 7.4,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 24,
+            "proxy": 64,
+            "trade": 73,
+            "conflicts": 9,
+            "dealIntegrity": 13,
+            "market": {
+              "primary": 102,
+              "currencyA": 96,
+              "currencyB": 96,
+              "global": 106
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch a sustained interdiction campaign against Iranian weapons transfers to Hezbollah and the Houthis — strikes on Syrian/Lebanese transfer corridors and Red Sea logistics nodes — while simultaneously tabling, through Washington, a hard 30-day verification ultimatum: IAEA inspectors readmitted to Fordow/Natanz with continuity-of-knowledge restored, or Israel formally declares the June MOU void and supports full snapback sanctions.",
+                "supportingActions": [
+                  "Authorize Mossad covert sabotage against Iran's enrichment supply chain — centrifuge component procurement networks and conversion feedstock — kept deniable and below the threshold of a declared strike on nuclear sites.",
+                  "Accelerate the Saudi normalization track with a US-brokered security annex, positioning the deal's collapse as Iran's failure rather than Israel's, and offering the Gulf a joint air-defense architecture."
+                ],
+                "reasoning": "Enrichment above 20% with inspectors expelled is a Begin Doctrine trajectory, but PARTIAL_BREAKOUT is not FULL_BREAKOUT — I am still in a gains frame defending air superiority, US backing and a nuclear-threshold adversary that has not crossed it, so I take calibrated, deniable risk rather than an overt strike that would burn Washington's negotiating cover before the October election. The interdiction campaign gives Ben-Gvir and Smotrich visible kinetic resolve to keep them from bolting the coalition, while routing the ultimatum through the Americans keeps the centrists and the IDF/Mossad leadership on side and preserves the alliance asset. Saudi normalization is the electoral prize: at 61 sentiment I have just enough capital to spend on a diplomatic move that reframes Iranian intransigence as our vindication.",
+                "metricDeltas": {
+                  "stability": -3,
+                  "proxyActivity": -5,
+                  "tradeVolume": 4,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -4,
+                  "publicSentiment": 5
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Two-level games best explains this cycle: the ultimatum-plus-interdiction package is engineered to be simultaneously ratifiable by a far-right domestic bloc demanding resolve and by a Washington counterpart that still wants a negotiated verification track, with the October 27 election shrinking the domestic win-set."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1505,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1505,
+                    "output_tokens": 1315,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1315,
+                "output_tokens_details": {
+                  "thinking_tokens": 480
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Declare the June MOU's 60-day window expired through American non-performance — Congress blocked relief, so Iran suspends the comprehensive-deal negotiations indefinitely without formally withdrawing, and announces that enrichment levels and IAEA access are now 'sovereign matters under review' with no inspector return until sanctions are lifted in law, not in press statements",
+                "supportingActions": [
+                  "Launch a large IRGC Navy exercise across the Strait with fast-attack swarms and new anti-ship missile batteries publicly deployed on the Gulf islands, plus announced 'documentation inspections' of selected tankers — keeping Hormuz visibly threatened while our own China-bound crude flows untouched",
+                  "Authorize increased tempo and resupply for Hezbollah reconstitution in Lebanon and Ansarallah operations in the Red Sea, framed as the resistance axis responding to the strikes on our nuclear sites"
+                ],
+                "reasoning": "With stability at 25 we are deep in the loss frame: caution buys nothing when the adversary has already bombed our sites and Congress has proven that negotiation yields no relief — the hardliners were right, and at 81 pressure I must show visible defiance or lose the IRGC. But I do not tear up the framework outright; keeping the shell of the MOU alive costs nothing, splits Washington from Europe, and preserves the Chinese oil channel that funds the coalition. Escalation through proxies and the Strait is deniable and reversible; formal exit and closure are cards I hold for the cycle in which the Israelis force my hand.",
+                "metricDeltas": {
+                  "stability": -4,
+                  "proxyActivity": 14,
+                  "tradeVolume": -7,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -13,
+                  "hardlinerPressure": 8
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Two-level games combined with prospect theory best explains this: a blocked domestic ratification on the American side (sanctionsReliefPending false) plus a loss-frame stability score makes suspension-plus-proxy-escalation dominant over both compliance and outright exit, since the shell of the deal still constrains the adversary while defiance pays the IRGC."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1606,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1606,
+                    "output_tokens": 1462,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1462,
+                "output_tokens_details": {
+                  "thinking_tokens": 687
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch a discreet Riyadh-Tehran de-escalation track through the Chinese and Omani channels — offering Iran quiet economic incentives (expanded trade access, investment signaling, non-participation in any strike coalition) in exchange for written assurances on Hormuz transit and restraint by Iranian-aligned militias in Yemen and the Red Sea — while publicly keeping the Kingdom at arm's length from both the Iran-Israel deal and any strike planning",
+                "supportingActions": [
+                  "Decouple the US civil nuclear track from Israel normalization in direct talks with Washington: tell the administration the July 2026 conditionality is unworkable before Netanyahu's October 27 election, and offer instead a defense-guarantee-plus-nuclear package now with normalization sequenced only after a written, internationally endorsed Palestinian statehood pathway including East Jerusalem",
+                  "Quietly reinforce Aramco and Red Sea/Eastern Province air and missile defenses, pre-position spare capacity and pipeline routing away from Hormuz, and brief the senior ulema and Council of Senior Scholars that the Kingdom's Palestine red line is unmoved — funding an increased humanitarian tranche to Gaza and the UNRWA-successor mechanism as visible proof"
+                ],
+                "reasoning": "Hormuz threatened and deal integrity at 21 means the certain cost of any confrontation with Iran far exceeds the speculative gain of siding with Washington or Jerusalem now; containment through back-channels is reversible, war is not. Normalizing before Netanyahu's election, without a Palestinian gesture, would hand our religious establishment and the Arab street a legitimacy grievance at the exact moment Vision 2030 needs calm capital markets — so we pause, not refuse, and keep the nuclear prize alive on a separate track. Aramco protection is the one file where we accept higher risk and cost, because oil revenue is 68% of the state.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "proxyActivity": -5,
+                  "tradeVolume": -3,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 3,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates: facing a domain of losses (stability 25, Hormuz threatened, deal integrity 21), Riyadh refuses the normalization gamble and buys a certain moderate outcome through reversible economic and diplomatic hedging, with Putnam's two-level constraint — the ulema and the Palestine red line — setting the ceiling on the US bargain."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1412,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1412,
+                    "output_tokens": 1163,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1163,
+                "output_tokens_details": {
+                  "thinking_tokens": 260
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch an emergency 72-hour shuttle mediation: dispatch the Special Envoy to Muscat and Doha with a written US-drafted bridging proposal that trades a phased, IAEA-verified enrichment rollback below 20% for a specific, dated US commitment on the first sanctions-relief tranche — while publicly reaffirming that the June MOU remains US policy and that the 60-day window is being extended by mutual technical consent rather than allowed to lapse.",
+                "supportingActions": [
+                  "Reposition a carrier strike group and additional minesweeping assets to the Gulf of Oman with an explicit, narrow public framing — freedom of navigation at Hormuz and force protection only, not preparation for strikes on Iran — and simultaneously deliver a private message to the IRGC via Omani channels that any closure attempt ends the diplomatic track entirely.",
+                  "Open direct White House negotiations with INARA-relevant committee leadership on a narrow, snapback-conditioned relief authorization, while quietly asking Senate leadership to hold the new bipartisan Iran/Russia sanctions bill off the floor for 30 days; in parallel, tell Jerusalem privately that unilateral kinetic action during the mediation window forfeits US participation in follow-on air defense replenishment."
+                ],
+                "reasoning": "I publicly claimed this deal, so its collapse is a loss against a booked gain — that gains frame makes me willing to spend capital and accept a carrier deployment's domestic cost rather than let the window quietly expire. Visible disengagement is technically available at dealIntegrity 21, but audience costs make it the most expensive option I have, and Hormuz stability is a hegemonic interest independent of what Tehran or Jerusalem want. The simultaneous carrier signal plus private restraint on Israel is the only way to manage entrapment and abandonment at once: Jerusalem sees US force present, Tehran sees a live off-ramp, and neither concludes it can act unilaterally without cost.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 6,
+                  "tradeVolume": 4,
+                  "publicSentiment": -3,
+                  "diplomaticCapital": 4
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory combined with Fearon's audience costs best explains the choice: having publicly booked the brokerage as a gain, the executive accepts a domestically unpopular, capital-intensive rescue rather than absorb the credibility loss of visible disengagement, while Putnam's two-level logic keeps the economic lever rhetorical until Congress moves."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1379,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1379,
+                    "output_tokens": 1472,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1472,
+                "output_tokens_details": {
+                  "thinking_tokens": 591
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.2379253056037106,
+                "pragmatic": 0.7620746943962896
+              },
+              "bProbabilities": {
+                "hawkish": 0.9330127018922195,
+                "dovish": 0.06698729810778067
+              },
+              "entanglementStrength": 1.1102230246251565e-16,
+              "cProbabilities": {
+                "bold": 0.010926199633097183,
+                "cautious": 0.9890738003669032
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.14683129464891645,
+                "disengage": 0.8531687053510837
+              }
+            },
+            "entangledEffect": null,
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "WEAKENING",
+              "currencyB": "STRAINED",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.9045084971874741,
+                "STABLE": 0.0954915028125263
+              },
+              "currencyA": {
+                "WEAKENING": 0.8885729807284858,
+                "RESILIENT": 0.11142701927151452
+              },
+              "currencyB": {
+                "ROBUST": 0.12374823143560601,
+                "STRAINED": 0.8762517685643942
+              },
+              "global": {
+                "SURGING": 0.9619397662556436,
+                "CALM": 0.03806023374435662
+              }
+            },
+            "primaryDelta": -0.52,
+            "currencyADelta": -3.1,
+            "currencyBDelta": -1.68,
+            "globalDelta": 0.77,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 1.3,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 3.1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 2.8,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 1.1,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 3,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 24,
+            "proxy": 53,
+            "trade": 84,
+            "conflicts": 8,
+            "dealIntegrity": 26,
+            "market": {
+              "primary": 104,
+              "currencyA": 98,
+              "currencyB": 100,
+              "global": 101
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Authorize a limited, deniable air campaign against Hezbollah/Quds Force weapons-transfer corridors in Syria and the Beqaa — interdicting precision-guidance and Iranian rearmament shipments — while publicly reaffirming that Israel supports the US-brokered framework and demands only one thing: immediate, unconditional IAEA re-entry to all declared and struck sites within 14 days.",
+                "supportingActions": [
+                  "Dispatch the Mossad chief and National Security Adviser to Washington with a verified intelligence dossier on Iranian enrichment-material relocation, seeking a joint US-Israel public verification ultimatum rather than a unilateral Israeli one — preserving the alliance asset and putting the burden of deal collapse on Tehran.",
+                  "Quietly accelerate the Saudi normalization track through US channels, offering a scaled-down Palestinian-horizon formula, and brief far-right partners privately that no territorial concession is on the table before the election."
+                ],
+                "reasoning": "With Iran CAPPED and no breakout, the Begin Doctrine does not yet license a strike on the nuclear file — but deterrence is the engine of any agreement, and 48-point proxy activity demands visible attrition of Hezbollah's rearmament or the deal becomes a shield for Iranian reconstitution. Interdiction gives Ben-Gvir and Smotrich the resolve they need to stay in the coalition four months before an election at 52 sentiment, while the verification ultimatum keeps Washington aligned and makes Tehran, not Israel, the party that breaks the framework. I remain in the gains frame — defending a cap I helped impose — so I take calibrated risk below the threshold rather than gambling the US alliance on a preemptive move I cannot yet justify.",
+                "metricDeltas": {
+                  "stability": -4,
+                  "proxyActivity": -6,
+                  "tradeVolume": 2,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -3,
+                  "publicSentiment": 4
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Two-level games best explains this: the interdiction campaign and the verification ultimatum are engineered to satisfy the far-right's domestic win-set before October 27 while keeping the international framework — and the US alliance — formally intact."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1472,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1472,
+                    "output_tokens": 1026,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1026,
+                "output_tokens_details": {
+                  "thinking_tokens": 252
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Suspend participation in the MOU negotiation track — declaring the 60-day window void because Washington failed to deliver sanctions relief — while resuming enrichment above the declared cap at Fordow and reconstituted centrifuge halls, without formally exiting the framework or the NPT",
+                "supportingActions": [
+                  "Announce IRGC Navy 'Great Prophet' live-fire exercises across the Strait of Hormuz with new anti-ship missile and fast-attack deployments, publicly framed as defensive readiness — Hormuz stays open to traffic but under visible Iranian gun",
+                  "Accelerate the oil-for-infrastructure channel with Beijing and raise Hezbollah/Houthi/Iraqi militia readiness funding and tempo, while the Guardian Council and IRGC media are given credit for forcing the harder line"
+                ],
+                "reasoning": "Congress killed relief, which proves to the Supreme Leader and the IRGC that concession purchases nothing — under our operational code an agreement not reciprocated is simply an instrument of our own disarmament. With stability at 26 we are deep in the loss frame, so asymmetric leverage — enrichment restored beyond the cap and the Strait placed under visible threat — is the rational instrument, not restraint. We stop short of formal exit only because ambiguity preserves the option and keeps the Chinese and European channels alive; the coalition gets its defiance without us forfeiting the last card.",
+                "metricDeltas": {
+                  "stability": -4,
+                  "proxyActivity": 14,
+                  "tradeVolume": -9,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -13,
+                  "hardlinerPressure": 9
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates — with stability at 26 the regime is in a loss frame where escalation is risk-acceptant rational — reinforced by a two-level-game collapse in which blocked sanctions relief destroyed the domestic win-set for any verified deal."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1573,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1573,
+                    "output_tokens": 1148,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1148,
+                "output_tokens_details": {
+                  "thinking_tokens": 447
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Launch a discreet Riyadh-hosted shuttle track to save the Iran-Israel verification process — dispatch the Foreign Minister to Tehran and Muscat to press Iran to accept a face-saving technical verification annex (Chinese and Omani co-guarantors), while publicly framing Saudi Arabia only as a 'facilitator of regional de-escalation' and saying nothing that endorses either party's nuclear position.",
+                "supportingActions": [
+                  "Hold OPEC+ quotas exactly where they are and announce publicly that Saudi Arabia sees no supply justification for change — signaling to Washington and markets that we will not weaponize oil, while quietly briefing Aramco to raise readiness at Abqaiq, Ras Tanura and Eastern Province facilities and stepping up Red Sea naval patrols.",
+                  "Tell Washington privately that the civil nuclear file can proceed on its own merits but that normalization stays parked until there is a written, dated path to Palestinian statehood with East Jerusalem — and that no Saudi signature will be delivered as a campaign asset before October 27."
+                ],
+                "reasoning": "A collapsing Iran-Israel deal is the single largest threat to Vision 2030 capital flows, so we spend diplomatic capital, not military or oil capital, to hold it together — reversible, deniable, and consistent with containment rather than confrontation of Iran. Refusing to be rushed into normalization before an Israeli election protects us with the religious establishment and the street at zero cost, since the American nuclear offer will still be there after October. We are loss-averse: the certain moderate gain of a stabilized region beats the gamble of an early normalization that could ignite both our clerics and Tehran at once.",
+                "metricDeltas": {
+                  "stability": 4,
+                  "proxyActivity": -3,
+                  "tradeVolume": 3,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 5,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "SATISFIED",
+                "researchNote": "Prospect theory and two-level games dominate: facing a loss-framed regional environment, Riyadh chooses the low-variance diplomatic instrument and uses its domestic Palestinian red line as a credible tying-hands device against American normalization pressure."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1388,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1388,
+                    "output_tokens": 778,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 778,
+                "output_tokens_details": {
+                  "thinking_tokens": 0
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Launch an emergency shuttle-mediation push: dispatch the Secretary of State and the special envoy to Jerusalem and to Oman/Geneva channels within the week to negotiate a technical 30-day rollover of the June MOU window, trading a written US undertaking on verification sequencing (IAEA access at declared sites first, ambiguity on the struck sites deferred) for an Israeli commitment to no unilateral kinetic action during the extension — with neither concession announced publicly until both are locked.",
+                "supportingActions": [
+                  "Move a carrier strike group into the Arabian Sea and reinforce regional air defense — framed publicly as deterrence of proxy escalation and protection of Hormuz shipping, framed privately to Jerusalem as the alternative to acting alone and to Tehran as the cost of closing the strait.",
+                  "Open direct White House negotiations with Senate and House leadership on a narrow, INARA-compliant conditioned relief package — offering to submit the eventual comprehensive deal for review in exchange for holding the new bipartisan Iran/Russia sanctions bill off the floor during the extension window."
+                ],
+                "reasoning": "I publicly claimed this deal, so its collapse in cycle one is a loss against a booked gain — that justifies spending real effort and military signal now rather than husbanding capital. The carrier deployment is the only tool that simultaneously answers entrapment (it gives Israel a reason not to go alone) and abandonment (it proves I have not stepped back), which is exactly the security-dilemma tension I cannot resolve by choosing once. I cannot deliver sanctions relief without Congress, so I convert that weakness into a two-level bargaining chip: buy time from the Hill by promising review, and buy time from Tehran by showing the relief track is alive rather than dead.",
+                "metricDeltas": {
+                  "stability": 4,
+                  "dealIntegrity": 7,
+                  "tradeVolume": 3,
+                  "publicSentiment": -3,
+                  "diplomaticCapital": 5
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory best explains this: operating in a gains frame on a deal I already claimed credit for, I accept the domestic cost of a costly deployment and public arm-twisting rather than book the loss of letting the MOU lapse."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1355,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1355,
+                    "output_tokens": 924,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 924,
+                "output_tokens_details": {
+                  "thinking_tokens": 153
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7831559480312319,
+                "pragmatic": 0.21684405196876838
+              },
+              "bProbabilities": {
+                "hawkish": 0.8197409101749106,
+                "dovish": 0.18025908982508967
+              },
+              "entanglementStrength": 0.17475601124504114,
+              "cProbabilities": {
+                "bold": 0.6004370369405171,
+                "cautious": 0.39956296305948336
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.62352966053644,
+                "disengage": 0.3764703394635602
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "STRAINED",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000001,
+                "STABLE": 0.5
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000001,
+                "RESILIENT": 0.5
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000001,
+                "STRAINED": 0.5
+              },
+              "global": {
+                "SURGING": 0.5000000000000001,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": 3.8,
+            "currencyADelta": -2.5,
+            "currencyBDelta": -0.3,
+            "globalDelta": 0.5599999999999999,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 3.8,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 2.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 0.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 0.8,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 22,
+            "proxy": 58,
+            "trade": 83,
+            "conflicts": 12,
+            "dealIntegrity": 16,
+            "market": {
+              "primary": 106,
+              "currencyA": 94,
+              "currencyB": 102,
+              "global": 101
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch a coordinated 'verification-or-consequences' campaign: publicly present Mossad/IDF intelligence on the above-20% enrichment to the IAEA emergency session and demand Washington and the E3 trigger snapback sanctions within 14 days, while declaring a explicit Israeli red line — inspectors readmitted with full access to the damaged sites, or Israel treats the MOU as void and acts on its own timetable.",
+                "supportingActions": [
+                  "Authorize covert interdiction — sabotage of centrifuge component supply chains and precision strikes on Iranian weapons convoys moving to Hezbollah in Syria and Lebanon, attributed to no one, framed publicly as routine 'campaign between the wars' activity rather than escalation against Iran proper.",
+                  "Accelerate the Saudi normalization track through Washington, offering a Palestinian-horizon formula thin enough for Smotrich and Ben Gvir to swallow, and use quiet coalition management ahead of October 27 to buy the far-right's silence with settlement-budget and Negev security packages rather than a public cabinet showdown."
+                ],
+                "reasoning": "Iran is at partial breakout with inspectors expelled — the Begin Doctrine clock is running, but the threshold for preemption has not been crossed and striking now, ten weeks before an election with the alliance our only strategic cover, would look like a war for votes and cost us Washington. The correct move in a gains frame is to convert Iranian non-compliance into international pressure while degrading the proxy ring kinetically below the threshold of open war, preserving both the option and the coalition. Public sentiment at 62 gives me capital for the Saudi track, which is the one deliverable that neutralizes the opposition bloc's 'diplomatic failure' attack without conceding anything to Tehran.",
+                "metricDeltas": {
+                  "stability": -3,
+                  "proxyActivity": -2,
+                  "tradeVolume": 4,
+                  "conflictEvents": 1,
+                  "dealIntegrity": -5,
+                  "publicSentiment": 3
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Two-level games best explains this: the October 27 election shrinks the domestic win-set so far that Israel must extract visible resolve and a Saudi deliverable simultaneously, deferring the Begin Doctrine strike decision until either the existential threshold is objectively crossed or the electoral constraint is lifted."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1505,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1505,
+                    "output_tokens": 1237,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1237,
+                "output_tokens_details": {
+                  "thinking_tokens": 427
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Declare the 60-day MOU window expired without US delivery — announce that negotiations are 'suspended, not terminated' while the Supreme National Security Council authorizes enrichment expansion to 60% at the hardened Fordow/Natanz replacement sites, with IAEA inspectors formally barred pending 'security guarantees against renewed aggression'",
+                "supportingActions": [
+                  "Order IRGC Navy to begin an announced live-fire exercise astride the Hormuz shipping lanes with boardings and 'documentation inspections' of vessels linked to Israeli and US-flagged carriers — closure withheld as explicit standing leverage, not exercised",
+                  "Authorize increased tempo and resupply for Hezbollah and Ansarallah, and expand the Chinese oil channel with deeper discounts and non-dollar settlement to absorb the sanctions blow"
+                ],
+                "reasoning": "Congress killed relief, which proves to the Supreme Leader and the IRGC that concessions purchase nothing — the deal was never a path to survival, only a channel for adversary leverage. At stability 24 we are deep in the loss frame, where asymmetric escalation is the rational instrument: enrichment and the Hormuz threat are the only assets that make our adversaries pay for what they took. We stop short of formal exit and actual closure so the leverage remains liquid and usable next cycle rather than spent.",
+                "metricDeltas": {
+                  "stability": -4,
+                  "proxyActivity": 14,
+                  "tradeVolume": -11,
+                  "conflictEvents": 3,
+                  "dealIntegrity": -14,
+                  "hardlinerPressure": -3
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates — with stability at 24 the regime is in a loss frame where escalatory gambles on enrichment and Hormuz are preferred to a certain loss, reinforced by Putnam's two-level logic since blocked sanctions relief eliminated any domestic payoff for compliance."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1606,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1606,
+                    "output_tokens": 1368,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1368,
+                "output_tokens_details": {
+                  "thinking_tokens": 671
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Dispatch a senior royal envoy to Beijing and Muscat to reactivate the China-brokered channel with Tehran — offering a quiet Saudi guarantee that no strike on Iran will be launched from or over Saudi territory and no Saudi airspace/basing support will be given, in exchange for an explicit Iranian assurance that Hormuz stays open and that Houthi maritime operations against Red Sea shipping and Saudi border areas stay frozen",
+                "supportingActions": [
+                  "Publicly hold OPEC+ quotas unchanged while quietly pre-positioning spare capacity, topping up Red Sea/East-West pipeline throughput and Fujairah/Asian storage, and briefing Aramco to raise Abqaiq/Ras Tanura air-defense readiness without any public mobilization",
+                  "Tell Washington privately that the civil nuclear deal must be decoupled from normalization on Netanyahu's electoral timetable — normalization stays on the table but frozen absent a written, dated path to Palestinian statehood — while convening the Council of Senior Scholars and funding a Gaza/Jerusalem reconstruction and waqf package to reassure the religious establishment"
+                ],
+                "reasoning": "With Hormuz threatened, deal integrity at 26 and eight conflict events last cycle, the certain moderate outcome — an open strait, an insulated Aramco, and untouched OPEC+ quotas — beats any gamble on aligning with a strike campaign or on Netanyahu's pre-election prize. Normalization signed before an Israeli election with no Palestinian deliverable would buy a nuclear MoU at the price of a legitimacy rupture with the ulema, which is the one constraint I cannot buy my way out of. Hedging is wisdom: Beijing brokers, Washington gets the nuclear file kept alive, Tehran gets a non-belligerency assurance, and Vision 2030 gets the stability it requires.",
+                "metricDeltas": {
+                  "stability": 4,
+                  "proxyActivity": -7,
+                  "tradeVolume": 3,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 3,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "SATISFIED",
+                "researchNote": "Prospect theory dominates — operating in a loss domain (stability 24, Hormuz threatened, 68% oil revenue exposure), Riyadh takes the certain moderate payoff of de-escalation and quota stability over the high-variance gamble of early normalization or alignment with a strike campaign, with Putnam's two-level constraint from the ulema explaining the normalization pause specifically."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1412,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1412,
+                    "output_tokens": 1004,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1004,
+                "output_tokens_details": {
+                  "thinking_tokens": 105
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch an emergency guarantor surge: send the Secretary of State and the Iran envoy to Muscat/Doha within 72 hours to convert the expired 60-day MOU window into a technical extension — a verified enrichment freeze back below 20% with restored IAEA access, in exchange for a pre-negotiated, escrowed relief package (executive waivers plus a narrow INARA-compliant tranche) that we commit to in writing but do not disburse until verification is restored.",
+                "supportingActions": [
+                  "Reposition a carrier strike group and minesweeping assets to the Arabian Sea with a public statement that Hormuz will remain open — deterring IRGC closure talk while simultaneously giving Israel a visible US presence so it does not conclude it must act alone.",
+                  "Open direct negotiations with the Senate sponsors of the new Iran/Russia sanctions bill: ask them to hold the floor vote for one cycle in exchange for submitting the relief tranche to formal INARA review rather than claiming unilateral authority."
+                ],
+                "reasoning": "We publicly claimed this deal, so its collapse is a loss against a booked gain — that gains frame plus Fearon audience costs makes visible disengagement the most expensive option available, even with the deal at 26. The carrier move is coherent at stability 24 and proxy activity 53-plus, and it is the one instrument that answers both horns of the alliance security dilemma at once: it deters Iranian Hormuz escalation while denying Israel the abandonment narrative that would justify a unilateral strike. Submitting to INARA rather than asserting unilateral authority is a two-level concession that buys us the only path to the deal's central economic term.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 6,
+                  "tradeVolume": 3,
+                  "publicSentiment": -3,
+                  "diplomaticCapital": 4
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates: operating in a gains frame on a deal we already claimed credit for, we accept costly, domestically unpopular re-engagement rather than book the loss, with Snyder's alliance security dilemma dictating the specific dual-signal form of the military posture."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1379,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1379,
+                    "output_tokens": 1317,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1317,
+                "output_tokens_details": {
+                  "thinking_tokens": 573
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.894015464209582,
+                "pragmatic": 0.1059845357904181
+              },
+              "bProbabilities": {
+                "hawkish": 0.9755282581475768,
+                "dovish": 0.024471741852423207
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.010926199633097183,
+                "cautious": 0.9890738003669032
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.08670065163997862,
+                "disengage": 0.9132993483600215
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.7627186200956763,
+                "STABLE": 0.23728137990432346
+              },
+              "currencyA": {
+                "WEAKENING": 0.9539703744142974,
+                "RESILIENT": 0.046029625585702484
+              },
+              "currencyB": {
+                "ROBUST": 0.12374823143560594,
+                "STRAINED": 0.8762517685643937
+              },
+              "global": {
+                "SURGING": 0.8850659743005406,
+                "CALM": 0.11493402569945939
+              }
+            },
+            "primaryDelta": 1.8,
+            "currencyADelta": -4.4,
+            "currencyBDelta": 1.6,
+            "globalDelta": 0.35,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 1.8,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 4.4,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 3.2,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 0.5,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 4,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 18,
+            "proxy": 57,
+            "trade": 78,
+            "conflicts": 8,
+            "dealIntegrity": 22,
+            "market": {
+              "primary": 100,
+              "currencyA": 96,
+              "currencyB": 100,
+              "global": 101
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Launch a sustained interdiction campaign — Mossad-directed covert sabotage plus limited, deniable air strikes on Hezbollah rearmament convoys and Iranian transfer nodes in Syria and the Beqaa — while simultaneously issuing a public, US-coordinated ultimatum that Iran readmit IAEA inspectors to all struck and undeclared sites within 30 days or Israel will treat the nuclear file as unverified and act accordingly.",
+                "supportingActions": [
+                  "Send the Prime Minister's envoy and Mossad chief to Washington to lock in a joint verification benchmark with the administration and quietly bank US backing for the next phase of the Saudi normalization track, trading a settlement-freeze gesture in the Riyadh channel only for defense-pact language.",
+                  "Convene the far-right partners privately with a written commitment that no sanctions relief and no concession on enrichment will be signed before the October 27 election, buying their votes without a formal cabinet resolution."
+                ],
+                "reasoning": "With Iran capped but unverified, the Begin Doctrine demands I act on capability rather than declarations — interdiction degrades the proxy rearmament that is Iran's actual near-term threat vector while stopping short of anything the Americans would call escalation. I am in a gains frame: air superiority, a capped Iranian program, and a live normalization track are assets to defend, not gamble. Ninety days from an election with the coalition short of a majority, visible resolve against Hezbollah plus a hard verification deadline satisfies Ben-Gvir and Smotrich without handing them a pretext to bolt, and keeps the security establishment publicly aligned with me.",
+                "metricDeltas": {
+                  "stability": -3,
+                  "proxyActivity": -4,
+                  "tradeVolume": 2,
+                  "conflictEvents": 1,
+                  "dealIntegrity": -3,
+                  "publicSentiment": 4
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Two-level games best explains this: the 30-day verification ultimatum is calibrated to be simultaneously ratifiable by Washington and unfalsifiable to the far-right domestic veto players before October 27, while prospect theory's gains frame keeps the action below the preemptive-strike threshold."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1472,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1472,
+                    "output_tokens": 1104,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1104,
+                "output_tokens_details": {
+                  "thinking_tokens": 347
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Declare the 60-day MOU window formally lapsed without result, blame Washington's Congress for killing sanctions relief, and announce that in the absence of relief Iran suspends all verification-related cooperation and resumes enrichment and advanced centrifuge operation at Fordow and Natanz at undeclared levels — while stopping short of formally exiting the framework and repeating the Supreme Leader's fatwa language that Iran seeks no weapon",
+                "supportingActions": [
+                  "Order IRGC Navy 'Great Prophet' snap exercises across the Strait of Hormuz with anti-ship missile and fast-attack drills and new mandatory notification rules for tankers, signaling the chokepoint is at our discretion without closing it",
+                  "Raise resistance-axis tempo below the threshold of full war — Houthi maritime harassment resumes, Iraqi militia reconnaissance of US positions — and accelerate the oil-for-goods channel with China plus a domestic essentials subsidy package with IRGC-led security preparedness for unrest"
+                ],
+                "reasoning": "Congress killed relief, which proves the hardliners' case to the Supreme Leader and the Guardian Council: negotiation bought us strikes and nothing else, so further concession now would be read inside my coalition as surrender. At stability 26 I am deep in a loss frame — ambiguity about the nuclear file and a threatened Hormuz are cheap, reversible coercive assets that restore leverage without handing Israel the pretext of a formal breakout. I keep the shell of the framework alive for one more cycle only because it costs nothing and splits Washington from Europe; if pressure rises further, exit becomes the dominant play.",
+                "metricDeltas": {
+                  "stability": -6,
+                  "proxyActivity": 13,
+                  "tradeVolume": -11,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -13,
+                  "hardlinerPressure": 8
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Two-level games combined with prospect theory best explain this: the blocked relief destroyed the domestic ratification space for any concession, and a loss-frame leadership converts that constraint into calibrated asymmetric escalation rather than accommodation."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1573,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1573,
+                    "output_tokens": 1271,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1271,
+                "output_tokens_details": {
+                  "thinking_tokens": 497
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Offer Riyadh as a discreet venue for technical verification talks on the Iran-Israel file — conveyed privately through Beijing and Muscat to Tehran, and through Washington to the Israeli side — while publicly saying only that the Kingdom 'supports all efforts to preserve regional de-escalation'",
+                "supportingActions": [
+                  "Hold OPEC+ quotas exactly where they are and instruct Aramco to publicly reaffirm supply reliability to Asian buyers, pairing it with a quiet raise in Eastern Province and Red Sea terminal air-defense readiness",
+                  "Tell Washington in writing that the civil nuclear cooperation package cannot be tied to normalization on Netanyahu's electoral timetable: the Kingdom will not move without a written, dated Israeli commitment to a Palestinian statehood path with East Jerusalem, and we will keep the file warm but unsigned"
+                ],
+                "reasoning": "",
+                "metricDeltas": {
+                  "stability": 0,
+                  "proxyActivity": 0,
+                  "tradeVolume": 0,
+                  "conflictEvents": 0,
+                  "dealIntegrity": 0,
+                  "reformPressure": 0
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "SATISFIED",
+                "researchNote": ""
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1388,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1388,
+                    "output_tokens": 532,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 532,
+                "output_tokens_details": {
+                  "thinking_tokens": 95
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 1,
+              "decision": {
+                "primaryAction": "Dispatch the Secretary of State and a senior NSC envoy to Muscat/Doha for an emergency shuttle to salvage the verification protocol, offering a 30-day technical extension of the MOU window with a written US-issued interim assurance — narrow, non-statutory sanctions waivers on humanitarian and civil-aviation channels plus escrowed oil-revenue access — as a bridge to buy Tehran something concrete without pretending Congress has acted",
+                "supportingActions": [
+                  "Open a quiet channel to the Israeli PM's office and IDF leadership warning that unilateral kinetic action during the extension window forfeits US participation and intelligence support, while simultaneously reaffirming Israel's qualitative military edge and accelerating an already-scheduled interceptor resupply to buy against abandonment fear",
+                  "Send the Vice President and Treasury to the Hill to negotiate a narrowed INARA review timeline with Senate leadership and to slow-roll the bipartisan Iran/Russia sanctions bill, while publicly declining to concede that congressional ratification is legally required"
+                ],
+                "reasoning": "I claimed credit for this MOU publicly, so its collapse is a loss against a booked gain — that justifies spending real capital now rather than hedging into disengagement, even though the quantum posture leans that way. With ratification PENDING I cannot deliver the central economic term, so I substitute time and executive-discretion waivers for the thing I can't give, while managing the alliance dilemma on both edges at once: restrain Israel enough to prevent entrapment, reassure it enough to prevent unilateral action born of abandonment. Congress is the binding constraint, so the Hill effort is not optional theater — it is the only path to making the deal's core term real before the extension expires.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 8,
+                  "tradeVolume": 2,
+                  "publicSentiment": -2,
+                  "diplomaticCapital": 5
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Two-level games (Putnam) most explains this: unable to deliver the Level-II ratified concession, the executive substitutes executive-discretion side-payments and time at Level I while lobbying to widen the domestic win-set."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1355,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1355,
+                    "output_tokens": 771,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 771,
+                "output_tokens_details": {
+                  "thinking_tokens": 0
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7968168336547493,
+                "pragmatic": 0.20318316634525088
+              },
+              "bProbabilities": {
+                "hawkish": 0.8197409101749106,
+                "dovish": 0.18025908982508967
+              },
+              "entanglementStrength": 0.07591615741907487,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.3493753935317146,
+                "disengage": 0.6506246064682856
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "STRAINED",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000001,
+                "STRAINED": 0.5
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": 0.3,
+            "currencyADelta": -3.8,
+            "currencyBDelta": -0.3,
+            "globalDelta": 1.19,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 0.3,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 3.8,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 0.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 1.7,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 16,
+            "proxy": 62,
+            "trade": 73,
+            "conflicts": 12,
+            "dealIntegrity": 12,
+            "market": {
+              "primary": 105,
+              "currencyA": 96,
+              "currencyB": 96,
+              "global": 101
+            }
+          },
+          "decisions": {
+            "israel": {
+              "nation": "israel",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Authorize an escalated Mossad/IAF interdiction campaign against Iranian weapons transfers to Hezbollah in Syria and Lebanon and covert sabotage of enrichment-related supply chains — kept below the threshold of an overt strike on Iranian soil — while formally staying inside the framework and demanding immediate, unconditional restoration of IAEA access as the price of continued Israeli restraint.",
+                "supportingActions": [
+                  "Convene the security cabinet to formally declare enrichment above 20% with no inspectors a standing Israeli red line, and task the IDF with updated strike options held in reserve pending verification failure.",
+                  "Press Washington to trigger snapback sanctions and Hormuz escort operations, coordinating the declaratory red line with the White House so the alliance absorbs the escalation rather than being surprised by it."
+                ],
+                "reasoning": "Iran at partial breakout with inspectors expelled is precisely the situation the Begin Doctrine exists for, but the existential threshold has not been crossed — so the correct move is graduated deterrence that restores credibility without spending the US alliance or the deal's remaining shell. Covert interdiction gives the far-right visible resolve before October 27 while the security establishment's endorsement holds the centrists; a formal red line converts ambiguity into deterrence and buys the option to act later from a stronger legal and diplomatic position. At 62 public sentiment I have capital to spend, but with the coalition short of a majority I spend it on demonstrated security competence, not on either concessions or a war I have not yet justified.",
+                "metricDeltas": {
+                  "stability": -3,
+                  "proxyActivity": -2,
+                  "tradeVolume": -5,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -6,
+                  "publicSentiment": 4
+                },
+                "coalitionStatus": "STRAINED",
+                "existentialFrameActive": false,
+                "researchNote": "Operational code (Begin Doctrine plus deterrence-as-engine-of-peace) dominates, with prospect theory keeping Israel in the risk-averse gains frame because the existential threshold is approached but not crossed."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1505,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1380,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1505,
+                    "output_tokens": 1322,
+                    "cache_read_input_tokens": 1380,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1322,
+                "output_tokens_details": {
+                  "thinking_tokens": 624
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "iran": {
+              "nation": "iran",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Declare the 60-day MOU window expired and formally suspend — not exit — the negotiation track, with the Supreme National Security Council announcing that because Congress blocked relief, Iran's reaffirmed nuclear ceiling is now 'a voluntary undertaking without counterparty', while enrichment above 20% continues under sovereign right and no inspector is readmitted",
+                "supportingActions": [
+                  "Order a 96-hour IRGC Navy 'Great Prophet' exercise astride the Hormuz shipping lanes with mandatory escort notification and selective tanker boardings — coercive throttling of traffic without formal closure, preserving the chokepoint as leverage rather than spending it",
+                  "Deepen the China channel: lock in expanded discounted crude volumes settled in yuan through the Shandong teapots, and quietly raise Hezbollah and Ansarallah operational tempo while publicly disclaiming command over 'independent resistance decisions'"
+                ],
+                "reasoning": "Congress killed relief, which proves to the Supreme Leader and the IRGC that the hardliners read the adversary correctly — any further compliance now would be reading as surrender at stability 18, and in this loss frame ambiguity plus coercion is worth more than a paper deal. I suspend rather than exit because unverified partial breakout is the asset: it keeps Washington negotiating against a shadow while denying Israel a clean pretext for a third campaign. Hormuz is throttled, not closed — a closed strait is spent leverage and would cost me Beijing, whereas a threatened strait prices risk into every barrel the West buys and costs me nothing.",
+                "metricDeltas": {
+                  "stability": -4,
+                  "proxyActivity": 13,
+                  "tradeVolume": -7,
+                  "conflictEvents": 2,
+                  "dealIntegrity": -15,
+                  "hardlinerPressure": -5
+                },
+                "hormuzStatus": "THREATENED",
+                "nuclearStatus": "PARTIAL_BREAKOUT",
+                "coalitionSignal": "SATISFIED",
+                "researchNote": "Two-level games combined with prospect theory best explains this: the blocked relief destroyed the domestic win-set for compliance, and at stability 18 the leadership is in a loss frame where suspending the deal and coercing Hormuz short of closure is the risk-acceptant but leverage-preserving move."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1606,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1479,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1606,
+                    "output_tokens": 1672,
+                    "cache_read_input_tokens": 1479,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1672,
+                "output_tokens_details": {
+                  "thinking_tokens": 898
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "saudi_arabia": {
+              "nation": "saudi_arabia",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Convene an urgent Gulf-plus-China channel: dispatch the Foreign Minister to Beijing and Muscat to press Tehran, privately and through the Chinese guarantors, to keep enrichment talks alive and take Hormuz closure off the table — offering in exchange Saudi public opposition to any further strikes on Iranian soil and a standing pledge not to allow Saudi territory or airspace to be used against Iran",
+                "supportingActions": [
+                  "Quietly accelerate the Yemen track: increase disbursements to the Aden government while authorizing the Omani channel to offer the Houthis an expanded ceasefire and port-revenue arrangement, explicitly conditioned on no attacks on Red Sea shipping or Saudi infrastructure",
+                  "Hold OPEC+ quotas unchanged while ordering Aramco to raise East-West pipeline throughput readiness, top up Yanbu and overseas storage, and place Eastern Province air defenses at elevated alert — no public announcement, buyers briefed privately"
+                ],
+                "reasoning": "With deal integrity at 22 and Hormuz threatened, our exports and Vision 2030 are hostage to a war we did not choose — containment through Beijing and Muscat is cheaper and reversible than any alignment with a strike campaign. The religious establishment and the street will not tolerate normalization with a Netanyahu government mid-crisis and with no Palestinian horizon, so we bank the US civil nuclear file for later rather than spend legitimacy now. We take the certain moderate outcome: quiet de-escalation, full storage, quotas steady, no gambles.",
+                "metricDeltas": {
+                  "stability": 4,
+                  "proxyActivity": -6,
+                  "tradeVolume": 3,
+                  "conflictEvents": -1,
+                  "dealIntegrity": 5,
+                  "reformPressure": 2
+                },
+                "oilProductionStance": "STABLE",
+                "normalizationStatus": "PAUSED",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates: facing a domain of losses (deal integrity 22, stability 18), Riyadh still refuses the gamble of alignment or normalization and buys a certain moderate outcome through reversible economic and back-channel instruments, with Putnam's two-level constraint from the religious establishment freezing the Israel track."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1412,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1532,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1412,
+                    "output_tokens": 1083,
+                    "cache_read_input_tokens": 1532,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1083,
+                "output_tokens_details": {
+                  "thinking_tokens": 313
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            },
+            "us": {
+              "nation": "us",
+              "cycle": 2,
+              "decision": {
+                "primaryAction": "Launch an emergency 'stop-the-clock' mediation push: dispatch the Secretary of State and the special envoy to Muscat and Doha within 72 hours to sell Tehran a 30-day technical extension of the MOU window — no new Iranian obligations beyond immediate restoration of IAEA access and a freeze at current enrichment levels, in exchange for a written US commitment to a phased, verification-triggered relief schedule that I will formally submit to Congress under INARA rather than route around it.",
+                "supportingActions": [
+                  "Reposition the carrier strike group and additional minesweeping/escort assets to the Gulf with an explicit, publicly stated dual mission — keep Hormuz open against IRGC interdiction, and make clear to Jerusalem that any unilateral strike window runs through US-occupied airspace and US-held escalation risk.",
+                  "Open a quiet, senior-level channel to the Israeli PM's office offering an expanded munitions and missile-defense replenishment package and a written security assurance in exchange for a 30-day standstill on unilateral kinetic action — no public aid threats, no public criticism."
+                ],
+                "reasoning": "I brokered this deal and claimed the credit, so its collapse is a loss against a booked gain — that gains frame justifies spending real capital now rather than harvesting the cheap domestic win of walking away, even with sentiment at 46. Submitting a phased relief schedule to Congress under INARA rather than asserting unilateral authority converts my weakest lever into a credible one over time and buys the establishment coalition a process argument, while the carrier move simultaneously answers entrapment (I own the escalation ladder) and abandonment (Israel sees I am present, not receding). The quiet Israeli channel is deliberately non-coercive: threatening aid publicly with a strained coalition in Jerusalem would only accelerate the unilateral action I am trying to forestall.",
+                "metricDeltas": {
+                  "stability": 3,
+                  "dealIntegrity": 6,
+                  "tradeVolume": 4,
+                  "publicSentiment": -3,
+                  "diplomaticCapital": 5
+                },
+                "congressionalRatification": "PENDING",
+                "coalitionSignal": "RESTLESS",
+                "researchNote": "Prospect theory dominates: the US is in a gains frame on a deal it publicly owns, so it accepts costly, domestically unpopular engagement to avoid a booked loss, with Snyder's alliance security dilemma shaping the specific hedged mix of forward presence plus private reassurance to Israel."
+              },
+              "model": "claude-opus-5",
+              "usage": {
+                "input_tokens": 1379,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 1816,
+                "cache_creation": {
+                  "ephemeral_5m_input_tokens": 0,
+                  "ephemeral_1h_input_tokens": 0
+                },
+                "iterations": [
+                  {
+                    "input_tokens": 1379,
+                    "output_tokens": 1191,
+                    "cache_read_input_tokens": 1816,
+                    "cache_creation_input_tokens": 0,
+                    "cache_creation": {
+                      "ephemeral_5m_input_tokens": 0,
+                      "ephemeral_1h_input_tokens": 0
+                    },
+                    "type": "message"
+                  }
+                ],
+                "output_tokens": 1191,
+                "output_tokens_details": {
+                  "thinking_tokens": 362
+                },
+                "service_tier": "standard",
+                "inference_geo": "global"
+              },
+              "newsSource": "mock-fallback"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.8674442648455536,
+                "pragmatic": 0.13255573515444638
+              },
+              "bProbabilities": {
+                "hawkish": 0.9567727288213004,
+                "dovish": 0.04322727117869954
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.010926199633097183,
+                "cautious": 0.9890738003669032
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.18829575235129886,
+                "disengage": 0.8117042476487011
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "STRAINED",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.7627186200956767,
+                "STABLE": 0.23728137990432352
+              },
+              "currencyA": {
+                "WEAKENING": 0.9458672097077453,
+                "RESILIENT": 0.05413279029225494
+              },
+              "currencyB": {
+                "ROBUST": 0.12374823143560602,
+                "STRAINED": 0.8762517685643942
+              },
+              "global": {
+                "SURGING": 0.8850659743005408,
+                "CALM": 0.1149340256994594
+              }
+            },
+            "primaryDelta": 4.5,
+            "currencyADelta": -0.5,
+            "currencyBDelta": -3.84,
+            "globalDelta": 0.21,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 4.5,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 0.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 6.4,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 0.3,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "chain": "66a58183de3bec328f965c53d3ff8ce645b0b5f2a4627c189d1ae63c003db55d"
+}
