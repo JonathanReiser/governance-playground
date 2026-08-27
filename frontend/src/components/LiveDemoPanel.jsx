@@ -6,71 +6,9 @@ import { estimateRemainingMs, formatDuration } from "../lib/eta";
 import { SCENARIOS } from "../lib/scenarios";
 import { initSimState } from "../lib/cycleRunner";
 import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
-import { applyStartingConditionOverrides } from "../lib/scenarioOverrides";
+import { describeStartingConditions } from "../lib/describeStartingConditions";
 
 const SERVER_URL = "/api";
-
-const FIELD_LABELS = {
-  hardlinerPressure: "hardliner pressure", reformPressure: "reform pressure",
-  diplomaticCapital: "diplomatic capital", sanctionsReliefPending: "sanctions relief pending",
-  sanctioned: "sanctioned", treasury: "treasury",
-};
-
-/**
- * Turns one or more selected startingConditionProposals into a real,
- * numeric "was X, becomes Y" summary — the answer to "what actually is
- * this baseline?" instead of a name and a paragraph of prose. No
- * selection shows the scenario's own current starting metrics directly;
- * one or more proposals are diffed against those same numbers, using the
- * REAL combined result (via applyStartingConditionOverrides) so a field
- * two proposals both touch shows its actual final value, not each
- * proposal's own value in isolation — same last-one-wins resolution the
- * deploy itself uses, made visible before anything is deployed.
- */
-function describeStartingConditions(scenarioData, proposals) {
-  if (proposals.length === 0) {
-    return scenarioData.simulation.metrics
-      .map((m) => `${m.name}: ${m.startingValue}`)
-      .join(" · ");
-  }
-
-  const combined = applyStartingConditionOverrides(scenarioData, proposals.map((p) => p.id));
-  const parts = [];
-  const seenMetrics = new Set();
-  const seenNationFields = new Set();
-
-  for (const proposal of proposals) {
-    const { nations, metrics } = proposal.overrides || {};
-    if (metrics) {
-      for (const id of Object.keys(metrics)) {
-        if (seenMetrics.has(id)) continue;
-        seenMetrics.add(id);
-        const name = scenarioData.simulation.metrics.find((m) => m.id === id)?.name || id;
-        const was = scenarioData.simulation.metrics.find((m) => m.id === id)?.startingValue;
-        const now = combined.simulation.metrics.find((m) => m.id === id)?.startingValue;
-        parts.push(`${name}: ${was} → ${now}`);
-      }
-    }
-    if (nations) {
-      for (const [nationId, patch] of Object.entries(nations)) {
-        for (const fields of Object.values(patch)) {
-          for (const field of Object.keys(fields)) {
-            const key = `${nationId}.${field}`;
-            if (seenNationFields.has(key)) continue;
-            seenNationFields.add(key);
-            const before = scenarioData.nations.find((n) => n.id === nationId);
-            const after = combined.nations.find((n) => n.id === nationId);
-            const was = before?.governance?.[field] ?? before?.economy?.[field];
-            const now = after?.governance?.[field] ?? after?.economy?.[field];
-            const label = FIELD_LABELS[field] || field;
-            parts.push(`${after?.name || nationId} ${label}: ${String(was)} → ${String(now)}`);
-          }
-        }
-      }
-    }
-  }
-  return parts.join(" · ");
-}
 
 /**
  * No-wallet path: deploys a real, isolated scenario instance on Sepolia
@@ -481,7 +419,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
 
       {status === "deploying" && (
         <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
-          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingConditions={startingConditions} />
+          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingConditions={startingConditions} scenarioData={SCENARIOS.find((s) => s.id === scenarioId)?.data} />
           <p>Deploying {SCENARIOS.find((s) => s.id === scenarioId)?.name} to Sepolia…</p>
           <p style={{ fontSize: 13, fontWeight: 600 }}>{progress.label}</p>
           <p className="muted" style={{ fontSize: 12 }}>
@@ -545,7 +483,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
 
       {status === "done" && result && (
         <div>
-          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingConditions={startingConditions} />
+          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingConditions={startingConditions} scenarioData={SCENARIOS.find((s) => s.id === scenarioId)?.data} />
           <p style={{ color: "#4ade80", fontWeight: 600 }}>✓ Deployed for real, on Sepolia.</p>
           <div className="muted" style={{ fontSize: 12, fontFamily: "monospace", lineHeight: 1.8 }}>
             <div>

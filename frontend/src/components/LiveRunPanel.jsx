@@ -236,7 +236,7 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
   return (
     <div className="connect-card" style={{ marginTop: "1.25rem" }}>
       <h2>Watching It Play Out</h2>
-      <ExperimentBanner scenarioName={scenario.meta.name} startingConditions={startingConditions} />
+      <ExperimentBanner scenarioName={scenario.meta.name} startingConditions={startingConditions} scenarioData={scenario} />
 
       {phase === "picking" && (
         <>
