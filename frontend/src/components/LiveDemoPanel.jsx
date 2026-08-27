@@ -6,6 +6,7 @@ import { estimateRemainingMs, formatDuration } from "../lib/eta";
 import { SCENARIOS } from "../lib/scenarios";
 import { initSimState } from "../lib/cycleRunner";
 import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
+import { applyStartingConditionOverrides } from "../lib/scenarioOverrides";
 
 const SERVER_URL = "/api";
 
@@ -16,38 +17,54 @@ const FIELD_LABELS = {
 };
 
 /**
- * Turns a startingConditionProposal into a real, numeric "was X, becomes
- * Y" summary — the answer to "what actually is this baseline?" instead of
- * a name and a paragraph of prose. `as_researched` (no overrides) shows
- * the scenario's own current starting metrics directly; every other
- * proposal is diffed against those same numbers so the size of the
- * change is visible, not just its direction.
+ * Turns one or more selected startingConditionProposals into a real,
+ * numeric "was X, becomes Y" summary — the answer to "what actually is
+ * this baseline?" instead of a name and a paragraph of prose. No
+ * selection shows the scenario's own current starting metrics directly;
+ * one or more proposals are diffed against those same numbers, using the
+ * REAL combined result (via applyStartingConditionOverrides) so a field
+ * two proposals both touch shows its actual final value, not each
+ * proposal's own value in isolation — same last-one-wins resolution the
+ * deploy itself uses, made visible before anything is deployed.
  */
-function describeStartingCondition(scenarioData, proposal) {
-  const metricName = (id) => scenarioData.simulation.metrics.find((m) => m.id === id)?.name || id;
-  const metricValue = (id) => scenarioData.simulation.metrics.find((m) => m.id === id)?.startingValue;
-
-  if (!proposal.overrides) {
+function describeStartingConditions(scenarioData, proposals) {
+  if (proposals.length === 0) {
     return scenarioData.simulation.metrics
       .map((m) => `${m.name}: ${m.startingValue}`)
       .join(" · ");
   }
 
+  const combined = applyStartingConditionOverrides(scenarioData, proposals.map((p) => p.id));
   const parts = [];
-  const { nations, metrics } = proposal.overrides;
-  if (metrics) {
-    for (const [id, value] of Object.entries(metrics)) {
-      parts.push(`${metricName(id)}: ${metricValue(id)} → ${value}`);
+  const seenMetrics = new Set();
+  const seenNationFields = new Set();
+
+  for (const proposal of proposals) {
+    const { nations, metrics } = proposal.overrides || {};
+    if (metrics) {
+      for (const id of Object.keys(metrics)) {
+        if (seenMetrics.has(id)) continue;
+        seenMetrics.add(id);
+        const name = scenarioData.simulation.metrics.find((m) => m.id === id)?.name || id;
+        const was = scenarioData.simulation.metrics.find((m) => m.id === id)?.startingValue;
+        const now = combined.simulation.metrics.find((m) => m.id === id)?.startingValue;
+        parts.push(`${name}: ${was} → ${now}`);
+      }
     }
-  }
-  if (nations) {
-    for (const [nationId, patch] of Object.entries(nations)) {
-      const nation = scenarioData.nations.find((n) => n.id === nationId);
-      for (const fields of Object.values(patch)) {
-        for (const [field, value] of Object.entries(fields)) {
-          const was = nation?.governance?.[field] ?? nation?.economy?.[field];
-          const label = FIELD_LABELS[field] || field;
-          parts.push(`${nation?.name || nationId} ${label}: ${String(was)} → ${String(value)}`);
+    if (nations) {
+      for (const [nationId, patch] of Object.entries(nations)) {
+        for (const fields of Object.values(patch)) {
+          for (const field of Object.keys(fields)) {
+            const key = `${nationId}.${field}`;
+            if (seenNationFields.has(key)) continue;
+            seenNationFields.add(key);
+            const before = scenarioData.nations.find((n) => n.id === nationId);
+            const after = combined.nations.find((n) => n.id === nationId);
+            const was = before?.governance?.[field] ?? before?.economy?.[field];
+            const now = after?.governance?.[field] ?? after?.economy?.[field];
+            const label = FIELD_LABELS[field] || field;
+            parts.push(`${after?.name || nationId} ${label}: ${String(was)} → ${String(now)}`);
+          }
         }
       }
     }
@@ -70,11 +87,19 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   const [status, setStatus] = useState("idle"); // idle | background | picking-condition | deploying | done | running | error
   const [result, setResult] = useState(null);
   const [runSeed, setRunSeed] = useState(null); // { state, mac } — bridges deploy's last step into commit-cycle's first
-  // The starting-condition proposal this deploy is actually using — set
-  // the moment it's picked (not just once the deploy finishes) so
+  // The starting-condition proposal(s) this deploy is actually using —
+  // set the moment they're picked (not just once the deploy finishes) so
   // "deploying…" and every screen after it can say what's running,
-  // instead of only the picker screen itself ever mentioning it.
-  const [startingCondition, setStartingCondition] = useState(null); // { id, name, description } | null
+  // instead of only the picker screen itself ever mentioning it. A
+  // visitor can combine several at once (see the picker below) — this
+  // is always an array, `[]` meaning "as researched," not a single value.
+  const [startingConditions, setStartingConditions] = useState(null); // [{ id, name, description }] | null
+  // Which non-default proposal ids are currently checked on the picker
+  // screen — `[]` means "as researched." Reset whenever a new scenario
+  // is picked (see pickScenario below), so leftover selections from a
+  // previous scenario's proposal list (different ids entirely) can't
+  // silently carry over.
+  const [selectedConditionIds, setSelectedConditionIds] = useState([]);
   const [error, setError] = useState("");
   const [retryable, setRetryable] = useState(false);
   const [progress, setProgress] = useState({ stepIndex: 0, totalSteps: null, label: "", txHashes: [] });
@@ -86,11 +111,11 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   // or a backgrounded tab getting its network suspended partway through
   // (both hit this in practice, not hypothetically — see the "Failed to
   // fetch" case this was built for) shouldn't cost everything already
-  // confirmed on-chain. `overrideId` rides along too — set once when the
+  // confirmed on-chain. `overrideIds` rides along too — set once when the
   // deploy starts, only actually read by the server on step 0 (see
   // server.js's /api/demo/deploy/step), but kept here so a retry of that
   // very first request still sends the same choice.
-  const checkpoint = useRef({ stepIndex: 0, state: {}, mac: undefined, overrideId: undefined });
+  const checkpoint = useRef({ stepIndex: 0, state: {}, mac: undefined, overrideIds: undefined });
 
   // Wall-clock start of the current deploy attempt. `elapsedMs` is state,
   // not a ref read during render: Date.now() and the ref itself are only
@@ -128,11 +153,11 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
   async function driveLoop(id) {
     try {
       while (true) {
-        const { stepIndex, state, mac, overrideId } = checkpoint.current;
+        const { stepIndex, state, mac, overrideIds } = checkpoint.current;
         const res = await fetch(`${SERVER_URL}/demo/deploy/step`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ scenarioId: id, stepIndex, state, mac, overrideId }),
+          body: JSON.stringify({ scenarioId: id, stepIndex, state, mac, overrideIds }),
         });
 
         // A dead/misconfigured serverless function, a proxy error, or a
@@ -161,16 +186,22 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
           setStatus("done");
 
           const scenarioMeta = SCENARIOS.find((s) => s.id === id);
-          const proposal = (scenarioMeta?.data.startingConditionProposals || [])
-            .find((p) => p.id === data.state?.overrideId);
+          const appliedIds = Array.isArray(data.state?.overrideIds)
+            ? data.state.overrideIds
+            : data.state?.overrideIds ? [data.state.overrideIds] : [];
+          const appliedProposals = appliedIds
+            .map((oid) => (scenarioMeta?.data.startingConditionProposals || []).find((p) => p.id === oid))
+            .filter(Boolean);
           saveRun({
             registryAddress: data.result.registryAddress,
             registryBlock: data.result.registryBlock,
             oracleAddress: data.result.oracleAddress,
             scenarioId: id,
             scenarioName: scenarioMeta?.name || id,
-            startingConditionId: data.state?.overrideId || "as_researched",
-            startingConditionName: proposal?.name || "Deploy as researched (default)",
+            startingConditionIds: appliedProposals.map((p) => p.id),
+            startingConditionNames: appliedProposals.length > 0
+              ? appliedProposals.map((p) => p.name)
+              : ["Deploy as researched (default)"],
           });
           // Seeds a resumable checkpoint at cycle 0 for every deployed run,
           // not just ones the visitor happens to click "Watch it play out"
@@ -214,15 +245,16 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
 
   function pickScenario(id) {
     setScenarioId(id);
+    setSelectedConditionIds([]); // a previous scenario's picks don't carry over — different proposal ids entirely
     setStatus("background");
   }
 
-  function startDeploy(proposal) {
+  function startDeploy(proposals) {
     setStatus("deploying");
     setError("");
     setProgress({ stepIndex: 0, totalSteps: null, label: "Starting…", txHashes: [] });
-    checkpoint.current = { stepIndex: 0, state: {}, mac: undefined, overrideId: proposal.id };
-    setStartingCondition(proposal);
+    checkpoint.current = { stepIndex: 0, state: {}, mac: undefined, overrideIds: proposals.map((p) => p.id) };
+    setStartingConditions(proposals);
     // Only ever runs from this onClick-triggered function, never during
     // render; the lint rule can't distinguish that statically for a
     // function this deep in the component body, but Date.now() here has
@@ -247,7 +279,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
         registryAddress={result.registryAddress}
         sealedState={runSeed.state}
         sealedMac={runSeed.mac}
-        startingCondition={startingCondition}
+        startingConditions={startingConditions}
         onExit={() => setStatus("done")}
       />
     );
@@ -337,39 +369,83 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
         );
       })()}
 
-      {status === "picking-condition" && (
-        <>
-          <p className="muted" style={{ fontSize: 13 }}>
-            Pick a starting condition. "Deploy as researched" uses this scenario's own cited
-            baseline. Every other option is a real, currently-pending or currently-live policy
-            proposal — picking one overrides only the specific numbers that proposal actually
-            affects, real-world, nothing else.
-          </p>
-          <div className="connect-options">
-            {(() => {
-              const scenarioData = SCENARIOS.find((s) => s.id === scenarioId)?.data;
-              return (scenarioData?.startingConditionProposals || []).map((p) => (
-                <button key={p.id} className="connect-option secondary" onClick={() => startDeploy(p)}>
-                  <span className="connect-option-icon">{p.id === "as_researched" ? "📌" : "📰"}</span>
-                  <div className="connect-option-text">
-                    <strong>{p.name}</strong>
-                    <span>{p.description}</span>
-                    <span style={{ fontFamily: "monospace", opacity: 0.9 }}>{describeStartingCondition(scenarioData, p)}</span>
-                    {p.source && <span style={{ fontStyle: "italic", opacity: 0.75 }}>Source: {p.source}</span>}
-                  </div>
-                </button>
-              ));
-            })()}
-          </div>
-          <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setStatus("background")}>
-            ← Back
-          </button>
-        </>
-      )}
+      {status === "picking-condition" && (() => {
+        const scenarioData = SCENARIOS.find((s) => s.id === scenarioId)?.data;
+        const allProposals = scenarioData?.startingConditionProposals || [];
+        const asResearched = allProposals.find((p) => p.id === "as_researched");
+        const realProposals = allProposals.filter((p) => p.id !== "as_researched");
+        const selectedProposals = realProposals.filter((p) => selectedConditionIds.includes(p.id));
+
+        function toggle(id) {
+          setSelectedConditionIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+        }
+
+        return (
+          <>
+            <p className="muted" style={{ fontSize: 13 }}>
+              Pick one or more starting conditions to combine — real, currently-pending or
+              currently-live policy proposals. Selecting several lets you see how they interact
+              when applied together, not just each one alone; a field two proposals both touch
+              takes whichever one you checked last, shown live in the combined summary below.
+            </p>
+            <div className="connect-options">
+              <button
+                className="connect-option secondary"
+                style={selectedConditionIds.length === 0 ? { borderColor: "#818cf8" } : undefined}
+                onClick={() => setSelectedConditionIds([])}
+              >
+                <span className="connect-option-icon">{selectedConditionIds.length === 0 ? "✅" : "📌"}</span>
+                <div className="connect-option-text">
+                  <strong>{asResearched?.name || "Deploy as researched (default)"}</strong>
+                  <span>{asResearched?.description}</span>
+                </div>
+              </button>
+              {realProposals.map((p) => {
+                const checked = selectedConditionIds.includes(p.id);
+                return (
+                  <button
+                    key={p.id}
+                    className="connect-option secondary"
+                    style={checked ? { borderColor: "#818cf8" } : undefined}
+                    onClick={() => toggle(p.id)}
+                  >
+                    <span className="connect-option-icon">{checked ? "☑️" : "📰"}</span>
+                    <div className="connect-option-text">
+                      <strong>{p.name}</strong>
+                      <span>{p.description}</span>
+                      {p.source && <span style={{ fontStyle: "italic", opacity: 0.75 }}>Source: {p.source}</span>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="muted" style={{ fontSize: 12, marginTop: "0.75rem", padding: "0.5rem", border: "1px solid currentColor", borderRadius: 4 }}>
+              <strong>
+                {selectedProposals.length === 0
+                  ? "Deploying as researched — no override:"
+                  : `Combining ${selectedProposals.length} condition${selectedProposals.length === 1 ? "" : "s"}:`}
+              </strong>
+              <div style={{ fontFamily: "monospace", marginTop: "0.3rem" }}>
+                {describeStartingConditions(scenarioData, selectedProposals)}
+              </div>
+            </div>
+
+            <button className="btn-primary" style={{ marginTop: "0.75rem" }} onClick={() => startDeploy(selectedProposals)}>
+              {selectedProposals.length === 0
+                ? "Deploy as researched →"
+                : `Deploy with ${selectedProposals.length} condition${selectedProposals.length === 1 ? "" : "s"} →`}
+            </button>
+            <button className="btn-secondary" style={{ marginTop: "0.5rem", fontSize: 12 }} onClick={() => setStatus("background")}>
+              ← Back
+            </button>
+          </>
+        );
+      })()}
 
       {status === "deploying" && (
         <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
-          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingCondition={startingCondition} />
+          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingConditions={startingConditions} />
           <p>Deploying {SCENARIOS.find((s) => s.id === scenarioId)?.name} to Sepolia…</p>
           <p style={{ fontSize: 13, fontWeight: 600 }}>{progress.label}</p>
           <p className="muted" style={{ fontSize: 12 }}>
@@ -433,7 +509,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
 
       {status === "done" && result && (
         <div>
-          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingCondition={startingCondition} />
+          <ExperimentBanner scenarioName={SCENARIOS.find((s) => s.id === scenarioId)?.name} startingConditions={startingConditions} />
           <p style={{ color: "#4ade80", fontWeight: 600 }}>✓ Deployed for real, on Sepolia.</p>
           <div className="muted" style={{ fontSize: 12, fontFamily: "monospace", lineHeight: 1.8 }}>
             <div>

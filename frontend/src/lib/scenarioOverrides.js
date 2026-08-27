@@ -48,3 +48,13 @@ export function applyStartingConditionOverride(scenario, overrideId) {
   }
   return next;
 }
+
+/**
+ * Applies SEVERAL proposals at once, in the order given — see
+ * server/scenarioOverrides.js's identical function for the full
+ * reasoning (overlap resolution, accepted input shapes).
+ */
+export function applyStartingConditionOverrides(scenario, overrideIds) {
+  const ids = Array.isArray(overrideIds) ? overrideIds : overrideIds ? [overrideIds] : [];
+  return ids.reduce((acc, id) => applyStartingConditionOverride(acc, id), scenario);
+}

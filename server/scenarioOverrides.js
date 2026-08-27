@@ -56,4 +56,28 @@ function applyStartingConditionOverride(scenario, overrideId) {
   return next;
 }
 
-module.exports = { applyStartingConditionOverride };
+/**
+ * Applies SEVERAL proposals at once, in the order given — folding each
+ * one's overrides on top of the last, so "manipulating multiple
+ * variables together" (picking, say, both a sanctions-bill proposal and
+ * a Saudi-normalization proposal) is just this function applied to a
+ * scenario that already has the first proposal's overrides baked in.
+ *
+ * Real proposals do overlap on some fields (e.g. two Middle East 2026
+ * proposals both set Iran's hardlinerPressure, to different values) —
+ * this resolves that the same way any layered-override system does:
+ * last one in `overrideIds` wins for that specific field. Nothing here
+ * tries to detect or merge conflicting values more cleverly than that;
+ * the frontend's own combined-diff preview is what actually surfaces an
+ * overlap to whoever is picking, before they deploy anything.
+ *
+ * `overrideIds` may be a single id (treated as a one-element list, for
+ * callers that only ever apply one), an array of ids, or empty/missing
+ * (returns the scenario unchanged, same as an unknown single id would).
+ */
+function applyStartingConditionOverrides(scenario, overrideIds) {
+  const ids = Array.isArray(overrideIds) ? overrideIds : overrideIds ? [overrideIds] : [];
+  return ids.reduce((acc, id) => applyStartingConditionOverride(acc, id), scenario);
+}
+
+module.exports = { applyStartingConditionOverride, applyStartingConditionOverrides };

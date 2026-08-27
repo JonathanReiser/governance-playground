@@ -67,15 +67,23 @@ export function ConnectStep({ onConnect }) {
         </div>
       );
     }
-    // "My Runs" only ever saved the id/name (see saveRun in
-    // LiveDemoPanel.jsx), not the full proposal — recovered here from the
-    // scenario's own current proposal list so the banner can show its
-    // description too, same as a fresh deploy does. Falls back to just
-    // the saved name if the proposal list has since changed underneath
-    // it, rather than showing nothing.
-    const startingCondition =
-      scenarioMeta.data.startingConditionProposals?.find((p) => p.id === continuingRun.run.startingConditionId)
-      || { name: continuingRun.run.startingConditionName };
+    // "My Runs" only ever saved ids/names (see saveRun in
+    // LiveDemoPanel.jsx), not the full proposals — recovered here from
+    // the scenario's own current proposal list so the banner can show
+    // descriptions too, same as a fresh deploy does. `startingConditionIds`
+    // is the current (array, possibly several combined) field; a run
+    // saved before that shipped only has the older singular
+    // startingConditionId/startingConditionName, handled as a one-element
+    // fallback rather than showing nothing for those older runs.
+    const run = continuingRun.run;
+    const savedIds = run.startingConditionIds
+      ?? (run.startingConditionId && run.startingConditionId !== "as_researched" ? [run.startingConditionId] : []);
+    const startingConditions = savedIds.length > 0
+      ? savedIds.map((id, i) =>
+          scenarioMeta.data.startingConditionProposals?.find((p) => p.id === id)
+          || { name: (run.startingConditionNames || [run.startingConditionName])[i] || id }
+        )
+      : [];
     return (
       <div className="step-panel center-panel">
         <LiveRunPanel
@@ -83,7 +91,7 @@ export function ConnectStep({ onConnect }) {
           scenarioId={continuingRun.continuation.scenarioId}
           registryAddress={continuingRun.run.registryAddress}
           initialCheckpoint={continuingRun.continuation}
-          startingCondition={startingCondition}
+          startingConditions={startingConditions}
           onExit={() => { setMyRuns(listRuns()); setContinuingRun(null); setShowMyRuns(true); }}
         />
       </div>
@@ -208,7 +216,7 @@ export function ConnectStep({ onConnect }) {
                 style={{ fontSize: 12, border: "1px solid currentColor", borderRadius: 4, padding: "0.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem" }}
               >
                 <div>
-                  <strong>{run.scenarioName}</strong> — {run.startingConditionName}
+                  <strong>{run.scenarioName}</strong> — {(run.startingConditionNames || [run.startingConditionName]).join(" + ")}
                   <div style={{ fontFamily: "monospace", fontSize: 11 }}>
                     {run.registryAddress.slice(0, 10)}… · {new Date(run.savedAt).toLocaleString()}
                   </div>

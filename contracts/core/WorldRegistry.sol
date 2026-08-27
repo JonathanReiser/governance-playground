@@ -159,6 +159,15 @@ contract WorldRegistry is Ownable {
     // ─────────────────────────────────────────
 
     event ScenarioLoaded(string name, string version);
+    // Which real-world starting-condition proposal(s) this run actually
+    // deployed with — empty array means "as researched," the scenario's
+    // own baseline, with nothing overridden. Recorded purely as a log,
+    // never read back on-chain by this contract, so a viewer with no
+    // other context (a shared ?view= link, someone who never saw the
+    // picker) can still learn what experiment a run represents — the
+    // gap this closes: before this event existed, that choice was only
+    // ever known off-chain, to whoever picked it in their own session.
+    event StartingConditionsApplied(string[] conditionIds);
     event NationRegistered(string nationId, address dao, address token);
     event RelationshipSet(
         string fromId,
@@ -228,7 +237,8 @@ contract WorldRegistry is Ownable {
         address _daoFactory,
         string calldata _name,
         string calldata _version,
-        uint256 _totalCycles
+        uint256 _totalCycles,
+        string[] calldata _startingConditionIds
     ) external onlyOwner {
         metricsOracle = _oracle;
         citizenTokenFactory = CitizenTokenFactory(_tokenFactory);
@@ -241,6 +251,7 @@ contract WorldRegistry is Ownable {
         simulationActive = false;
 
         emit ScenarioLoaded(_name, _version);
+        emit StartingConditionsApplied(_startingConditionIds);
     }
 
     // ─────────────────────────────────────────

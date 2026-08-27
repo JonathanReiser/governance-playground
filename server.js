@@ -1353,18 +1353,30 @@ app.get("/api/demo/status", async (_req, res) => {
 // one — no server-side session, so it works the same regardless of which
 // Vercel instance picks up the next request.
 app.post("/api/demo/deploy/step", demoDeployLimiter, async (req, res) => {
-  const { scenarioId, stepIndex, mac, overrideId } = req.body || {};
+  const { scenarioId, stepIndex, mac, overrideIds } = req.body || {};
   if (!scenarioId || !Number.isInteger(stepIndex)) {
     return res.status(400).json({ error: "scenarioId and integer stepIndex required" });
   }
   // Step 0 starts a fresh run — any state the client sent is ignored, not
   // just unverified, so there's nothing to forge yet. Same reasoning
-  // applies to overrideId: it's only ever read from the request on step
+  // applies to overrideIds: it's only ever read from the request on step
   // 0 (see runDeployStep) — every later step gets it back out of the
   // already-verified, HMAC-sealed state instead, so it can't be swapped
-  // mid-deploy. An unknown overrideId isn't rejected here — see
-  // applyStartingConditionOverride's own comment on why that's safe:
-  // deploys the researched default rather than corrupting the run.
+  // mid-deploy. An unknown id inside the array isn't rejected here — see
+  // applyStartingConditionOverrides's own comment on why that's safe:
+  // that specific id is just skipped, not the whole deploy corrupted.
+  // The shape itself (array of short strings) IS validated, since this
+  // ends up as literal string[] calldata to bootstrapConfig — bounding
+  // it keeps that call's calldata/gas trivial regardless of what a
+  // client sends, independent of whether the ids inside resolve to
+  // anything real.
+  if (stepIndex === 0 && overrideIds !== undefined) {
+    const shapeOk = Array.isArray(overrideIds) && overrideIds.length <= 10
+      && overrideIds.every((id) => typeof id === "string" && id.length <= 60);
+    if (!shapeOk) {
+      return res.status(400).json({ error: "overrideIds must be an array of up to 10 strings, each at most 60 characters" });
+    }
+  }
   const state = stepIndex === 0 ? {} : req.body?.state || {};
   if (JSON.stringify(state).length > 20_000) {
     return res.status(400).json({ error: "state payload too large" });
@@ -1373,7 +1385,7 @@ app.post("/api/demo/deploy/step", demoDeployLimiter, async (req, res) => {
     return res.status(400).json({ error: "Invalid or tampered deploy state — start a new deploy." });
   }
   try {
-    const out = await runDeployStep(scenarioId, stepIndex, state, undefined, overrideId);
+    const out = await runDeployStep(scenarioId, stepIndex, state, undefined, overrideIds);
     const sealed = sealState(scenarioId, out.stepIndex + 1, out.state);
     // On the final deploy step, also mint a run-phase seal (cycleIndex 0,
     // its own namespace) bound to the registry that just came out of

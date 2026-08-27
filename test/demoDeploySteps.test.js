@@ -331,16 +331,16 @@ describe("demo deploy — step machine", function () {
       expect(pressure).to.equal(BigInt(middleEast.nations.find((n) => n.id === "iran").governance.hardlinerPressure));
     });
 
-    it("step-by-step: overrideId set on step 0 carries through every later step via sealed state", async function () {
+    it("step-by-step: overrideIds set on step 0 carries through every later step via sealed state", async function () {
       const [signer] = await ethers.getSigners();
       let state = {};
       let out = await runDeployStep("taiwan-strait-2026", 0, state, signer, "arms_package_delivered");
       state = out.state;
-      expect(state.overrideId).to.equal("arms_package_delivered");
+      expect(state.overrideIds).to.equal("arms_package_delivered");
 
       let i = 1;
       while (!out.done) {
-        // overrideId omitted here on purpose — every step after 0 must
+        // overrideIds omitted here on purpose — every step after 0 must
         // recover it from state, not from a fresh argument.
         out = await runDeployStep("taiwan-strait-2026", i, state, signer);
         state = out.state;
@@ -349,6 +349,48 @@ describe("demo deploy — step machine", function () {
 
       const pressure = await readHardlinerPressure(out.result.registryAddress, "china", signer);
       expect(pressure).to.equal(82n);
+    });
+
+    it("combines multiple real proposals at once — 'manipulating multiple variables together'", async function () {
+      const [signer] = await ethers.getSigners();
+      // Both proposals touch Iran's hardlinerPressure (88 vs 85) — applied
+      // in this order, saudi_normalizes_anyway (last) wins there, same
+      // last-in-the-list-wins semantics scenarioOverrides.test.js already
+      // covers directly. saudi_normalizes_anyway also independently sets
+      // Saudi Arabia's own reformPressure, which congress_blocks_relief
+      // never touches — that effect should land regardless of order.
+      const result = await deployDemoScenario(
+        "middle-east-2026", () => {}, signer, ["congress_blocks_relief", "saudi_normalizes_anyway"]
+      );
+      const iranPressure = await readHardlinerPressure(result.registryAddress, "iran", signer);
+      expect(iranPressure).to.equal(85n);
+
+      const registry = new ethers.Contract(result.registryAddress, WorldRegistryABI.abi, signer);
+      const saudi = await registry.getNation("saudi_arabia");
+      const saudiDao = new ethers.Contract(saudi.daoAddress, NationDAOABI.abi, signer);
+      expect((await saudiDao.config()).reformPressure).to.equal(65n);
+    });
+
+    it("records the combined condition ids on-chain via StartingConditionsApplied, filtering out as_researched", async function () {
+      const [signer] = await ethers.getSigners();
+      const result = await deployDemoScenario(
+        "middle-east-2026", () => {}, signer, ["as_researched", "congress_blocks_relief"]
+      );
+      const registry = new ethers.Contract(result.registryAddress, WorldRegistryABI.abi, signer);
+      const logs = await registry.queryFilter(registry.filters.StartingConditionsApplied());
+      expect(logs).to.have.lengthOf(1);
+      // "as_researched" isn't a real experimental variable — see
+      // demoDeploy.js's own comment on why it's dropped before recording.
+      expect(logs[0].args.conditionIds).to.deep.equal(["congress_blocks_relief"]);
+    });
+
+    it("records an empty array on-chain when deployed as researched (no id at all)", async function () {
+      const [signer] = await ethers.getSigners();
+      const result = await deployDemoScenario("middle-east-2026", () => {}, signer, undefined);
+      const registry = new ethers.Contract(result.registryAddress, WorldRegistryABI.abi, signer);
+      const logs = await registry.queryFilter(registry.filters.StartingConditionsApplied());
+      expect(logs).to.have.lengthOf(1);
+      expect(logs[0].args.conditionIds).to.deep.equal([]);
     });
   });
 

@@ -26,7 +26,7 @@
 const crypto = require("crypto");
 const { ethers } = require("ethers");
 const { canonicalStringify } = require("./prereg");
-const { applyStartingConditionOverride } = require("./scenarioOverrides");
+const { applyStartingConditionOverrides } = require("./scenarioOverrides");
 
 const WorldRegistryABI       = require("../frontend/src/abi/WorldRegistry.json");
 const MetricsOracleABI       = require("../frontend/src/abi/MetricsOracle.json");
@@ -220,25 +220,29 @@ function verifySealedState(scenarioId, stepIndex, state, mac, namespace = "deplo
  *
  * `state` carries whatever the previous step produced (contract
  * addresses, the nation registry so far, and — once set on step 0 — which
- * `startingConditionProposals` entry (if any) this deploy is using); the
- * caller is responsible for holding it between requests (see sealState
- * above for why that's safe). `signer` defaults to the real demo wallet
- * but is injectable so tests can drive the exact same step sequence
- * against a local Hardhat network. `overrideId` only matters on step 0 —
- * every later step reads it back out of `state.overrideId` instead, so a
- * client only has to choose it once, not re-send it every call.
+ * `startingConditionProposals` entries (if any) this deploy is using,
+ * combined); the caller is responsible for holding it between requests
+ * (see sealState above for why that's safe). `signer` defaults to the
+ * real demo wallet but is injectable so tests can drive the exact same
+ * step sequence against a local Hardhat network. `overrideIds` only
+ * matters on step 0 — every later step reads it back out of
+ * `state.overrideIds` instead, so a client only has to choose it once,
+ * not re-send it every call. May be a single id, an array of ids (to
+ * combine several conditions — see scenarioOverrides.js's
+ * applyStartingConditionOverrides for how conflicts between them
+ * resolve), or omitted for the researched default.
  */
-async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigner(), overrideId) {
+async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigner(), overrideIds) {
   const steps = getDeploySteps(scenarioId); // validates scenarioId, throws if unknown
   if (!Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex >= steps.length) {
     throw new Error(`stepIndex out of range: ${stepIndex} (0-${steps.length - 1})`);
   }
   const s = state || {};
-  const effectiveOverrideId = stepIndex === 0 ? overrideId : s.overrideId;
-  const scenario = applyStartingConditionOverride(SCENARIOS[scenarioId], effectiveOverrideId);
+  const effectiveOverrideIds = stepIndex === 0 ? overrideIds : s.overrideIds;
+  const scenario = applyStartingConditionOverrides(SCENARIOS[scenarioId], effectiveOverrideIds);
   const step = steps[stepIndex];
   const addr = await signer.getAddress();
-  const next = { ...s, overrideId: effectiveOverrideId };
+  const next = { ...s, overrideIds: effectiveOverrideIds };
   let txHash;
 
   const attach = (address, abi) => new ethers.Contract(address, abi, signer);
@@ -292,13 +296,21 @@ async function runDeployStep(scenarioId, stepIndex, state, signer = getDemoSigne
       break;
     }
     case "bootstrapConfig": {
+      // Recorded on-chain (StartingConditionsApplied) as exactly what
+      // was actually deployed with — "as_researched" (the default,
+      // meaning nothing overridden) isn't a real experimental variable,
+      // so it's recorded as an empty array rather than a literal id, the
+      // same way "no id at all" is.
+      const rawIds = Array.isArray(s.overrideIds) ? s.overrideIds : s.overrideIds ? [s.overrideIds] : [];
+      const recordedConditionIds = rawIds.filter((id) => id && id !== "as_researched");
       const receipt = await (await registry().bootstrapConfig(
         s.oracleAddress,
         s.tokenFactoryAddress,
         s.daoFactoryAddress,
         scenario.meta.name,
         scenario.meta.version,
-        BigInt(scenario.simulation.defaultCycles)
+        BigInt(scenario.simulation.defaultCycles),
+        recordedConditionIds
       )).wait();
       txHash = receipt.hash;
       break;
@@ -492,12 +504,12 @@ async function commitDemoCycle(registryAddress, metrics, narrative, signer = get
  * runs, not a second copy of the deploy logic. No HMAC sealing needed
  * here: state never leaves the process between steps.
  */
-async function deployDemoScenario(scenarioId, onStatus = () => {}, signer = getDemoSigner(), overrideId) {
+async function deployDemoScenario(scenarioId, onStatus = () => {}, signer = getDemoSigner(), overrideIds) {
   const steps = getDeploySteps(scenarioId);
   let state = {};
   let out;
   for (let i = 0; i < steps.length; i++) {
-    out = await runDeployStep(scenarioId, i, state, signer, overrideId);
+    out = await runDeployStep(scenarioId, i, state, signer, overrideIds);
     onStatus(out.label);
     state = out.state;
   }
