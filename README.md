@@ -25,10 +25,17 @@ using pre-commitment + real quantum entropy + a publicly verifiable record. Incl
 **[an interactive version](https://claude.ai/code/artifact/f565d166-9b88-4789-ac88-e54daed32a11)**
 where you can try to rig the lottery yourself and watch the verification catch you.
 
-**[Or try it live yourself →](https://governance-playground.vercel.app)** — no install needed.
-Connect via MetaMask (works with Sepolia testnet — get free test ETH from a faucet, see Quickstart
-below). Note: MetaMask itself occasionally has extension bugs unrelated to this app — see
-Troubleshooting below if a transaction confirmation won't respond.
+**[Or try it live yourself →](https://governance-playground.vercel.app)** — no install needed. The
+site also has a **Live Demo** path with no wallet at all (a server-held key pays the gas), if you
+just want to watch a real run without any of the setup below.
+
+Connecting your own MetaMask instead works with Sepolia testnet — get free test ETH from a faucet
+first: [Google Cloud's Web3 faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
+or [Alchemy's Sepolia faucet](https://www.alchemy.com/faucets/ethereum-sepolia) both work without
+needing mainnet ETH elsewhere first. A full deploy is ~10-12 transactions — if a step fails with
+`insufficient funds`, that's this, not a bug; get more from the faucet and retry. Note: MetaMask
+itself occasionally has extension bugs unrelated to this app — see Troubleshooting below if a
+transaction confirmation won't respond.
 
 ---
 
