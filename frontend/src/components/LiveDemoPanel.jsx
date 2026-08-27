@@ -383,23 +383,38 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
         return (
           <>
             <p className="muted" style={{ fontSize: 13 }}>
-              Pick one or more starting conditions to combine — real, currently-pending or
-              currently-live policy proposals. Selecting several lets you see how they interact
-              when applied together, not just each one alone; a field two proposals both touch
-              takes whichever one you checked last, shown live in the combined summary below.
+              These are real, currently-pending or currently-live policy proposals. <strong>You can
+              check more than one</strong> — they combine into a single deploy so you can see how
+              they interact together, not just each alone; if two proposals both touch the same
+              field, whichever one you checked last wins (shown live in the summary below).
             </p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                fontWeight: 600,
+                fontSize: 13,
+                margin: "0.6rem 0 0.35rem",
+              }}
+            >
+              <span>☑️ Check any number below to combine them</span>
+              {selectedProposals.length > 0 && (
+                <span
+                  style={{
+                    background: "#818cf8",
+                    color: "#fff",
+                    borderRadius: 999,
+                    padding: "0.1rem 0.6rem",
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  {selectedProposals.length} selected
+                </span>
+              )}
+            </div>
             <div className="connect-options">
-              <button
-                className="connect-option secondary"
-                style={selectedConditionIds.length === 0 ? { borderColor: "#818cf8" } : undefined}
-                onClick={() => setSelectedConditionIds([])}
-              >
-                <span className="connect-option-icon">{selectedConditionIds.length === 0 ? "✅" : "📌"}</span>
-                <div className="connect-option-text">
-                  <strong>{asResearched?.name || "Deploy as researched (default)"}</strong>
-                  <span>{asResearched?.description}</span>
-                </div>
-              </button>
               {realProposals.map((p) => {
                 const checked = selectedConditionIds.includes(p.id);
                 return (
@@ -409,7 +424,14 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
                     style={checked ? { borderColor: "#818cf8" } : undefined}
                     onClick={() => toggle(p.id)}
                   >
-                    <span className="connect-option-icon">{checked ? "☑️" : "📰"}</span>
+                    <span className="connect-option-icon">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        readOnly
+                        style={{ width: 18, height: 18, pointerEvents: "none" }}
+                      />
+                    </span>
                     <div className="connect-option-text">
                       <strong>{p.name}</strong>
                       <span>{p.description}</span>
@@ -418,6 +440,20 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
                   </button>
                 );
               })}
+              <button
+                className="connect-option secondary"
+                style={{
+                  marginTop: "0.35rem",
+                  ...(selectedConditionIds.length === 0 ? { borderColor: "#818cf8" } : undefined),
+                }}
+                onClick={() => setSelectedConditionIds([])}
+              >
+                <span className="connect-option-icon">{selectedConditionIds.length === 0 ? "✅" : "↺"}</span>
+                <div className="connect-option-text">
+                  <strong>{asResearched?.name || "Deploy as researched (default)"}</strong>
+                  <span>{asResearched?.description} — picking this clears any boxes checked above.</span>
+                </div>
+              </button>
             </div>
 
             <div className="muted" style={{ fontSize: 12, marginTop: "0.75rem", padding: "0.5rem", border: "1px solid currentColor", borderRadius: 4 }}>
