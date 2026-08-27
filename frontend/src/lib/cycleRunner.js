@@ -16,7 +16,7 @@
  * none of which applies to an unedited autonomous run.
  */
 
-import { NationAgent, buildWorldState, applyDecisions, createRealEntropyPool } from "./agents";
+import { NationAgent, buildWorldState, applyDecisions, createRealEntropyPool } from "./agents.js";
 
 export const CYCLE_COUNT_OPTIONS = [1, 3, 5, 10];
 
@@ -222,10 +222,15 @@ export function summarizeMarket(market) {
  * actual committed metrics, not a proposal awaiting edits. This is what
  * makes the no-wallet run an honest "unedited AI reasoning" demo rather
  * than a second copy of the researcher tool with the editing UI removed.
+ *
+ * `decideFn`, when passed, skips NationAgent's own fetch entirely — see
+ * agents.js's NationAgent.decide() for what it is and why: this is what
+ * lets scripts/run-batch.js drive real batch trials directly from Node,
+ * through this exact same function, with no live HTTP server needed.
  */
-export async function runAutonomousCycle(scenario, simState, cycle, agentMemory) {
+export async function runAutonomousCycle(scenario, simState, cycle, agentMemory, decideFn) {
   const worldState = buildWorldState(scenario, simState, cycle, agentMemory);
-  const decisions = await NationAgent.runAll(scenario, worldState);
+  const decisions = await NationAgent.runAll(scenario, worldState, decideFn);
 
   const metricLabels = buildMetricLabels(scenario);
   const currentMetrics = simStateToMetrics(simState);

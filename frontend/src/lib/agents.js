@@ -36,7 +36,16 @@ export class NationAgent {
     this.nationId = nationId;
   }
 
-  async decide(worldState, scenarioId) {
+  // `decideFn`, when passed, is called directly instead of the fetch below
+  // — same shape server.js's own /api/agent/decide route returns
+  // ({nation, cycle, decision, model, usage, newsSource}), since it's
+  // literally the same decideNationAction() the route itself calls. This
+  // is what lets scripts/run-batch.js drive real decisions from Node
+  // without a live HTTP server in between: the browser path (no decideFn)
+  // is completely unchanged.
+  async decide(worldState, scenarioId, decideFn) {
+    if (decideFn) return decideFn({ nation: this.nationId, worldState, scenarioId });
+
     const res = await fetch(`${SERVER_URL}/agent/decide`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -52,11 +61,11 @@ export class NationAgent {
   }
 
   // Run every nation agent for this scenario in parallel, return results keyed by nationId
-  static async runAll(scenario, worldState) {
+  static async runAll(scenario, worldState, decideFn) {
     const nations = scenario.nations.map(n => n.id);
     const agents  = nations.map(id => new NationAgent(id));
 
-    const results = await Promise.allSettled(agents.map(a => a.decide(worldState, scenario.meta.id)));
+    const results = await Promise.allSettled(agents.map(a => a.decide(worldState, scenario.meta.id, decideFn)));
 
     return Object.fromEntries(
       nations.map((id, i) => {
