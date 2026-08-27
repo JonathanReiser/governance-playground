@@ -38,9 +38,35 @@ const GOVERNANCE_TYPE_LABELS = [
  * such logs (an older run, or one made through the wallet flow) simply
  * shows none — that's the real, honest state of that run's chain
  * history, not a fetch failure.
+ *
+ * Deliberately read-only for EVERYONE, including whoever deployed the
+ * run — running more agent cycles needs the quantum/market state
+ * LiveRunPanel.jsx checkpoints to that specific browser's local storage
+ * (see runHistory.js's saveContinuation), which a link can't carry. This
+ * page won't offer to run anything; it has a copy-link button and says
+ * so plainly instead of a silent missing feature. Keeping shared runs
+ * immutable is also the point, not just a limitation: "citable" means a
+ * run someone links to stays exactly what it was when they linked to it,
+ * not something a stranger can go extend.
+
  */
 export function ViewRunPage({ registryAddress, deployBlock, onBack }) {
   const [state, setState] = useState({ status: "loading" });
+  const [copied, setCopied] = useState(false);
+
+  async function copyLink() {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard permission can be denied, or unavailable outright (an
+      // older browser, a restrictive embed) — the URL itself is right
+      // there in the address bar either way, so this never blocks
+      // sharing, it just skips the one-click convenience.
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -183,6 +209,15 @@ export function ViewRunPage({ registryAddress, deployBlock, onBack }) {
           <a href={`https://sepolia.etherscan.io/address/${registryAddress}`} target="_blank" rel="noopener noreferrer">
             {registryAddress}
           </a>
+        </p>
+        <button className="btn-secondary" style={{ fontSize: 12 }} onClick={copyLink}>
+          {copied ? "✓ Copied" : "📋 Copy Link"}
+        </button>
+        <p className="muted" style={{ fontSize: 11, marginTop: "0.4rem" }}>
+          This page is read-only for everyone, including you — it shows exactly what's on-chain,
+          nothing more. Running more agent cycles on a run is only possible from the browser that
+          originally deployed it, via "My Runs" on the Connect screen; a shared link can't do that,
+          even for the person who made it.
         </p>
 
         {state.status === "loading" && <p className="muted">Reading this run's real state from Sepolia…</p>}
