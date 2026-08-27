@@ -20,7 +20,7 @@ const SERVER_URL = "/api";
  * one deliberate difference from the wallet-connected researcher tool —
  * see LiveRunPanel's own header comment).
  */
-export function LiveDemoPanel({ onBack, onWantWallet }) {
+export function LiveDemoPanel({ onBack, onWantWallet, onBackToMyRuns }) {
   const [scenarioId, setScenarioId] = useState(null);
   const [status, setStatus] = useState("idle"); // idle | background | picking-condition | deploying | done | running | error
   const [result, setResult] = useState(null);
@@ -219,6 +219,7 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
         sealedMac={runSeed.mac}
         startingConditions={startingConditions}
         onExit={() => setStatus("done")}
+        onBackToHome={onBackToMyRuns}
       />
     );
   }
@@ -536,6 +537,9 @@ export function LiveDemoPanel({ onBack, onWantWallet }) {
               Connect a wallet to play →
             </button>
           </div>
+          <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={onBackToMyRuns}>
+            🏠 Back to My Runs
+          </button>
         </div>
       )}
     </div>

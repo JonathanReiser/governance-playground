@@ -41,7 +41,7 @@ function actionLabel(id) {
  * in an earlier session). Either way the actual cycle loop below is
  * identical; only where checkpoint.current starts from differs.
  */
-export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedState, sealedMac, initialCheckpoint, startingConditions, onExit }) {
+export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedState, sealedMac, initialCheckpoint, startingConditions, onExit, onBackToHome }) {
   const nationMeta = buildNationMeta(scenario);
   const nationIds = scenario.nations.map((n) => n.id);
   const resuming = !!initialCheckpoint && initialCheckpoint.cycleIndex > 0;
@@ -387,9 +387,21 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
             <p className="muted" style={{ fontSize: 12, marginTop: "0.5rem" }}>
               Registry: <a href={`https://sepolia.etherscan.io/address/${registryAddress}`} target="_blank" rel="noopener noreferrer">{registryAddress}</a>
             </p>
-            <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={onExit}>
-              ← Back
-            </button>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
+              <button className="btn-secondary" style={{ fontSize: 12 }} onClick={onExit}>
+                ← Back
+              </button>
+              {/* Fresh-deploy path only (LiveDemoPanel.jsx): its own onExit
+                  only pops back to the deploy-summary screen, not out to
+                  the scenario picker/"My Runs" list — this is the one-click
+                  way there. The resume path (ConnectStep.jsx) doesn't pass
+                  this because its own onExit already goes straight home. */}
+              {onBackToHome && (
+                <button className="btn-primary" style={{ fontSize: 12 }} onClick={onBackToHome}>
+                  🏠 Back to My Runs
+                </button>
+              )}
+            </div>
           </div>
         );
       })()}
