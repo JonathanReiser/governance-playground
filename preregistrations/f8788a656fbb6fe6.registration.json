@@ -1,0 +1,30 @@
+{
+  "kind": "governance-playground/batch-preregistration",
+  "version": 1,
+  "createdAt": "2026-08-27T11:39:25.546Z",
+  "scenarioId": "middle-east-2026",
+  "startingConditionIds": [
+    "congress_blocks_relief"
+  ],
+  "hypothesis": "Blocking congressional sanctions relief lowers median regional stability relative to the researched baseline",
+  "trialCount": 5,
+  "cyclesPerTrial": 2,
+  "mode": "ai-quantum-tier1",
+  "agentModel": "claude-opus-5",
+  "agentEffort": "high",
+  "doctrineHashes": {
+    "iran": "f68ec8fcba2e53c9161d9719a86c84a8f14e23fd8455b19da9dcd4406fc29550",
+    "israel": "50c2bfe2dc810cf61625f7bac5e55dbbff38ba8d24ed1240fd42c986c6488644",
+    "saudi_arabia": "6b41535ae62e74c0f81a1c60c988512abe3685c50c8b54b2734f5de2b36460cd",
+    "us": "99dda438f312a38003ed4b1ae53fc7a87cf444f9d36f8e40d4293743c0b9a1bb"
+  },
+  "schemaHashes": {
+    "iran": "d8d40f9e73d1dde1a22f440364002af7a24f5c242eb3cf354c8e1d4742145255",
+    "israel": "21a646ebd49a74fd65cda10554d952a9ebb2456dd06879f6a9a39d85ebfc347d",
+    "saudi_arabia": "d29cfda0822348fc73006d1bff49ab113e664aef1c38cb2440e679c728b26349",
+    "us": "5b1968c35ae14af784928b567221e4356221f4e1f1fa8e2121befa559f34d14f"
+  },
+  "drawAfter": "2026-08-27T11:44:25.546Z",
+  "beaconUri": "https://beacon.nist.gov/beacon/2.0/pulse/time/next/1787831065546",
+  "commitment": "5 independent trials of 2 cycles each will be run at or after drawAfter, the first seeded from the NIST pulse at beaconUri, and every trial's full per-cycle output published whatever it says — not a selection of the trials that came out a particular way."
+}
