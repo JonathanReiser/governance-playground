@@ -4,7 +4,7 @@
  */
 
 const { expect } = require("chai");
-const { applyStartingConditionOverride } = require("../server/scenarioOverrides");
+const { applyStartingConditionOverride, applyStartingConditionOverrides } = require("../server/scenarioOverrides");
 const middleEast = require("../frontend/src/scenarios/middle-east-2026.json");
 const taiwanStrait = require("../frontend/src/scenarios/taiwan-strait-2026.json");
 
@@ -72,5 +72,64 @@ describe("server/scenarioOverrides.js — applyStartingConditionOverride", funct
     expect(out.nations.find((n) => n.id === "china").governance.hardlinerPressure).to.equal(82);
     expect(out.nations.find((n) => n.id === "taiwan").governance.hardlinerPressure).to.equal(32);
     expect(out.simulation.metrics.find((m) => m.id === "deal_integrity").startingValue).to.equal(32);
+  });
+});
+
+describe("server/scenarioOverrides.js — applyStartingConditionOverrides (multiple at once)", function () {
+  it("returns the scenario unchanged for an empty or missing list", function () {
+    for (const ids of [[], undefined, null]) {
+      const out = applyStartingConditionOverrides(middleEast, ids);
+      expect(out.nations.find((n) => n.id === "iran").governance.hardlinerPressure)
+        .to.equal(middleEast.nations.find((n) => n.id === "iran").governance.hardlinerPressure);
+    }
+  });
+
+  it("accepts a single id (not just an array) and behaves like the singular function", function () {
+    const viaSingular = applyStartingConditionOverride(middleEast, "congress_blocks_relief");
+    const viaPlural = applyStartingConditionOverrides(middleEast, "congress_blocks_relief");
+    expect(viaPlural.nations.find((n) => n.id === "iran").governance.hardlinerPressure)
+      .to.equal(viaSingular.nations.find((n) => n.id === "iran").governance.hardlinerPressure);
+  });
+
+  it("combines two non-overlapping fields from different proposals", function () {
+    // congress_blocks_relief sets Iran's economy fields; saudi_normalizes_anyway
+    // sets Saudi Arabia's reformPressure — genuinely independent nations/fields.
+    const out = applyStartingConditionOverrides(middleEast, ["congress_blocks_relief", "saudi_normalizes_anyway"]);
+    expect(out.nations.find((n) => n.id === "iran").economy.sanctionsReliefPending).to.equal(false);
+    expect(out.nations.find((n) => n.id === "saudi_arabia").governance.reformPressure).to.equal(65);
+  });
+
+  it("resolves a real overlapping field (Iran hardlinerPressure, set by both) as last-in-the-list wins", function () {
+    // congress_blocks_relief alone sets it to 88; senate_sanctions_bill_enacted
+    // alone sets it to 85 — applying both, in that order, must land on 85, not 88.
+    const congressAlone = applyStartingConditionOverride(middleEast, "congress_blocks_relief");
+    expect(congressAlone.nations.find((n) => n.id === "iran").governance.hardlinerPressure).to.equal(88);
+
+    const combined = applyStartingConditionOverrides(middleEast, ["congress_blocks_relief", "senate_sanctions_bill_enacted"]);
+    expect(combined.nations.find((n) => n.id === "iran").governance.hardlinerPressure).to.equal(85);
+
+    // Reversing the order reverses which one wins — confirms it's genuinely
+    // order-dependent, not coincidentally always the second proposal's value.
+    const reversed = applyStartingConditionOverrides(middleEast, ["senate_sanctions_bill_enacted", "congress_blocks_relief"]);
+    expect(reversed.nations.find((n) => n.id === "iran").governance.hardlinerPressure).to.equal(88);
+  });
+
+  it("skips an unknown id within the list, applying the rest (fails safe, not throws)", function () {
+    const out = applyStartingConditionOverrides(middleEast, ["not-a-real-proposal", "saudi_normalizes_anyway"]);
+    expect(out.nations.find((n) => n.id === "saudi_arabia").governance.reformPressure).to.equal(65);
+  });
+
+  it("does not mutate the original scenario object", function () {
+    const before = JSON.stringify(middleEast);
+    applyStartingConditionOverrides(middleEast, ["congress_blocks_relief", "saudi_normalizes_anyway"]);
+    expect(JSON.stringify(middleEast)).to.equal(before);
+  });
+
+  it("combines all three real Taiwan Strait proposals together without throwing", function () {
+    const out = applyStartingConditionOverrides(taiwanStrait, [
+      "arms_package_delivered", "china_expands_japan_export_ban", "trilateral_semiconductor_pact",
+    ]);
+    expect(out).to.be.an("object");
+    expect(out.nations.find((n) => n.id === "china").governance.hardlinerPressure).to.be.a("number");
   });
 });

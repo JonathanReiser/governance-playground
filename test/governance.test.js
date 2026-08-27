@@ -1106,7 +1106,7 @@ describe("WorldRegistry", function () {
       await expect(
         freshRegistry.bootstrapConfig(
           await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
-          "Test Scenario", "1.0", 15n
+          "Test Scenario", "1.0", 15n, []
         )
       ).to.emit(freshRegistry, "ScenarioLoaded").withArgs("Test Scenario", "1.0");
 
@@ -1125,7 +1125,7 @@ describe("WorldRegistry", function () {
     it("produces the identical end state as the three separate calls it replaces", async function () {
       await freshRegistry.bootstrapConfig(
         await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
-        "Test", "2.0", 7n
+        "Test", "2.0", 7n, []
       );
 
       const WorldRegistry = await ethers.getContractFactory("WorldRegistry");
@@ -1143,9 +1143,37 @@ describe("WorldRegistry", function () {
       await expect(
         freshRegistry.connect(alice).bootstrapConfig(
           await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
-          "Test", "1.0", 5n
+          "Test", "1.0", 5n, []
         )
       ).to.be.revertedWithCustomError(freshRegistry, "OwnableUnauthorizedAccount");
+    });
+
+    it("emits StartingConditionsApplied with an empty array when deployed as researched", async function () {
+      await expect(
+        freshRegistry.bootstrapConfig(
+          await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
+          "Test", "1.0", 5n, []
+        )
+      ).to.emit(freshRegistry, "StartingConditionsApplied").withArgs([]);
+    });
+
+    it("emits StartingConditionsApplied with every id, in order, when one or more conditions were combined", async function () {
+      const tx = await freshRegistry.bootstrapConfig(
+        await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
+        "Test", "1.0", 5n, ["congress_blocks_relief", "saudi_normalizes_anyway"]
+      );
+      await expect(tx).to.emit(freshRegistry, "StartingConditionsApplied")
+        .withArgs(["congress_blocks_relief", "saudi_normalizes_anyway"]);
+    });
+
+    it("is independently queryable via getLogs after the fact, same as any other event", async function () {
+      await freshRegistry.bootstrapConfig(
+        await freshOracle.getAddress(), await tokenFactory.getAddress(), await daoFactory.getAddress(),
+        "Test", "1.0", 5n, ["saudi_normalizes_anyway"]
+      );
+      const logs = await freshRegistry.queryFilter(freshRegistry.filters.StartingConditionsApplied());
+      expect(logs).to.have.lengthOf(1);
+      expect(logs[0].args.conditionIds).to.deep.equal(["saudi_normalizes_anyway"]);
     });
   });
 

@@ -4,6 +4,8 @@ import WorldRegistryABI from "../abi/WorldRegistry.json";
 import NationDAOABI from "../abi/NationDAO.json";
 import MetricsOracleABI from "../abi/MetricsOracle.json";
 import { findLogsLowerBound, queryLogsChunked } from "../lib/onchainLogs.js";
+import { SCENARIOS } from "../lib/scenarios.js";
+import { ExperimentBanner } from "./ExperimentBanner";
 
 // Same default the demo path uses (server/demoDeploy.js) — a real,
 // public, free Sepolia RPC. This page needs no signer and no wallet: on-
@@ -109,10 +111,31 @@ export function ViewRunPage({ registryAddress, deployBlock, onBack }) {
         const fromBlock = Number.isInteger(deployBlock) && deployBlock >= 0
           ? Math.max(0, deployBlock - 2) // small buffer, not load-bearing precision
           : await findLogsLowerBound(provider, registryAddress, latestBlock);
-        const [decisionLogs, narrativeLogs] = await Promise.all([
+        const [decisionLogs, narrativeLogs, startingConditionLogs] = await Promise.all([
           queryLogsChunked(registry, registry.filters.DecisionRecorded(), fromBlock, latestBlock),
           queryLogsChunked(registry, registry.filters.CycleNarrativeRecorded(), fromBlock, latestBlock),
+          queryLogsChunked(registry, registry.filters.StartingConditionsApplied(), fromBlock, latestBlock),
         ]);
+
+        // Which real proposal(s) this run actually deployed with — see
+        // WorldRegistry.sol's StartingConditionsApplied event. Only
+        // bootstrapConfig() ever emits it (once, at deploy time), so at
+        // most one log exists; none at all means either an older run
+        // (deployed before this event existed) or a run from the
+        // wallet-connected researcher tool, which never emits it. Ids
+        // are resolved to their real name/description by matching this
+        // registry's own scenarioName/scenarioVersion against the
+        // frontend's current scenario bundle — the same lookup
+        // ConnectStep.jsx's "Continue" path uses for the same reason.
+        const scenarioMeta = SCENARIOS.find(
+          (s) => s.data.meta.name === scenarioName && s.data.meta.version === scenarioVersion
+        );
+        const conditionIds = startingConditionLogs[0]?.args.conditionIds || null;
+        const startingConditions = conditionIds
+          ? conditionIds.map((id) =>
+              scenarioMeta?.data.startingConditionProposals?.find((p) => p.id === id) || { name: id }
+            )
+          : null;
 
         const cycleMap = new Map(); // cycle number -> { decisions: [], narrative }
         for (const log of decisionLogs) {
@@ -140,7 +163,7 @@ export function ViewRunPage({ registryAddress, deployBlock, onBack }) {
             status: "ready",
             scenarioName, scenarioVersion,
             currentCycle: Number(currentCycle), totalCycles: Number(totalCycles),
-            simulationActive, oracleAddress, nations, metrics, cycles,
+            simulationActive, oracleAddress, nations, metrics, cycles, startingConditions,
           });
         }
       } catch (e) {
@@ -176,6 +199,7 @@ export function ViewRunPage({ registryAddress, deployBlock, onBack }) {
 
         {state.status === "ready" && (
           <div>
+            <ExperimentBanner scenarioName={state.scenarioName} startingConditions={state.startingConditions} />
             <p style={{ fontSize: 14 }}>
               <strong>{state.scenarioName}</strong> <span className="muted">v{state.scenarioVersion}</span>
             </p>
