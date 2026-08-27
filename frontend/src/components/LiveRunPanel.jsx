@@ -232,7 +232,15 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
   const latest = history[history.length - 1];
 
   return (
-    <div className="connect-card" style={{ marginTop: "1.25rem" }}>
+    // .connect-card is meant for simple picker screens and caps out at
+    // max-width: 480px (see App.css) — fine for a couple of buttons, far
+    // too narrow now that this phase can hold a full trajectory chart and
+    // a multi-column nation-cards-grid. The inline width override below
+    // keeps the card's own background/border/padding (still reads as a
+    // card, not a bare full-bleed section) but lets it actually fill the
+    // space .app-main gives it (960px) instead of shrinking to 480px and
+    // centering in the leftover room.
+    <div className="connect-card" style={{ marginTop: "1.25rem", width: "100%", maxWidth: "100%" }}>
       <h2>Watching It Play Out</h2>
       <ExperimentBanner scenarioName={scenario.meta.name} startingConditions={startingConditions} scenarioData={scenario} />
       {/* Renders nothing until the first cycle actually commits — see
