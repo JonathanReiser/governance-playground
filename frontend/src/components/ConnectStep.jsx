@@ -190,6 +190,13 @@ export function ConnectStep({ onConnect }) {
         <LiveDemoPanel
           onBack={() => setShowLiveDemo(false)}
           onWantWallet={() => setShowLiveDemo(false)}
+          // Distinct from onBack: this one lands directly on "My Runs",
+          // not just the plain home screen — same one-click destination
+          // the resume path's own onExit already gives (see this file's
+          // <LiveRunPanel onExit=...> above). Used only after a deploy or
+          // a finished run, where "go find this on My Runs" is exactly
+          // what the visitor is trying to do next, not "start over."
+          onBackToMyRuns={() => { setMyRuns(listRuns()); setShowLiveDemo(false); setShowMyRuns(true); }}
         />
       )}
 
