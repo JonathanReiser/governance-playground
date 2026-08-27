@@ -260,6 +260,25 @@ kind of after-the-fact cherry-picking this whole mechanism exists to prevent —
 and both `verify-batch` and this page say so plainly. See the full ranking, live:
 `?compare=db8fc00c951fdb92,f8788a656fbb6fe6,f3c0fc2f16c12938,bd26d998026c8375`
 
+**Follow-up: are the effects additive?** Same 5×2 design, all 3 pairwise combinations of the real
+conditions above, each compared against what you'd predict by just adding the two single conditions'
+individual effects on top of baseline. None of them were additive — every combined arm landed better
+than predicted, all 6 `verify-batch` checks passing clean on every one (no fallback-model deviations
+this time):
+
+| Combination | Additive prediction | Actual median | Interaction |
+|---|---|---|---|
+| `congress_blocks_relief` + `saudi_normalizes_anyway` | 23 | **30** | +7 |
+| `congress_blocks_relief` + `senate_sanctions_bill_enacted` | 14 | **24** | +10 |
+| `senate_sanctions_bill_enacted` + `saudi_normalizes_anyway` | 29 | **31** | +2 |
+
+The most striking result: combining the best single lever with the worst one lands right back at pure
+baseline (30) — Saudi normalization doesn't just soften the damage from blocked sanctions relief, it
+appears to fully offset it. Stacking the two punitive measures also doesn't compound linearly; there's
+real diminishing returns on the punitive side too, though that arm has the widest trial-to-trial spread
+(16–33) of any arm in either study — worth more trials before leaning on it. See the full 7-arm
+picture, live: `?compare=db8fc00c951fdb92,f8788a656fbb6fe6,f3c0fc2f16c12938,bd26d998026c8375,503340f2f598039a,367d822898a67395,be558c31c284d19f`
+
 The sibling project
 [dao-governance-research](https://github.com/JonathanReiser/dao-governance-research) already applies
 the discipline in its plainest form — every design decision committed to git before the
