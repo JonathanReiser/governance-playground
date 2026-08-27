@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import {
-  runAutonomousCycle, buildNationMeta, CYCLE_COUNT_OPTIONS, initSimState,
+  runAutonomousCycle, buildNationMeta, buildMetricLabels, CYCLE_COUNT_OPTIONS, initSimState,
   buildDecisionRecords, summarizeQuantum, summarizeMarket,
 } from "../lib/cycleRunner";
 import { initQuantumBeliefs, initMarketBeliefs } from "../lib/agents";
@@ -8,13 +8,10 @@ import { stabilityLabel, stabilityColor } from "../lib/simulation";
 import { estimateRemainingMs, formatDuration } from "../lib/eta";
 import { saveContinuation, clearContinuation } from "../lib/runHistory";
 import { ExperimentBanner } from "./ExperimentBanner";
+import { RunCharts } from "./RunCharts";
+import { NationCard } from "./NationCard";
 
 const SERVER_URL = "/api";
-
-function actionLabel(id) {
-  if (!id) return "—";
-  return id.replace(/_/g, " ");
-}
 
 /**
  * The no-wallet counterpart to AICycleStep.jsx: watch a scenario play out
@@ -43,6 +40,7 @@ function actionLabel(id) {
  */
 export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedState, sealedMac, initialCheckpoint, startingConditions, onExit, onBackToHome }) {
   const nationMeta = buildNationMeta(scenario);
+  const metricLabels = buildMetricLabels(scenario);
   const nationIds = scenario.nations.map((n) => n.id);
   const resuming = !!initialCheckpoint && initialCheckpoint.cycleIndex > 0;
   // Both derived from props, not from checkpoint.current — React
@@ -237,6 +235,10 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
     <div className="connect-card" style={{ marginTop: "1.25rem" }}>
       <h2>Watching It Play Out</h2>
       <ExperimentBanner scenarioName={scenario.meta.name} startingConditions={startingConditions} scenarioData={scenario} />
+      {/* Renders nothing until the first cycle actually commits — see
+          RunCharts.jsx's own guard — so "picking" shows just the banner
+          above, exactly as before. */}
+      <RunCharts history={history} scenario={scenario} />
 
       {phase === "picking" && (
         <>
@@ -306,28 +308,25 @@ export function LiveRunPanel({ scenario, scenarioId, registryAddress, sealedStat
 
       {history.length > 0 && (phase === "thinking" || phase === "committing" || phase === "finished") && (
         <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {history.map((h) => (
-            <div key={h.cycle} className="muted" style={{ fontSize: 12, borderTop: "1px solid currentColor", paddingTop: "0.5rem", opacity: 0.9 }}>
-              <div style={{ fontWeight: 600, marginBottom: "0.25rem" }}>Cycle {h.cycle}</div>
-              {Object.entries(h.decisions).map(([id, r]) => (
-                <div key={id} style={{ marginBottom: "0.15rem" }}>
-                  <strong>{nationMeta[id]?.flag} {nationMeta[id]?.label}:</strong>{" "}
-                  {r.error ? `(error: ${r.error})` : actionLabel(r.decision?.primaryAction)}
-                  {r.decision?.reasoning && !r.error && (
-                    <span> — {r.decision.reasoning}</span>
-                  )}
-                </div>
-              ))}
+          {[...history].reverse().map((h) => (
+            <div key={h.cycle} style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}>
+              <div className="muted" style={{ fontSize: 12, fontWeight: 600, marginBottom: "0.5rem" }}>
+                Cycle {h.cycle} — stability now{" "}
+                <span style={{ color: stabilityColor(h.committed.stability) }}>
+                  {h.committed.stability} ({stabilityLabel(h.committed.stability)})
+                </span>
+              </div>
+              <div className="nation-cards-grid">
+                {Object.entries(h.decisions).map(([id, r]) => (
+                  <NationCard key={id} nationId={id} result={r} nationMeta={nationMeta} metricLabels={metricLabels} />
+                ))}
+              </div>
               {h.quantum?.entangledEffect?.label && (
-                <div style={{ marginTop: "0.25rem" }}>
+                <div className="muted" style={{ fontSize: 12, marginTop: "0.5rem" }}>
                   ⚛ Quantum collapse: <strong>{h.quantum.entangledEffect.label}</strong>
                 </div>
               )}
-              <div style={{ marginTop: "0.25rem" }}>
-                Stability now <strong style={{ color: stabilityColor(h.committed.stability) }}>
-                  {h.committed.stability} ({stabilityLabel(h.committed.stability)})
-                </strong>
-                {" — "}
+              <div className="muted" style={{ fontSize: 12, marginTop: "0.25rem" }}>
                 <a href={`https://sepolia.etherscan.io/tx/${h.txHash}`} target="_blank" rel="noopener noreferrer">
                   {h.txHash.slice(0, 14)}…
                 </a>
