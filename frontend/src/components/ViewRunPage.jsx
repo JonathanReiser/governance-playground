@@ -190,6 +190,7 @@ export function ViewRunPage({ registryAddress, deployBlock, onBack }) {
             scenarioName, scenarioVersion,
             currentCycle: Number(currentCycle), totalCycles: Number(totalCycles),
             simulationActive, oracleAddress, nations, metrics, cycles, startingConditions,
+            scenarioData: scenarioMeta?.data,
           });
         }
       } catch (e) {
@@ -234,7 +235,7 @@ export function ViewRunPage({ registryAddress, deployBlock, onBack }) {
 
         {state.status === "ready" && (
           <div>
-            <ExperimentBanner scenarioName={state.scenarioName} startingConditions={state.startingConditions} />
+            <ExperimentBanner scenarioName={state.scenarioName} startingConditions={state.startingConditions} scenarioData={state.scenarioData} />
             <p style={{ fontSize: 14 }}>
               <strong>{state.scenarioName}</strong> <span className="muted">v{state.scenarioVersion}</span>
             </p>
