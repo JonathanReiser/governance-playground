@@ -20,13 +20,20 @@
  *                                     frontend's Tier 2 toggle is on. Real IBM hardware, verified live,
  *                                     bit-ordering confirmed with a dedicated regression test — see
  *                                     python-bridge/layer1_qpu.py.)
+ *   GET  /api/batch/:hashPrefix    → a batch preregistration + its result (if sealed) + a live
+ *                                     verify-batch report, read straight from preregistrations/ — the
+ *                                     same git-committed files `node scripts/prereg.js verify-batch`
+ *                                     reads locally. See BatchResultsPage.jsx for the viewer.
  */
 
+const fs        = require("fs");
+const path      = require("path");
 const express   = require("express");
 const cors      = require("cors");
 const rateLimit = require("express-rate-limit");
 const Anthropic = require("@anthropic-ai/sdk").default;
 const { fetchRealHeadlines } = require("./server/news");
+const { verifyBatch, hashRecord } = require("./server/prereg");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -1237,6 +1244,40 @@ app.get("/api/news", async (req, res) => {
   }
   const { text: headlines, source: newsSource } = await getHeadlines(scenarioId, worldState);
   res.json({ headlines, newsSource });
+});
+
+
+// Same files `node scripts/prereg.js verify-batch`/`list` read locally,
+// bundled into the deployment (see vercel.json's `includeFiles`) so a
+// visitor can view a batch's real hypothesis, config, and every trial's
+// outcome without needing the repo checked out. Read-only, no batch can
+// be started from here — see BatchResultsPage.jsx's own comment on why
+// a real batch (hours of real trials) isn't a browser-triggerable flow
+// the way a single "watch it play out" run is.
+const PREREG_DIR = path.join(__dirname, "preregistrations");
+function loadBatchFiles(hashPrefix) {
+  const prefix = String(hashPrefix || "").slice(0, 16);
+  const regFile = fs.readdirSync(PREREG_DIR).find((f) => f.startsWith(prefix) && f.endsWith(".registration.json"));
+  if (!regFile) return null;
+  const registration = JSON.parse(fs.readFileSync(path.join(PREREG_DIR, regFile), "utf8"));
+  if (registration.kind !== "governance-playground/batch-preregistration") return null;
+  const hash = hashRecord(registration);
+  const resPath = path.join(PREREG_DIR, `${hash.slice(0, 16)}.result.json`);
+  const result = fs.existsSync(resPath) ? JSON.parse(fs.readFileSync(resPath, "utf8")) : null;
+  return { hash, registration, result };
+}
+
+app.get("/api/batch/:hashPrefix", async (req, res) => {
+  try {
+    const found = loadBatchFiles(req.params.hashPrefix);
+    if (!found) return res.status(404).json({ error: `No batch registration found matching ${req.params.hashPrefix}` });
+    const { hash, registration, result } = found;
+    const report = result ? await verifyBatch({ registration, result }) : null;
+    res.json({ hash, registration, result, report });
+  } catch (err) {
+    console.error("[batch] error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 

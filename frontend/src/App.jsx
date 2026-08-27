@@ -7,6 +7,7 @@ import { AICycleStep }    from "./components/AICycleStep";
 import { ResultsStep }    from "./components/ResultsStep";
 import { AIResultsStep }  from "./components/AIResultsStep";
 import { ViewRunPage }    from "./components/ViewRunPage";
+import { BatchResultsPage } from "./components/BatchResultsPage";
 import "./App.css";
 
 const STEPS = ["Connect", "Scenario", "Deploy", "Run", "Results"];
@@ -32,8 +33,33 @@ export default function App() {
     const registryAddress = params.get("view");
     const blockParam = params.get("block");
     const deployBlock = blockParam !== null && /^\d+$/.test(blockParam) ? Number(blockParam) : null;
-    return { registryAddress, deployBlock };
+    // ?batch=<registrationHash> — see BatchResultsPage.jsx's own comment on
+    // why this is a separate param from ?view rather than one page handling
+    // both: a batch has no on-chain address to key off of at all.
+    const batchHash = params.get("batch");
+    return { registryAddress, deployBlock, batchHash };
   });
+
+  if (viewParams.batchHash) {
+    return (
+      <div className="app">
+        <header className="app-header">
+          <div className="header-inner">
+            <div className="logo">
+              <span className="logo-icon">⬡</span>
+              <span className="logo-text">Governance Playground</span>
+            </div>
+          </div>
+        </header>
+        <main className="app-main">
+          <BatchResultsPage
+            hashPrefix={viewParams.batchHash}
+            onBack={() => { window.location.href = window.location.pathname; }}
+          />
+        </main>
+      </div>
+    );
+  }
 
   if (viewParams.registryAddress) {
     return (
