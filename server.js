@@ -1139,88 +1139,93 @@ async function getHeadlines(scenarioId, worldState) {
 // ROUTES
 // ─────────────────────────────────────────────────────────────
 
-app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
-  const { nation, worldState, scenarioId } = req.body;
-
+/**
+ * The actual decision call — pulled out of the /api/agent/decide route so
+ * scripts/run-batch.js can drive it directly, in a loop, without a live
+ * HTTP server in between. Throws (rather than ever returning an error
+ * shape) so both the route below and a batch script get one code path to
+ * handle failure, not two independently-maintained ones.
+ */
+async function decideNationAction({ nation, worldState, scenarioId }) {
   const scenarioPrompts = SYSTEM_PROMPTS[scenarioId];
-  if (!scenarioPrompts) {
-    return res.status(400).json({ error: `Unknown or unsupported scenario: ${scenarioId}` });
-  }
-  if (!scenarioPrompts[nation]) {
-    return res.status(400).json({ error: `Unknown nation "${nation}" for scenario "${scenarioId}"` });
-  }
-  if (!DECISION_SCHEMAS[scenarioId]?.[nation]) {
-    return res.status(400).json({ error: `No output schema for "${nation}" in "${scenarioId}"` });
-  }
+  if (!scenarioPrompts) throw new Error(`Unknown or unsupported scenario: ${scenarioId}`);
+  if (!scenarioPrompts[nation]) throw new Error(`Unknown nation "${nation}" for scenario "${scenarioId}"`);
+  if (!DECISION_SCHEMAS[scenarioId]?.[nation]) throw new Error(`No output schema for "${nation}" in "${scenarioId}"`);
 
   const { text: headlines, source: newsSource } = await getHeadlines(scenarioId, worldState);
   const enrichedState = { ...worldState, newsHeadlines: headlines };
   const { doctrine, situation } = splitPrompt(scenarioPrompts[nation], enrichedState);
 
-  try {
-    const message = await anthropic.beta.messages.create({
-      model: AGENT_MODEL,
-      max_tokens: 8000,
-      // A geopolitics simulation talks about strikes, blockades and breakout in
-      // every prompt, so a safety decline is a live possibility rather than a
-      // theoretical one. Server-side fallbacks re-run the same request on
-      // another model inside the same call instead of failing the cycle. The
-      // model that actually served is echoed back below — a run whose decisions
-      // came from a fallback has to be able to say so.
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      thinking: { type: "adaptive" },
-      output_config: {
-        effort: AGENT_EFFORT,
-        format: { type: "json_schema", schema: DECISION_SCHEMAS[scenarioId][nation] },
+  const message = await anthropic.beta.messages.create({
+    model: AGENT_MODEL,
+    max_tokens: 8000,
+    // A geopolitics simulation talks about strikes, blockades and breakout in
+    // every prompt, so a safety decline is a live possibility rather than a
+    // theoretical one. Server-side fallbacks re-run the same request on
+    // another model inside the same call instead of failing the cycle. The
+    // model that actually served is echoed back below — a run whose decisions
+    // came from a fallback has to be able to say so.
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    thinking: { type: "adaptive" },
+    output_config: {
+      effort: AGENT_EFFORT,
+      format: { type: "json_schema", schema: DECISION_SCHEMAS[scenarioId][nation] },
+    },
+    system: [
+      // Doctrine half: identical every cycle and every run, so it is the
+      // cache prefix. See splitPrompt() for why the split point matters.
+      { type: "text", text: doctrine, cache_control: { type: "ephemeral" } },
+      // Situation half: changes every cycle, so it must come after the breakpoint.
+      { type: "text", text: situation },
+    ],
+    messages: [
+      {
+        role: "user",
+        content: `Cycle ${worldState.cycle}: Review the current world state above and make your decision.`,
       },
-      system: [
-        // Doctrine half: identical every cycle and every run, so it is the
-        // cache prefix. See splitPrompt() for why the split point matters.
-        { type: "text", text: doctrine, cache_control: { type: "ephemeral" } },
-        // Situation half: changes every cycle, so it must come after the breakpoint.
-        { type: "text", text: situation },
-      ],
-      messages: [
-        {
-          role: "user",
-          content: `Cycle ${worldState.cycle}: Review the current world state above and make your decision.`,
-        },
-      ],
-    });
+    ],
+  });
 
-    // If the whole fallback chain declined, say so plainly rather than failing
-    // on a missing text block three lines down.
-    if (message.stop_reason === "refusal") {
-      const d = message.stop_details || {};
-      throw new Error(`model declined this decision (category: ${d.category ?? "unknown"})`);
-    }
+  // If the whole fallback chain declined, say so plainly rather than failing
+  // on a missing text block three lines down.
+  if (message.stop_reason === "refusal") {
+    const d = message.stop_details || {};
+    throw new Error(`model declined this decision (category: ${d.category ?? "unknown"})`);
+  }
 
-    // Adaptive thinking means content[0] may be a thinking block, not the answer.
-    const textBlock = message.content.find((b) => b.type === "text");
-    if (!textBlock) throw new Error("no text block in model response");
-    // Structured outputs guarantee schema-valid JSON — no fence-stripping or
-    // number-repair needed the way it was when this ran on a smaller model.
-    const decision = JSON.parse(textBlock.text);
-    logAgentUsage(nation, scenarioId, worldState.cycle, message.model, message.usage);
+  // Adaptive thinking means content[0] may be a thinking block, not the answer.
+  const textBlock = message.content.find((b) => b.type === "text");
+  if (!textBlock) throw new Error("no text block in model response");
+  // Structured outputs guarantee schema-valid JSON — no fence-stripping or
+  // number-repair needed the way it was when this ran on a smaller model.
+  const decision = JSON.parse(textBlock.text);
+  logAgentUsage(nation, scenarioId, worldState.cycle, message.model, message.usage);
 
-    res.json({
-      nation,
-      cycle: worldState.cycle,
-      decision,
-      // Which model actually produced this decision — normally AGENT_MODEL, but
-      // a different one if a fallback served. Recorded per decision so a
-      // published run can state its provenance rather than assume it.
-      model: message.model,
-      usage: message.usage,
-      // "real-gdelt" | "mock-fallback" — see getHeadlines above. Recorded
-      // for the same reason `model` is: a published run should be able to
-      // say what actually grounded it, not assume.
-      newsSource,
-    });
+  return {
+    nation,
+    cycle: worldState.cycle,
+    decision,
+    // Which model actually produced this decision — normally AGENT_MODEL, but
+    // a different one if a fallback served. Recorded per decision so a
+    // published run can state its provenance rather than assume it.
+    model: message.model,
+    usage: message.usage,
+    // "real-gdelt" | "mock-fallback" — see getHeadlines above. Recorded
+    // for the same reason `model` is: a published run should be able to
+    // say what actually grounded it, not assume.
+    newsSource,
+  };
+}
+
+app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
+  const { nation, worldState, scenarioId } = req.body;
+  try {
+    res.json(await decideNationAction({ nation, worldState, scenarioId }));
   } catch (err) {
     console.error(`[${nation}] agent error:`, err.message);
-    res.status(500).json({ error: err.message });
+    const status = /Unknown|No output schema/.test(err.message) ? 400 : 500;
+    res.status(status).json({ error: err.message });
   }
 });
 
@@ -1590,6 +1595,10 @@ module.exports.agentContract = {
   SYSTEM_PROMPTS,
   DECISION_SCHEMAS,
   SITUATION_HEADING,
+  // Exported so scripts/run-batch.js can drive real decisions directly, in
+  // a loop, without a live HTTP server in between — same function the
+  // /api/agent/decide route itself calls, not a second implementation.
+  decideNationAction,
   doctrineOf(scenarioId) {
     const nations = SYSTEM_PROMPTS[scenarioId];
     if (!nations) throw new Error(`Unknown scenario: ${scenarioId}`);

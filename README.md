@@ -194,15 +194,24 @@ as `UNPUBLISHED`. A promised result that never appears is evidence.
 
 **Batch mode — N independent trials, for a distribution instead of one run's single outcome.** A
 single preregistered run above still can't tell a real effect from ordinary stochasticity (real LLM
-sampling, real quantum collapse). Three parallel commands run and preregister a whole batch at once:
+sampling, real quantum collapse). Four commands register, run, seal, and verify a whole batch:
 
 ```bash
 node scripts/prereg.js register-batch middle-east-2026 --trials 50 --cycles 5 \
     --hypothesis "Blocking sanctions relief lowers median regional stability" \
     --conditions congress_blocks_relief --in 15m
-node scripts/prereg.js draw-batch <hash> --results batch.json    # every trial, sealed together
+node scripts/run-batch.js <hash>                                 # runs all 50 trials for real
+node scripts/prereg.js draw-batch <hash> --results preregistrations/<hash>.batch.json
 node scripts/prereg.js verify-batch <hash>
 ```
+
+`run-batch.js` drives the exact same pipeline a live visitor's browser does
+(`frontend/src/lib/cycleRunner.js`'s `runAutonomousCycle`) straight from Node, no browser or live
+HTTP server needed — real Claude decisions, real Tier 1 quantum collapse, real market resolution,
+per trial. Costly in the same way running that many cycles any other way is (real per-decision cost
+is logged to the console — one `[usage]` line per decision with real token counts and an estimated
+dollar figure — see `logAgentUsage` in `server.js`): a 50-trial × 5-cycle batch is 1,000 real
+decisions, so check that estimate before pointing this at a large trial count.
 
 Same NIST-pulse binding as the single-run path, plus one check specific to a batch: the published
 trial count must match what was registered, so a batch can't quietly shrink to just the trials that
