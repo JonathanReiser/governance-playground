@@ -1280,6 +1280,31 @@ app.get("/api/batch/:hashPrefix", async (req, res) => {
   }
 });
 
+// Several batches side by side — e.g. one condition each, tested against
+// the same baseline — for "which of these real alternatives is actually
+// best," not just "is this one alternative different from baseline."
+// Same underlying data/verification as /api/batch/:hashPrefix, just N of
+// them in one response instead of one fetch per arm. A hash this list
+// can't find is included with `error` set rather than dropped silently —
+// a broken link in a comparison should be visible, not quietly absent.
+app.get("/api/batch-compare", async (req, res) => {
+  try {
+    const prefixes = String(req.query.hashes || "").split(",").map((s) => s.trim()).filter(Boolean);
+    if (prefixes.length === 0) return res.status(400).json({ error: "?hashes=<hash1>,<hash2>,... is required" });
+    const arms = await Promise.all(prefixes.map(async (prefix) => {
+      const found = loadBatchFiles(prefix);
+      if (!found) return { hashPrefix: prefix, error: `No batch registration found matching ${prefix}` };
+      const { hash, registration, result } = found;
+      const report = result ? await verifyBatch({ registration, result }) : null;
+      return { hash, registration, result, report };
+    }));
+    res.json({ arms });
+  } catch (err) {
+    console.error("[batch-compare] error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Proxies to python-bridge/app.py — see that service's own README for
 // what it does and its current (structurally-complete, not yet

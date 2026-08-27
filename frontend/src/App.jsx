@@ -8,6 +8,7 @@ import { ResultsStep }    from "./components/ResultsStep";
 import { AIResultsStep }  from "./components/AIResultsStep";
 import { ViewRunPage }    from "./components/ViewRunPage";
 import { BatchResultsPage } from "./components/BatchResultsPage";
+import { StrategyComparisonPage } from "./components/StrategyComparisonPage";
 import "./App.css";
 
 const STEPS = ["Connect", "Scenario", "Deploy", "Run", "Results"];
@@ -37,8 +38,32 @@ export default function App() {
     // why this is a separate param from ?view rather than one page handling
     // both: a batch has no on-chain address to key off of at all.
     const batchHash = params.get("batch");
-    return { registryAddress, deployBlock, batchHash };
+    // ?compare=<hash1>,<hash2>,... — several batches ranked side by side,
+    // see StrategyComparisonPage.jsx.
+    const compareHashes = params.get("compare");
+    return { registryAddress, deployBlock, batchHash, compareHashes };
   });
+
+  if (viewParams.compareHashes) {
+    return (
+      <div className="app">
+        <header className="app-header">
+          <div className="header-inner">
+            <div className="logo">
+              <span className="logo-icon">⬡</span>
+              <span className="logo-text">Governance Playground</span>
+            </div>
+          </div>
+        </header>
+        <main className="app-main">
+          <StrategyComparisonPage
+            hashList={viewParams.compareHashes}
+            onBack={() => { window.location.href = window.location.pathname; }}
+          />
+        </main>
+      </div>
+    );
+  }
 
   if (viewParams.batchHash) {
     return (

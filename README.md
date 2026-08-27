@@ -229,10 +229,36 @@ same six live-verified checks `verify-batch` prints on the command line — read
 `?view=<address>` for a single on-chain run, this link's permanence depends on this site staying up
 — there's no public chain a batch's data lives on, a deliberate cost tradeoff explained above, not
 an oversight — and a real batch (dozens to hundreds of real cycles) is never something this page can
-start; it only ever shows one that already finished. The first real batch is committed and live:
-`?batch=f8788a656fbb6fe6` — 5 trials testing whether blocking congressional sanctions relief lowers
-regional stability (it did, consistently: final stability 18–29 across all 5 trials, against a
-researched baseline of 32).
+start; it only ever shows one that already finished.
+
+**A shareable `?compare=<hash1>,<hash2>,...` view** (`StrategyComparisonPage.jsx`,
+`GET /api/batch-compare`) ranks several batches side by side by median final stability — for "which
+of these real alternatives actually performs best," not just "does this one alternative differ from
+baseline." Nothing enforces that the arms you list are actually comparable (same cycle count, same
+scenario) — that's on whoever builds the `?compare=` link, the same way it would be for a paper's
+methods section.
+
+**First real study, published and live**: four arms, same 5-trial × 2-cycle design, comparing every
+real starting-condition proposal Middle East 2026 actually defines against the researched baseline —
+asking which lever most improves regional security:
+
+| Arm | Median final stability |
+|---|---|
+| `saudi_normalizes_anyway` — Saudi Arabia normalizes with Israel anyway | **34** (best) |
+| as-researched baseline | 30 |
+| `senate_sanctions_bill_enacted` — new Iran/Russia sanctions bill | 25 |
+| `congress_blocks_relief` — Congress blocks sanctions relief outright | 19 (worst) |
+
+Among the tested alternatives, Saudi normalization is the strongest lever for stability; both
+sanctions-related conditions make it worse than doing nothing, with blocking relief outright the
+most damaging. **One disclosed caveat**: the `saudi_normalizes_anyway` arm's `verify-batch` correctly
+fails the "registered model only" check — one decision (trial 3, cycle 2, Israel) hit a real Opus 5
+safety-classifier decline on substantive interdiction/ultimatum content, and the server-side fallback
+correctly re-ran it on `claude-opus-4-8`, producing a coherent, on-schema answer. Kept as published
+rather than re-run: discarding a real result over imperfect provenance would itself be exactly the
+kind of after-the-fact cherry-picking this whole mechanism exists to prevent — the deviation is real,
+and both `verify-batch` and this page say so plainly. See the full ranking, live:
+`?compare=db8fc00c951fdb92,f8788a656fbb6fe6,f3c0fc2f16c12938,bd26d998026c8375`
 
 The sibling project
 [dao-governance-research](https://github.com/JonathanReiser/dao-governance-research) already applies
@@ -346,6 +372,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Pre-registration (publish parameters, bind to a future NIST pulse, publish whatever comes back) | ✅ Done — `scripts/prereg.js`, verified end-to-end against the live beacon |
 | Batch pre-registration (N independent trials, one hypothesis, published trial count enforced) | ✅ Done — `scripts/prereg.js register-batch`/`draw-batch`/`verify-batch` + `scripts/run-batch.js`, verified end-to-end against the live beacon with real trials |
 | Batch results viewer (`?batch=<hash>`, distribution chart + live verification) | ✅ Done — `BatchResultsPage.jsx`, first real batch published and live |
+| Strategy comparison view (`?compare=<hashes>`, ranked across arms) | ✅ Done — `StrategyComparisonPage.jsx`, first real 4-arm study published and live |
 | Political layer (Layer 1), real IBM quantum hardware (Tier 2) | ✅ Done — opt-in toggle, scoped to the entangled Iran/Israel pair only (standalone/peacekeeper stay Tier 1). Verified live end-to-end: real backend (`ibm_fez`), real job id, feeds the actual committed on-chain outcome, not a side display |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
