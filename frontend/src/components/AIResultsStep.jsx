@@ -1,7 +1,5 @@
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-} from "recharts";
 import { stabilityLabel, stabilityColor } from "../lib/simulation";
+import { RunCharts } from "./RunCharts";
 
 const METRIC_ID_TO_KEY = {
   stability_index: "stability",
@@ -10,11 +8,6 @@ const METRIC_ID_TO_KEY = {
   conflict_events: "conflicts",
   deal_integrity:  "dealIntegrity",
 };
-
-// Same 4-slot palette regardless of which real-world instruments fill the
-// slots — see scenario.aiAgents.marketInstruments for what "primary"/
-// "currencyA"/"currencyB"/"global" mean in a given scenario.
-const MARKET_COLORS = { primary: "#f97316", currencyA: "#22c55e", currencyB: "#818cf8", global: "#ef4444" };
 
 function buildNationMeta(scenario) {
   return Object.fromEntries(scenario.nations.map(n => [n.id, { label: n.name, flag: n.flag, color: n.color }]));
@@ -72,16 +65,6 @@ export function AIResultsStep({ results, scenario, onReset }) {
   };
   const end = finalState ?? history.at(-1) ?? start;
 
-  const chartData = history.map(h => ({
-    cycle: h.cycle, stability: h.stability, dealIntegrity: h.dealIntegrity, proxy: h.proxy,
-  }));
-
-  const marketData = history.map(h => ({
-    cycle: h.cycle,
-    primary: h.market?.primary, currencyA: h.market?.currencyA,
-    currencyB: h.market?.currencyB, global: h.market?.global,
-  }));
-
   const entangledCycles = history.filter(h => h.quantum?.entangledEffect);
   const tailWeights = history
     .map(h => h.market?.speculation?.primary?.tailWeight)
@@ -137,49 +120,14 @@ export function AIResultsStep({ results, scenario, onReset }) {
         </p>
       </div>
 
-      {/* Political trajectory */}
-      <section className="section">
-        <h3>Political Trajectory</h3>
-        <div className="chart-wrap">
-          <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={chartData} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-              <XAxis dataKey="cycle" label={{ value: "Cycle", position: "insideBottom", offset: -2 }} stroke="#666" />
-              <YAxis domain={[0, 100]} stroke="#666" />
-              <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 6 }} labelStyle={{ color: "#aaa" }} />
-              <Legend />
-              <Line type="monotone" dataKey="stability"     stroke="#6366f1" strokeWidth={2} dot={false} name={metricLabels.stability} />
-              <Line type="monotone" dataKey="dealIntegrity" stroke="#eab308" strokeWidth={2} dot={false} name={metricLabels.dealIntegrity} />
-              <Line type="monotone" dataKey="proxy"         stroke="#ef4444" strokeWidth={2} dot={false} name={metricLabels.proxy} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
+      <RunCharts history={history} scenario={scenario} />
 
-      {/* Economic field trajectory */}
-      <section className="section">
-        <h3>Economic Field (Layer 2/3)</h3>
-        <div className="chart-wrap">
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={marketData} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-              <XAxis dataKey="cycle" stroke="#666" />
-              <YAxis stroke="#666" />
-              <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 6 }} labelStyle={{ color: "#aaa" }} />
-              <Legend />
-              {marketInstruments.map(inst => (
-                <Line key={inst.key} type="monotone" dataKey={inst.key} stroke={MARKET_COLORS[inst.key]} strokeWidth={2} dot={false} name={inst.label} />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        {avgTailWeight != null && (
-          <p className="muted">
-            Avg. speculation tail weight across {tailWeights.length} cycles: {avgTailWeight.toFixed(2)} — the share
-            of each price move attributable to interference-driven fat tails rather than ordinary variance.
-          </p>
-        )}
-      </section>
+      {avgTailWeight != null && (
+        <p className="muted">
+          Avg. speculation tail weight across {tailWeights.length} cycles: {avgTailWeight.toFixed(2)} — the share
+          of each price move attributable to interference-driven fat tails rather than ordinary variance.
+        </p>
+      )}
 
       {/* Stability summary */}
       <section className="section">
