@@ -222,6 +222,18 @@ batch's actual exposure is publishing only its best-looking trials, not entropy 
 that gap needs the same "commit before you can see results" trick this file already used for one
 run, not a second, gas-costing trust mechanism running in parallel.
 
+**A shareable `?batch=<hash>` viewer** (`BatchResultsPage.jsx`, `GET /api/batch/:hashPrefix`) shows
+any sealed batch's hypothesis, config, a per-trial bar chart of final regional stability, and the
+same six live-verified checks `verify-batch` prints on the command line — read straight from
+`preregistrations/*.json`, bundled into the deployment via `vercel.json`'s `includeFiles`. Unlike
+`?view=<address>` for a single on-chain run, this link's permanence depends on this site staying up
+— there's no public chain a batch's data lives on, a deliberate cost tradeoff explained above, not
+an oversight — and a real batch (dozens to hundreds of real cycles) is never something this page can
+start; it only ever shows one that already finished. The first real batch is committed and live:
+`?batch=f8788a656fbb6fe6` — 5 trials testing whether blocking congressional sanctions relief lowers
+regional stability (it did, consistently: final stability 18–29 across all 5 trials, against a
+researched baseline of 32).
+
 The sibling project
 [dao-governance-research](https://github.com/JonathanReiser/dao-governance-research) already applies
 the discipline in its plainest form — every design decision committed to git before the
@@ -332,7 +344,8 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Instinct layer, Tier 2 (real IBM quantum hardware) | ✅ Done — opt-in toggle, verified live end-to-end on real hardware (`ibm_marrakesh`), see `python-bridge/README.md` |
 | Political layer (Layer 1) + economic field (Layer 2/3), real entropy (Tier 1) | ✅ Done — the actual flagship collapse (not just the instinct veto's) now sources from real ANU QRNG at every live commit, verified live. `scripts/quantum-vs-classical-test.mjs`'s shared default is untouched on purpose (still `Math.random`, thousands of trials per validation run) |
 | Pre-registration (publish parameters, bind to a future NIST pulse, publish whatever comes back) | ✅ Done — `scripts/prereg.js`, verified end-to-end against the live beacon |
-| Batch pre-registration (N independent trials, one hypothesis, published trial count enforced) | ✅ Done — `scripts/prereg.js register-batch`/`draw-batch`/`verify-batch`, verified end-to-end against the live beacon |
+| Batch pre-registration (N independent trials, one hypothesis, published trial count enforced) | ✅ Done — `scripts/prereg.js register-batch`/`draw-batch`/`verify-batch` + `scripts/run-batch.js`, verified end-to-end against the live beacon with real trials |
+| Batch results viewer (`?batch=<hash>`, distribution chart + live verification) | ✅ Done — `BatchResultsPage.jsx`, first real batch published and live |
 | Political layer (Layer 1), real IBM quantum hardware (Tier 2) | ✅ Done — opt-in toggle, scoped to the entangled Iran/Israel pair only (standalone/peacekeeper stay Tier 1). Verified live end-to-end: real backend (`ibm_fez`), real job id, feeds the actual committed on-chain outcome, not a side display |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
