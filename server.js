@@ -1381,6 +1381,35 @@ app.post("/api/layer1/qpu-collapse", qpuReadingLimiter, async (req, res) => {
 });
 
 
+// Proxies to python-bridge /q-ai-deliberate route for Q-AI nation agent deliberation
+app.post("/api/q-ai/deliberate", qpuReadingLimiter, async (req, res) => {
+  const { nation_id, pressure, risk_posture } = req.body || {};
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+
+  try {
+    const response = await fetch(`${PYTHON_BRIDGE_URL}/q-ai-deliberate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nation_id, pressure, risk_posture }),
+      signal: controller.signal,
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      return res.status(response.status).json(body);
+    }
+    res.json(body);
+  } catch (err) {
+    const reason = err.name === "AbortError" ? "python-bridge timed out after 30s" : `python-bridge unreachable: ${err.message}`;
+    console.error("[q-ai/deliberate]", reason);
+    res.status(502).json({ error: reason, hint: "is python-bridge/app.py running? see python-bridge/README.md" });
+  } finally {
+    clearTimeout(timeout);
+  }
+});
+
+
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
 
