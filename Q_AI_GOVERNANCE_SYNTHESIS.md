@@ -70,6 +70,29 @@ Integrated into `governance-playground` via `python-bridge/q_ai_engine.py` and E
 
 ---
 
+## 💹 5. Quantum Economics & Live Snapshot API Oracle
+
+### 5.1 Quantum Economics & Financial Markets (`quantum_economics.py`)
+- **Market Sentiment Superposition:** Investor sentiment as a 2-qubit statevector $|\psi\rangle = c_0 |\text{Bullish}\rangle + c_1 |\text{Bearish}\rangle$ evolving under financial shock Hamiltonians.
+- **Financial News Order Effects:** Models non-commutative disclosure sequences ($AB \neq BA$, e.g. Inflation data before Fed rate decision vs vice-versa).
+- **Systemic Liquidity Contagion:** Bank runs and crypto liquidity crunches modeled as Bell state entanglement collapse ($|\Phi^+\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)$).
+
+### 5.2 Live Snapshot API Oracle (`snapshot_live_oracle.py`)
+- Queries the live **Snapshot GraphQL API (`https://hub.snapshot.org/graphql`)** for active proposals across top Web3 DAOs (`uniswap.eth`, `arbitrumfoundation.eth`, `opgovernance.eth`, `gitcoindao.eth`, `aave.eth`).
+- Computes real-time vote predictions (% YES / % NO) and consensus risk indices.
+
+---
+
+## 📦 6. PyPI Package (`q-ai-governance`) & CLI (`q-ai-gov`)
+
+Installable Python package providing three CLI subcommands:
+- `q-ai-gov predict --public-good 9.2 --roi 9.5`: Predicts real DAO proposal vote approval.
+- `q-ai-gov allocate --budget 1500000`: Computes optimal DAO treasury funding.
+- `q-ai-gov live`: Pulls and predicts active proposals from Snapshot GraphQL API.
+- `q-ai-gov econ`: Runs Quantum Economics financial market simulations.
+
+---
+
 ## 📁 Codebase Directory & File Index
 
 ### Repository 1: `quantum-orch-or`
