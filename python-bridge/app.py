@@ -13,8 +13,10 @@ from flask import Flask, jsonify, request
 
 from instinct_qpu import read_instinct
 from layer1_qpu import collapse_entangled_pair
+from q_ai_engine import NationQuantumDeliberationEngine
 
 app = Flask(__name__)
+deliberation_engine = NationQuantumDeliberationEngine()
 
 
 @app.post("/qpu-reading")
@@ -30,6 +32,20 @@ def qpu_reading():
 
     reading = read_instinct(pressure, entangled_readout)
     return jsonify(reading)
+
+
+@app.post("/q-ai-deliberate")
+def q_ai_deliberate():
+    body = request.get_json(silent=True) or {}
+    nation_id = body.get("nation_id", "US")
+    pressure = body.get("pressure", 50.0)
+    risk_posture = body.get("risk_posture", "dovish")
+
+    if not isinstance(pressure, (int, float)):
+        return jsonify({"error": "pressure must be a number (0-100)"}), 400
+
+    result = deliberation_engine.deliberate(nation_id, pressure_index=float(pressure), risk_posture=risk_posture)
+    return jsonify(result)
 
 
 @app.post("/layer1-collapse")
