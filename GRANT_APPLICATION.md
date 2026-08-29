@@ -9,6 +9,9 @@ Governance Playground is an open-source research sandbox where political scienti
 
 **Live demo:** https://governance-playground.vercel.app — no install required.
 **Code:** https://github.com/JonathanReiser/governance-playground (public, ISC-licensed)
+**PyPI Core Engine:** `pip install q-ai-governance` ([pypi.org/project/q-ai-governance/](https://pypi.org/project/q-ai-governance/))
+**CERN Zenodo Publication:** [DOI: 10.5281/zenodo.22151233](https://zenodo.org/records/22151233)
+**Full Academic Paper:** [full_quantum_governance_paper.md](https://github.com/JonathanReiser/quantum-orch-or/blob/main/full_quantum_governance_paper.md)
 **On-chain, independently verifiable:** [WorldRegistry on Sepolia Etherscan](https://sepolia.etherscan.io/address/0x863c9db5437AfA4F32d02661ba1EA9752dce592E)
 
 The first scenario: **The Middle East, May 2026** — a fragile post-war environment following the US/Israel-Iran peace deal. It now runs in two modes. Four fixed-rule experiments are already running:
