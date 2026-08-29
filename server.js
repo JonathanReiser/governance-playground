@@ -1306,9 +1306,16 @@ app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
   try {
     res.json(await decideNationAction({ nation, worldState, scenarioId }));
   } catch (err) {
-    console.error(`[${nation}] agent error:`, err.message);
-    const status = /Unknown|No output schema/.test(err.message) ? 400 : 500;
-    res.status(status).json({ error: err.message });
+    console.error(`[${nation}] agent error (${err.message}) — serving bulletproof local fallback`);
+    const fallbackDecision = generateLocalQAIDecision(scenarioId || "middle-east-2026", nation || "us", worldState || {});
+    res.json({
+      nation: nation || "us",
+      cycle: worldState?.cycle || 1,
+      decision: fallbackDecision,
+      model: "q-ai-local-fallback-engine",
+      usage: { input_tokens: 0, output_tokens: 0 },
+      newsSource: "mock-fallback (Q-AI Local Fallback)"
+    });
   }
 });
 
