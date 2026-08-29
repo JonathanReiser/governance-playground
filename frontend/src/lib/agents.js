@@ -118,24 +118,7 @@ export class NationAgent {
   async decide(worldState, scenarioId, decideFn) {
     if (decideFn) return decideFn({ nation: this.nationId, worldState, scenarioId });
 
-    try {
-      const res = await fetch(`${SERVER_URL}/agent/decide`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nation: this.nationId, worldState, scenarioId }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.decision && !data.error) {
-          return data;
-        }
-      }
-    } catch (e) {
-      console.warn(`Server agent fetch error (${e.message}) — using client Q-AI decision engine`);
-    }
-
-    // Client-side Bulletproof Fallback Engine
+    // Compute decision directly with Q-AI Client Engine (0 network requests, 0 external API calls)
     const decision = generateClientQAIDecision(scenarioId, this.nationId, worldState);
     return {
       nation: this.nationId,
