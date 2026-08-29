@@ -1237,82 +1237,69 @@ function generateLocalQAIDecision(scenarioId, nation, worldState) {
 }
 
 async function decideNationAction({ nation, worldState, scenarioId }) {
+  const scenarioPrompts = SYSTEM_PROMPTS[scenarioId];
+  if (!scenarioPrompts) throw new Error(`Unknown or unsupported scenario: ${scenarioId}`);
+  if (!scenarioPrompts[nation]) throw new Error(`Unknown nation "${nation}" for scenario "${scenarioId}"`);
+  if (!DECISION_SCHEMAS[scenarioId]?.[nation]) throw new Error(`No output schema for "${nation}" in "${scenarioId}"`);
+
+  const { text: headlines, source: newsSource } = await getHeadlines(scenarioId, worldState);
+  const enrichedState = { ...worldState, newsHeadlines: headlines };
+  const { doctrine, situation } = splitPrompt(scenarioPrompts[nation], enrichedState);
+
+  let decision = null;
+  let modelUsed = "q-ai-local-fallback-engine";
+  let usageUsed = { input_tokens: 0, output_tokens: 0 };
+
+  // Try Anthropic API
   try {
-    const scenarioPrompts = SYSTEM_PROMPTS[scenarioId];
-    if (!scenarioPrompts) throw new Error(`Unknown or unsupported scenario: ${scenarioId}`);
-    if (!scenarioPrompts[nation]) throw new Error(`Unknown nation "${nation}" for scenario "${scenarioId}"`);
-    if (!DECISION_SCHEMAS[scenarioId]?.[nation]) throw new Error(`No output schema for "${nation}" in "${scenarioId}"`);
-
-    const { text: headlines, source: newsSource } = await getHeadlines(scenarioId, worldState);
-    const enrichedState = { ...worldState, newsHeadlines: headlines };
-    const { doctrine, situation } = splitPrompt(scenarioPrompts[nation], enrichedState);
-
-    // Try calling Anthropic API
-    try {
-      const message = await anthropic.beta.messages.create({
-        model: AGENT_MODEL,
-        max_tokens: 8000,
-        betas: ["server-side-fallback-2026-07-01"],
-        fallbacks: "default",
-        thinking: { type: "adaptive" },
-        output_config: {
-          effort: AGENT_EFFORT,
-          format: { type: "json_schema", schema: DECISION_SCHEMAS[scenarioId][nation] },
+    const message = await anthropic.beta.messages.create({
+      model: AGENT_MODEL,
+      max_tokens: 8000,
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      thinking: { type: "adaptive" },
+      output_config: {
+        effort: AGENT_EFFORT,
+        format: { type: "json_schema", schema: DECISION_SCHEMAS[scenarioId][nation] },
+      },
+      system: [
+        { type: "text", text: doctrine, cache_control: { type: "ephemeral" } },
+        { type: "text", text: situation },
+      ],
+      messages: [
+        {
+          role: "user",
+          content: `Cycle ${worldState.cycle}: Review the current world state above and make your decision.`,
         },
-        system: [
-          { type: "text", text: doctrine, cache_control: { type: "ephemeral" } },
-          { type: "text", text: situation },
-        ],
-        messages: [
-          {
-            role: "user",
-            content: `Cycle ${worldState.cycle}: Review the current world state above and make your decision.`,
-          },
-        ],
-      });
+      ],
+    });
 
-      if (message.stop_reason === "refusal") {
-        const d = message.stop_details || {};
-        throw new Error(`model declined this decision (category: ${d.category ?? "unknown"})`);
-      }
-
+    if (message && message.content) {
       const textBlock = message.content.find((b) => b.type === "text");
-      if (!textBlock) throw new Error("no text block in model response");
-      const decision = JSON.parse(textBlock.text);
-      logAgentUsage(nation, scenarioId, worldState.cycle, message.model, message.usage);
-
-      return {
-        nation,
-        cycle: worldState.cycle,
-        decision,
-        model: message.model,
-        usage: message.usage,
-        newsSource,
-      };
-    } catch (apiErr) {
-      console.warn(`[${nation}] Anthropic API error (${apiErr.message}) — serving local Q-AI fallback decision`);
-      const fallbackDecision = generateLocalQAIDecision(scenarioId, nation, worldState);
-      return {
-        nation,
-        cycle: worldState.cycle,
-        decision: fallbackDecision,
-        model: "q-ai-local-fallback-engine",
-        usage: { input_tokens: 0, output_tokens: 0 },
-        newsSource: newsSource + " (Q-AI Local Fallback)"
-      };
+      if (textBlock && textBlock.text) {
+        decision = JSON.parse(textBlock.text);
+        modelUsed = message.model || AGENT_MODEL;
+        usageUsed = message.usage || usageUsed;
+      }
     }
-  } catch (outerErr) {
-    console.warn(`[${nation}] Setup error (${outerErr.message}) — serving local Q-AI fallback decision`);
-    const fallbackDecision = generateLocalQAIDecision(scenarioId || "middle-east-2026", nation || "israel", worldState || {});
-    return {
-      nation: nation || "israel",
-      cycle: worldState?.cycle || 1,
-      decision: fallbackDecision,
-      model: "q-ai-local-fallback-engine",
-      usage: { input_tokens: 0, output_tokens: 0 },
-      newsSource: "mock-fallback (Q-AI Local Fallback)"
-    };
+  } catch (apiErr) {
+    console.warn(`[${nation}] Anthropic API call error (${apiErr.message}) — using Local Q-AI Fallback Decision`);
   }
+
+  // Guaranteed fallback if LLM returned null or error
+  if (!decision || typeof decision !== "object") {
+    decision = generateLocalQAIDecision(scenarioId, nation, worldState);
+    modelUsed = "q-ai-local-fallback-engine";
+  }
+
+  return {
+    nation,
+    cycle: worldState.cycle || 1,
+    decision,
+    model: modelUsed,
+    usage: usageUsed,
+    newsSource,
+  };
 }
 
 app.post("/api/agent/decide", agentDecideLimiter, async (req, res) => {
