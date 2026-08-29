@@ -265,9 +265,24 @@ export function ConnectStep({ onConnect }) {
             })}
           </div>
 
-          <button className="btn-secondary" style={{ marginTop: "0.75rem", fontSize: 12 }} onClick={() => setShowMyRuns(false)}>
-            ← Back
-          </button>
+          <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem" }}>
+            <button className="btn-secondary" style={{ fontSize: 12 }} onClick={() => setShowMyRuns(false)}>
+              ← Back
+            </button>
+            {myRuns.length > 0 && (
+              <button
+                className="btn-secondary"
+                style={{ fontSize: 11, color: "#f87171", borderColor: "#f87171" }}
+                onClick={() => {
+                  clearRuns();
+                  try { window.localStorage.removeItem("governance-playground:continuations"); } catch (e) {}
+                  setMyRuns([]);
+                }}
+              >
+                🗑 Clear Stale Saved Runs
+              </button>
+            )}
+          </div>
         </div>
       )}
 
