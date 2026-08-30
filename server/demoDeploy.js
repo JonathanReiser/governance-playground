@@ -89,34 +89,33 @@ async function withNonceRetry(signer, fn, retries = 2) {
  * contracts.js — several visitors could hit /api/demo/deploy close
  * together, and without this the wallet's nonce tracking races. */
 function getDemoSigner() {
+  if (!process.env.DEMO_PRIVATE_KEY) {
+    throw new Error("DEMO_PRIVATE_KEY not set — no-wallet demo path is disabled.");
+  }
   if (!_signer) {
-    const pkey = process.env.DEMO_PRIVATE_KEY || ethers.Wallet.createRandom().privateKey;
-    const wallet = new ethers.Wallet(pkey, getDemoProvider());
+    const wallet = new ethers.Wallet(process.env.DEMO_PRIVATE_KEY, getDemoProvider());
     _signer = new ethers.NonceManager(wallet);
   }
   return _signer;
 }
 
 async function getDemoStatus() {
-  const pkey = process.env.DEMO_PRIVATE_KEY || "fallback";
-  try {
-    const signer = getDemoSigner();
-    const address = await signer.getAddress();
-    const balanceWei = await getDemoProvider().getBalance(address).catch(() => 0n);
-    const balanceEth = Number(ethers.formatEther(balanceWei));
-    return {
-      enabled: true,
-      address,
-      balanceEth,
-      isFallback: pkey === "fallback",
-      // A full scenario deploy is ~10-12 transactions; well under 0.02 ETH
-      // of Sepolia gas even at generous prices, but flag low balance before
-      // it fails mid-deploy (worse UX than failing up front).
-      lowBalance: balanceEth < 0.02,
-    };
-  } catch (e) {
-    return { enabled: true, address: "0x0000000000000000000000000000000000000000", balanceEth: 100 };
+  if (!process.env.DEMO_PRIVATE_KEY) {
+    return { enabled: false };
   }
+  const signer = getDemoSigner();
+  const address = await signer.getAddress();
+  const balanceWei = await getDemoProvider().getBalance(address);
+  const balanceEth = Number(ethers.formatEther(balanceWei));
+  return {
+    enabled: true,
+    address,
+    balanceEth,
+    // A full scenario deploy is ~10-12 transactions; well under 0.02 ETH
+    // of Sepolia gas even at generous prices, but flag low balance before
+    // it fails mid-deploy (worse UX than failing up front).
+    lowBalance: balanceEth < 0.02,
+  };
 }
 
 /**
@@ -189,19 +188,18 @@ function getDeploySteps(scenarioId) {
  * under the same key. Defaults to "deploy" so every existing deploy-step
  * caller is unaffected; run-phase callers pass "run" explicitly.
  */
-const DEMO_HMAC_SECRET = process.env.DEMO_PRIVATE_KEY || "q-ai-governance-playground-demo-secret-2026";
-
 function sealState(scenarioId, stepIndex, state, namespace = "deploy") {
   const mac = crypto
-    .createHmac("sha256", DEMO_HMAC_SECRET)
+    .createHmac("sha256", process.env.DEMO_PRIVATE_KEY || "")
     .update(canonicalStringify({ namespace, scenarioId, stepIndex, state }))
     .digest("hex");
   return { state, mac };
 }
 
 function verifySealedState(scenarioId, stepIndex, state, mac, namespace = "deploy") {
+  if (!process.env.DEMO_PRIVATE_KEY) return false;
   const expected = crypto
-    .createHmac("sha256", DEMO_HMAC_SECRET)
+    .createHmac("sha256", process.env.DEMO_PRIVATE_KEY)
     .update(canonicalStringify({ namespace, scenarioId, stepIndex, state }))
     .digest("hex");
   const a = Buffer.from(expected, "hex");
