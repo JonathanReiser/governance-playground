@@ -1,0 +1,28 @@
+{
+  "kind": "governance-playground/batch-preregistration",
+  "version": 1,
+  "createdAt": "2026-08-30T00:16:17.085Z",
+  "scenarioId": "taiwan-strait-2026",
+  "startingConditionIds": [
+    "china_expands_japan_export_ban"
+  ],
+  "hypothesis": "China expands its export ban against Japan (vs. as-researched) — an escalatory/punitive lever, testing the Taiwan Strait replication of the regional-security strategy study",
+  "trialCount": 5,
+  "cyclesPerTrial": 2,
+  "mode": "ai-quantum-tier1",
+  "agentModel": "claude-opus-5",
+  "agentEffort": "high",
+  "doctrineHashes": {
+    "china": "90cf0c0030d06b25427b496fbc650b1abac1bc01f4a2902d6dd8ec395937956c",
+    "japan": "c571f2299967a37a78f02b127c593dd0089ad758a87a7c7496fb646af8a87124",
+    "taiwan": "0f33c333181f310c203d092b6a32e561f3c63f5a4c05940cd21dcbcf7b49c981"
+  },
+  "schemaHashes": {
+    "china": "43d5c155984579b70e477f082a66a91013d45d8194d1eeddb38aad727f7baf47",
+    "japan": "9cc4f5c42ba509b0b55d5c7708b1d87fa645b651b995202984dde04408b4db34",
+    "taiwan": "21a646ebd49a74fd65cda10554d952a9ebb2456dd06879f6a9a39d85ebfc347d"
+  },
+  "drawAfter": "2026-08-30T00:21:17.085Z",
+  "beaconUri": "https://beacon.nist.gov/beacon/2.0/pulse/time/next/1788049277085",
+  "commitment": "5 independent trials of 2 cycles each will be run at or after drawAfter, the first seeded from the NIST pulse at beaconUri, and every trial's full per-cycle output published whatever it says — not a selection of the trials that came out a particular way."
+}
