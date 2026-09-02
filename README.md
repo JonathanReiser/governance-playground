@@ -413,6 +413,7 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Batch results viewer (`?batch=<hash>`, distribution chart + live verification) | ✅ Done — `BatchResultsPage.jsx`, first real batch published and live |
 | Strategy comparison view (`?compare=<hashes>`, ranked across arms) | ✅ Done — `StrategyComparisonPage.jsx`, first real 4-arm study published and live |
 | Political layer (Layer 1), real IBM quantum hardware (Tier 2) | ✅ Done — opt-in toggle, scoped to the entangled Iran/Israel pair only (standalone/peacekeeper stay Tier 1). Verified live end-to-end: real backend (`ibm_fez`), real job id, feeds the actual committed on-chain outcome, not a side display |
+| EWL quantum-game comparison baseline | ✅ Done — `python-bridge/ewl_game.py` + `dyad_baseline.py`. **Theory only, not a mechanism**: it computes classical Nash, classical correlated (Aumann) and EWL quantum reference points for the Iran/Israel dyad and reports where the Claude agents actually landed against them. It has no hardware path, is wired into nothing, and cannot move any run — see `python-bridge/README.md`. Nation agents reason in language; they do not apply unitaries to shared qubits, so EWL can never be reported as a cause of anything observed here |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
 | More scenarios (Palestine, Taiwan Strait, Russia-Ukraine, …) | ⬜ Planned |
@@ -470,7 +471,7 @@ Three separate suites, all running in CI on every push/PR to `main`:
 ```bash
 npm test                   # 83-test Solidity/Chai suite — contracts/ (.github/workflows/contracts-tests.yml)
 cd frontend && npm test    # vitest — the quantum-engine plumbing (agents.js/markets.js) (.github/workflows/frontend-tests.yml)
-cd python-bridge && ./venv/bin/python3 -m pytest tests/ -v   # instinct_qpu.py + layer1_qpu.py — no token needed; the 3 real-hardware tests skip cleanly without one
+cd python-bridge && ./venv/bin/python3 -m pytest tests/ -v   # instinct_qpu.py + layer1_qpu.py + the EWL baseline — no token needed; the 3 real-hardware tests skip cleanly without one
 ```
 
 ### Troubleshooting: MetaMask stuck on "Review alert"
