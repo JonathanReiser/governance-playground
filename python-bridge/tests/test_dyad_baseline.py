@@ -225,3 +225,72 @@ class TestFlaskEndpoint:
         assert [e["profile"] for e in payload["reference_points"]["ewl_quantum_restricted"]["equilibria"]] == ["QQ"]
         assert "RESTRICTED" in payload["reference_points"]["ewl_quantum_restricted"]["caveat"]
         assert payload["observed"]["total_cycles"] > 0
+
+
+class TestRegistrationMatchesRun:
+    """
+    A sealed result is permanent, including one that didn't execute the
+    condition it declared. 700254f5 is exactly that: registered as
+    mou_deal_concluded, ran at plain baseline. Any analysis that
+    reconstructs starting values from the registration would attribute
+    that run's 20 cycles to a condition it never applied —
+    prompt_gates.py counted 20 phantom "gate open" cycles from it before
+    this check existed.
+    """
+
+    def _scenario(self):
+        import json
+
+        from dyad_baseline import REPO_ROOT
+
+        return json.loads((REPO_ROOT / "frontend" / "src" / "scenarios" / "middle-east-2026.json").read_text())
+
+    def test_declared_stability_reflects_the_condition_not_just_the_baseline(self):
+        from dyad_baseline import declared_starting_stability
+
+        scenario = self._scenario()
+        assert declared_starting_stability({"startingConditionIds": []}, scenario) == 32.0
+        assert declared_starting_stability({"startingConditionIds": ["mou_deal_concluded"]}, scenario) == 62.0
+
+    def test_flags_a_run_whose_data_contradicts_its_registration(self):
+        from dyad_baseline import registration_matches_run
+
+        cycles = [{"cycle": 1, "committed": {"stability": 31}}]
+        matches, reason = registration_matches_run(
+            {"startingConditionIds": ["mou_deal_concluded"]}, cycles, self._scenario()
+        )
+        assert matches is False
+        assert "did not execute its registration" in reason
+
+    def test_accepts_a_run_that_did_execute_its_registration(self):
+        # Same declared condition, data consistent with it — must NOT be
+        # flagged, or the check would throw away the valid arm too.
+        from dyad_baseline import registration_matches_run
+
+        cycles = [{"cycle": 1, "committed": {"stability": 70}}]
+        matches, reason = registration_matches_run(
+            {"startingConditionIds": ["mou_deal_concluded"]}, cycles, self._scenario()
+        )
+        assert matches is True and reason is None
+
+    def test_accepts_an_ordinary_baseline_run(self):
+        from dyad_baseline import registration_matches_run
+
+        cycles = [{"cycle": 1, "committed": {"stability": 29}}]
+        assert registration_matches_run({"startingConditionIds": []}, cycles, self._scenario())[0] is True
+
+    def test_no_opinion_when_there_is_nothing_to_check_against(self):
+        # Absent cycle-1 stability, the honest answer is "can't tell",
+        # not a fabricated mismatch.
+        from dyad_baseline import registration_matches_run
+
+        assert registration_matches_run({"startingConditionIds": ["mou_deal_concluded"]}, [], self._scenario())[0] is True
+
+    def test_the_real_void_run_is_excluded_from_the_loaded_corpus(self):
+        # End-to-end: 700254f5 is sealed and in preregistrations/, and must
+        # not contribute decisions to any analysis.
+        assert all(not o["registration"].startswith("700254f5") for o in load_dyad_decisions())
+
+    def test_the_real_valid_arm_is_still_included(self):
+        # The check must not be so blunt it discards the arm that worked.
+        assert any(o["registration"].startswith("7f84ea20") for o in load_dyad_decisions())

@@ -42,7 +42,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from dyad_baseline import PREREGISTRATIONS_DIR, REPO_ROOT
+from dyad_baseline import PREREGISTRATIONS_DIR, REPO_ROOT, registration_matches_run
 
 SERVER_JS = REPO_ROOT / "server.js"
 
@@ -178,6 +178,8 @@ def analyse(directory: Path | str = PREREGISTRATIONS_DIR, scenario_id: str = "mi
     directory = Path(directory)
     observed: dict[str, list[float]] = {gate.variable: [] for gate in GATES}
     cycle_count = 0
+    excluded: list[dict] = []
+    scenario = json.loads(SCENARIO_JSON.read_text())
 
     for result_path in sorted(directory.glob("*.result.json")):
         digest = result_path.name.split(".")[0]
@@ -189,6 +191,17 @@ def analyse(directory: Path | str = PREREGISTRATIONS_DIR, scenario_id: str = "mi
             continue
         result = json.loads(result_path.read_text())
         trials = result.get("trials") or [{"cycles": result.get("cycles", [])}]
+
+        # Two of the three gate variables are reconstructed from the declared
+        # condition, so a run that didn't actually execute its registration
+        # would contribute values it never had. Excluded and reported rather
+        # than silently mixed in — see registration_matches_run().
+        all_cycles = [c for t in trials for c in t.get("cycles", [])]
+        matches, reason = registration_matches_run(registration, all_cycles, scenario)
+        if not matches:
+            excluded.append({"registration": digest, "cycles": len(all_cycles), "reason": reason})
+            continue
+
         for trial in trials:
             cycles = trial.get("cycles", [])
             cycle_count += len(cycles)
@@ -225,6 +238,7 @@ def analyse(directory: Path | str = PREREGISTRATIONS_DIR, scenario_id: str = "mi
     return {
         "scenario_id": scenario_id,
         "cycles_analysed": cycle_count,
+        "excluded_runs": excluded,
         "transcription_verified": verify_transcription(),
         "gates": gates,
         "any_gate_ever_open": any(g["ever_open"] for g in gates),
@@ -239,6 +253,10 @@ def format_report(report: dict) -> str:
         f"  scenario {report['scenario_id']}, {report['cycles_analysed']} published cycles",
         "",
     ]
+    for entry in report.get("excluded_runs", []):
+        lines.append(f"  EXCLUDED {entry['registration'][:8]} ({entry['cycles']} cycles): {entry['reason']}")
+    if report.get("excluded_runs"):
+        lines.append("")
     stale = [q for q, ok in report["transcription_verified"].items() if not ok]
     if stale:
         lines += ["  !! TRANSCRIPTION STALE — these quotes are no longer in server.js:"]
