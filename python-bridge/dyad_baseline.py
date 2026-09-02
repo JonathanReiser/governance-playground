@@ -126,6 +126,60 @@ def classify_indicator_vote(deltas: dict) -> str | None:
 CLASSIFIERS = {"conflict_events": classify_conflict_events, "indicator_vote": classify_indicator_vote}
 
 
+# A run is only usable as evidence about its declared condition if the run
+# actually executed that condition. That is not a hypothetical: registration
+# 700254f5 declares mou_deal_concluded but ran at plain baseline, because the
+# generated scenario JSON was stale and applyStartingConditionOverrides()
+# no-ops on an unknown id (fixed in scripts/run-batch.js, but the sealed
+# result is permanent and stays in the record on purpose).
+#
+# Trusting the registration would silently corrupt any analysis that
+# reconstructs starting values from it — prompt_gates.py counted 20 phantom
+# "gate open" cycles from this one run before the check below existed.
+#
+# The check is derived rather than hardcoded so it catches the next one too:
+# cycle-1 committed stability is real recorded data, so it can be compared
+# against what the declared condition should have produced. The agents move
+# stability by at most a few points before the first commit, so a gap this
+# large means the override never applied.
+STABILITY_MISMATCH_TOLERANCE = 15.0
+
+
+def declared_starting_stability(registration: dict, scenario: dict) -> float:
+    """What cycle-1 stability should start from, per the declared condition."""
+    metrics = {m["id"]: m["startingValue"] for m in scenario["simulation"]["metrics"]}
+    value = float(metrics["stability_index"])
+    proposals = {p["id"]: p for p in scenario.get("startingConditionProposals", [])}
+    for condition_id in registration.get("startingConditionIds") or []:
+        overrides = (proposals.get(condition_id) or {}).get("overrides") or {}
+        if "stability_index" in (overrides.get("metrics") or {}):
+            value = float(overrides["metrics"]["stability_index"])
+    return value
+
+
+def registration_matches_run(registration: dict, cycles: list[dict], scenario: dict) -> tuple[bool, str | None]:
+    """
+    Whether a sealed run actually executed the condition it declared.
+    Returns (matches, reason-if-not).
+    """
+    observed = [
+        (c.get("committed") or {}).get("stability")
+        for c in cycles
+        if c.get("cycle") == 1 and (c.get("committed") or {}).get("stability") is not None
+    ]
+    if not observed:
+        return True, None  # nothing to check against; don't invent a failure
+    declared = declared_starting_stability(registration, scenario)
+    median = sorted(observed)[len(observed) // 2]
+    if abs(median - declared) > STABILITY_MISMATCH_TOLERANCE:
+        return False, (
+            f"declared condition implies starting stability {declared:.0f}, but cycle-1 committed "
+            f"stability was {median:.0f} — the override did not apply and this run did not execute "
+            f"its registration"
+        )
+    return True, None
+
+
 def _iter_cycles(result: dict):
     if "trials" in result:
         for trial in result["trials"]:
@@ -168,6 +222,13 @@ def load_dyad_decisions(directory: Path | str = PREREGISTRATIONS_DIR, scenario_i
         if registration.get("scenarioId") != scenario_id:
             continue
         result = json.loads(result_path.read_text())
+
+        # Skip runs that didn't execute the condition they declared — their
+        # decisions are real, but they are not evidence about that condition.
+        scenario = json.loads((REPO_ROOT / "frontend" / "src" / "scenarios" / f"{scenario_id}.json").read_text())
+        matches, _ = registration_matches_run(registration, list(_iter_cycles(result)), scenario)
+        if not matches:
+            continue
 
         for cycle in _iter_cycles(result):
             decisions = cycle.get("decisions") or {}

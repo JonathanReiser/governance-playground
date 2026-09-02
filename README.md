@@ -123,6 +123,18 @@ rungs name escalation outright: 30–60 is "tactical opportunism, proxy escalati
 thresholds are transcribed with `server.js` line references and re-verified against the live file on
 every test run, so a reworded prompt fails loudly instead of silently invalidating the table.
 
+Two notes on reproducing those numbers. The table above is the corpus **as it stood before the test
+below** — the nine gates-closed batches. The tool now also reads the gates-open arm, so it reports
+92 cycles with those gates open in 10, 5 and 10 of them respectively; that is the test working, not
+a contradiction. And it **excludes registration `700254f5` and says so in its output**: that run
+declared `mou_deal_concluded` but executed at baseline, because the generated scenario JSON was
+stale and an unknown condition id silently no-opped. Its sealed result stays in the record rather
+than being deleted, but two of the three gate variables are reconstructed from the declared
+condition, so including it would have contributed 20 cycles of values the run never had. The
+exclusion is derived, not hardcoded — cycle-1 committed stability is real recorded data, so it can
+be checked against what the declared condition should have produced, and the next such run is
+caught the same way.
+
 **So it was tested directly.** Starting condition `mou_deal_concluded` opens all three gates at once
 and changes nothing else; registration
 [`7f84ea20`](preregistrations/7f84ea20ff2bf939.registration.json) preregistered the prediction and
