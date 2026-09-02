@@ -49,7 +49,7 @@ def calculate_coherence_metric(statevector, num_qubits):
     c_matrix = np.zeros((num_qubits, num_qubits))
     for i in range(num_qubits):
         for j in range(num_qubits):
-            c_matrix[i, j] = zz_exp[i, j] - z_expects[i] * z_expects[j] if 'zz_exp' in locals() else zz_expects[i, j] - z_expects[i] * z_expects[j]
+            c_matrix[i, j] = zz_expects[i, j] - z_expects[i] * z_expects[j]
             
     return np.sum(np.abs(c_matrix)), c_matrix
 

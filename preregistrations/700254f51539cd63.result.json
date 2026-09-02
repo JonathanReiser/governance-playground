@@ -1,0 +1,2767 @@
+{
+  "kind": "governance-playground/batch-result",
+  "version": 1,
+  "registrationHash": "700254f51539cd631165e8e912e2d2c78e02dc354bc2ae8a1004f27447913b0f",
+  "beacon": {
+    "pulseIndex": 1924171,
+    "timeStamp": "2026-09-02T18:55:00.000Z",
+    "outputValue": "FB398C58976BA2390599A31697147B46672766B631E101111596CA3BE0A26F9EC5AD395353A9BD0FDC5DD99E6370C071A563B97C09A2F08AE71A1630F2D318A7",
+    "uri": "https://beacon.nist.gov/beacon/2.0/pulse/time/next/1788375250425"
+  },
+  "completedAt": "2026-09-02T20:00:25.541Z",
+  "servedModels": [],
+  "trialCount": 10,
+  "trials": [
+    {
+      "trialIndex": 0,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 30,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 104,
+              "currencyA": 92,
+              "currencyB": 100,
+              "global": 104
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9e6ZsdArRE5fvwWEnW\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9e6pkPU1naAg46RZMq\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9e4JCUekVBPfveQAzT\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9e6p1Di9YQi5spRXPF\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5000000000000001
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5000000000000001
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5000000000000001
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": 3.9,
+            "currencyADelta": -8.5,
+            "currencyBDelta": 0.45,
+            "globalDelta": 3.9899999999999998,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 3.9,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 8.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 0.9,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 5.7,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 28,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 6,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 115,
+              "currencyA": 90,
+              "currencyB": 101,
+              "global": 106
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9eYJBV53gK6cMhcKuk\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9eBFuJC1b2hVgDa51f\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9eYGwefaPiSArYZnjg\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9eYHwRZy4tEoy68ZVU\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.9463912329591105,
+                "pragmatic": 0.05360876704088954
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.03453580344153214,
+                "cautious": 0.9654641965584678
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.03569229892949135,
+                "disengage": 0.964307701070509
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "riyal_windfall",
+                "target": "saudi_arabia",
+                "theta": 0.1869247628885927,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.9504844339512099,
+                "STABLE": 0.04951556604879047
+              },
+              "currencyA": {
+                "WEAKENING": 0.9330127018922195,
+                "RESILIENT": 0.06698729810778069
+              },
+              "currencyB": {
+                "ROBUST": 0.9045084971874741,
+                "STRAINED": 0.09549150281252634
+              },
+              "global": {
+                "SURGING": 0.975528258147577,
+                "CALM": 0.024471741852423224
+              }
+            },
+            "primaryDelta": 10.5,
+            "currencyADelta": -2.4,
+            "currencyBDelta": 0.8,
+            "globalDelta": 1.68,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 10.5,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 2.4,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 1.6,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 2.4,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 1,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 31,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 104,
+              "currencyA": 99,
+              "currencyB": 101,
+              "global": 100
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9ecBbUmo5XEbT8XxZk\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9exwGC9WzmZ1DnzeFC\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9ey3hxFCzvHqBdsnW5\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9egSLCdV3SA4UzDUAP\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "activelyMediate",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -1,
+              "conflictEvents": 1,
+              "label": "entangled escalation (dampened by active US mediation)"
+            },
+            "peacekeeperIntervention": {
+              "dampened": true,
+              "original": {
+                "stability": -2,
+                "conflictEvents": 1,
+                "label": "entangled escalation"
+              }
+            },
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": 3.9,
+            "currencyADelta": -0.8,
+            "currencyBDelta": 1.05,
+            "globalDelta": 0.48999999999999994,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 3.9,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 0.8,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 2.1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 0.7,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 30,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 6,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 109,
+              "currencyA": 91,
+              "currencyB": 102,
+              "global": 99
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9fPdpJHBrQAcWJ1Wkx\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9f6p2mpqiJts1yrALR\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9fPc5fXXCkNJsJH2mB\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9fPc5ZrJg7Rk6NTzUj\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "activelyMediate",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.9463912329591105,
+                "pragmatic": 0.05360876704088954
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.9654641965584678,
+                "cautious": 0.03453580344153214
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.964307701070509,
+                "disengage": 0.03569229892949135
+              }
+            },
+            "entangledEffect": {
+              "stability": -1,
+              "conflictEvents": 1,
+              "label": "entangled escalation (dampened by active US mediation)"
+            },
+            "peacekeeperIntervention": {
+              "dampened": true,
+              "original": {
+                "stability": -2,
+                "conflictEvents": 1,
+                "label": "entangled escalation"
+              }
+            },
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "riyal_windfall",
+                "target": "saudi_arabia",
+                "theta": 0.1869247628885927,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.9504844339512097,
+                "STABLE": 0.04951556604879045
+              },
+              "currencyA": {
+                "WEAKENING": 0.9330127018922195,
+                "RESILIENT": 0.06698729810778067
+              },
+              "currencyB": {
+                "ROBUST": 1.0000000000000002,
+                "STRAINED": 0
+              },
+              "global": {
+                "SURGING": 0.975528258147577,
+                "CALM": 0.024471741852423214
+              }
+            },
+            "primaryDelta": 4.9,
+            "currencyADelta": -8.3,
+            "currencyBDelta": 1.15,
+            "globalDelta": -0.57,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 4.9,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 8.3,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 2.3,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 1.9,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 2,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 34,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 4,
+            "dealIntegrity": 43,
+            "market": {
+              "primary": 114,
+              "currencyA": 96,
+              "currencyB": 102,
+              "global": 105
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9fgM9N4V8rAEihU6Xr\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9fpMrG56Fb7dv2pyfu\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9fgQctjJoriBf7yq3g\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9fg6WndpoNJA4WCT1Y\"}"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "dovish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": 2,
+              "dealIntegrity": 1,
+              "label": "entangled de-escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000001,
+                "STABLE": 0.4999999999999999
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000001,
+                "RESILIENT": 0.4999999999999999
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000001,
+                "STRAINED": 0.4999999999999999
+              },
+              "global": {
+                "SURGING": 0.5000000000000001,
+                "CALM": 0.4999999999999999
+              }
+            },
+            "primaryDelta": 14,
+            "currencyADelta": -3.8,
+            "currencyBDelta": 2.25,
+            "globalDelta": 5.39,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 14,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 3.8,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 4.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 7.7,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 36,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 4,
+            "dealIntegrity": 44,
+            "market": {
+              "primary": 116,
+              "currencyA": 95,
+              "currencyB": 104,
+              "global": 105
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9ft94ZNzstbkhp46yb\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gExT4fMxBKxqCmTRy\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9g77fVX49tuH1UoFjS\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gEtjboqdCNuCSTRt6\"}"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "dovish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.05360876704088954,
+                "pragmatic": 0.9463912329591105
+              },
+              "bProbabilities": {
+                "hawkish": 0,
+                "dovish": 1
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.9654641965584678,
+                "cautious": 0.03453580344153214
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.03569229892949135,
+                "disengage": 0.964307701070509
+              }
+            },
+            "entangledEffect": {
+              "stability": 2,
+              "dealIntegrity": 1,
+              "label": "entangled de-escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "riyal_windfall",
+                "target": "saudi_arabia",
+                "theta": 0.1869247628885927,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 1,
+                "STABLE": 0
+              },
+              "currencyA": {
+                "WEAKENING": 1,
+                "RESILIENT": 0
+              },
+              "currencyB": {
+                "ROBUST": 1,
+                "STRAINED": 0
+              },
+              "global": {
+                "SURGING": 1,
+                "CALM": 0
+              }
+            },
+            "primaryDelta": 2.1,
+            "currencyADelta": -0.9,
+            "currencyBDelta": 1.7,
+            "globalDelta": 0.48999999999999994,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 2.1,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 0.9,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 3.4,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 0.7,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 3,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 31,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 114,
+              "currencyA": 96,
+              "currencyB": 104,
+              "global": 100
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gfZ498N2Eg6wGmuM7\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gfZoJBgCkgPU1ACP4\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gfY4d8KiWwr5nUxEX\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gfpg32j1mDDYZNPLa\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "activelyMediate",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -1,
+              "conflictEvents": 1,
+              "label": "entangled escalation (dampened by active US mediation)"
+            },
+            "peacekeeperIntervention": {
+              "dampened": true,
+              "original": {
+                "stability": -2,
+                "conflictEvents": 1,
+                "label": "entangled escalation"
+              }
+            },
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": 13.5,
+            "currencyADelta": -4.5,
+            "currencyBDelta": 3.75,
+            "globalDelta": 0.13999999999999999,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 13.5,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 4.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 7.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 0.2,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 30,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 6,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 119,
+              "currencyA": 95,
+              "currencyB": 105,
+              "global": 101
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gjskZprmwKJwmKuhU\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gjxTswDtcLen8kRxK\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9h6euob3Q4jnJ6yZip\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9gjuVWvP2QAENCxACZ\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "activelyMediate",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.9463912329591105,
+                "pragmatic": 0.05360876704088954
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.9654641965584678,
+                "cautious": 0.03453580344153214
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.964307701070509,
+                "disengage": 0.03569229892949135
+              }
+            },
+            "entangledEffect": {
+              "stability": -1,
+              "conflictEvents": 1,
+              "label": "entangled escalation (dampened by active US mediation)"
+            },
+            "peacekeeperIntervention": {
+              "dampened": true,
+              "original": {
+                "stability": -2,
+                "conflictEvents": 1,
+                "label": "entangled escalation"
+              }
+            },
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "riyal_windfall",
+                "target": "saudi_arabia",
+                "theta": 0.1869247628885927,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.9504844339512097,
+                "STABLE": 0.04951556604879045
+              },
+              "currencyA": {
+                "WEAKENING": 0.9330127018922195,
+                "RESILIENT": 0.06698729810778067
+              },
+              "currencyB": {
+                "ROBUST": 1.0000000000000002,
+                "STRAINED": 0
+              },
+              "global": {
+                "SURGING": 0.975528258147577,
+                "CALM": 0.024471741852423214
+              }
+            },
+            "primaryDelta": 4.7,
+            "currencyADelta": -0.9,
+            "currencyBDelta": 1.45,
+            "globalDelta": 1.19,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 4.7,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 0.9,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 2.9,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 1.7,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 4,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 30,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 99,
+              "currencyA": 101,
+              "currencyB": 99,
+              "global": 99
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9hY4daraFG97t5avsT\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9hY4NwS5UkzW9CTKCu\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9hY4dQizXSxKjc6vbr\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9hY5NVagnVn4Jbj85e\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": -0.52,
+            "currencyADelta": 1.41,
+            "currencyBDelta": -0.6,
+            "globalDelta": -1.11,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 1.3,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 4.7,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 3.7,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 28,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 6,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 99,
+              "currencyA": 102,
+              "currencyB": 97,
+              "global": 99
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9i31AjaiviRmRkx7wG\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9hyaYcEC9DmWTPpYQS\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9i2xhBZ23nD33uVNxC\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9hyV5oCgpMjMEeT1D3\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 1,
+                "pragmatic": 0
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 1,
+                "cautious": 0
+              },
+              "pProbabilities": {
+                "activelyMediate": 0,
+                "disengage": 1
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.049515566048790455,
+                "STABLE": 0.9504844339512097
+              },
+              "currencyA": {
+                "WEAKENING": 0.06698729810778066,
+                "RESILIENT": 0.9330127018922195
+              },
+              "currencyB": {
+                "ROBUST": 0,
+                "STRAINED": 1.0000000000000002
+              },
+              "global": {
+                "SURGING": 0.024471741852423217,
+                "CALM": 0.9755282581475769
+              }
+            },
+            "primaryDelta": -0.48,
+            "currencyADelta": 1.2299999999999998,
+            "currencyBDelta": -1.8599999999999999,
+            "globalDelta": -0.21,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 1.2,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 4.1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 3.1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 0.7,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 5,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 31,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 98,
+              "currencyA": 101,
+              "currencyB": 99,
+              "global": 99
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9i6xYoV2wyXGhKQhJh\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9iTekMxGgoZfqcWqNe\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9iTiDZjUtYjA4gMEbu\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9iTgEWJCYqXXHtCCHs\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "activelyMediate",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -1,
+              "conflictEvents": 1,
+              "label": "entangled escalation (dampened by active US mediation)"
+            },
+            "peacekeeperIntervention": {
+              "dampened": true,
+              "original": {
+                "stability": -2,
+                "conflictEvents": 1,
+                "label": "entangled escalation"
+              }
+            },
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": -1.8399999999999999,
+            "currencyADelta": 0.8999999999999999,
+            "currencyBDelta": -0.54,
+            "globalDelta": -0.84,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 4.6,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 3,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 0.9,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 2.8,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 30,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 6,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 98,
+              "currencyA": 102,
+              "currencyB": 96,
+              "global": 98
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9itMYc2jbrdvh6N1kd\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9ikCAQ6qMbSS8Nuj1m\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9ikR3wx6fmFFfZLeob\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9iXbdUZZvHdYHPSCRL\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "activelyMediate",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 1,
+                "pragmatic": 0
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 1,
+                "cautious": 0
+              },
+              "pProbabilities": {
+                "activelyMediate": 1,
+                "disengage": 0
+              }
+            },
+            "entangledEffect": {
+              "stability": -1,
+              "conflictEvents": 1,
+              "label": "entangled escalation (dampened by active US mediation)"
+            },
+            "peacekeeperIntervention": {
+              "dampened": true,
+              "original": {
+                "stability": -2,
+                "conflictEvents": 1,
+                "label": "entangled escalation"
+              }
+            },
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.049515566048790455,
+                "STABLE": 0.9504844339512097
+              },
+              "currencyA": {
+                "WEAKENING": 0.06698729810778066,
+                "RESILIENT": 0.9330127018922195
+              },
+              "currencyB": {
+                "ROBUST": 0,
+                "STRAINED": 1.0000000000000002
+              },
+              "global": {
+                "SURGING": 0.024471741852423217,
+                "CALM": 0.9755282581475769
+              }
+            },
+            "primaryDelta": -0.36000000000000004,
+            "currencyADelta": 1.08,
+            "currencyBDelta": -3.3,
+            "globalDelta": -0.87,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 0.9,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 3.6,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 5.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 2.9,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 6,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 30,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 99,
+              "currencyA": 100,
+              "currencyB": 98,
+              "global": 100
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9jKPwCKrucgnpYm5Pi\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9jKLxLwW3P3iESEf6d\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9jKLi1wohpJWLN9pHo\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9jKNwauRAeo9LSsLWP\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": -1.36,
+            "currencyADelta": 0.44999999999999996,
+            "currencyBDelta": -1.62,
+            "globalDelta": -0.44999999999999996,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 3.4,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 1.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 2.7,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 1.5,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 28,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 6,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 97,
+              "currencyA": 101,
+              "currencyB": 98,
+              "global": 100
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9jk3G3M1urYXghcAke\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9jk4zhkjurWaCcg4xE\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9jk7jC5BptDXuX4dRt\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9jk5Vf3AFiRYLjXzie\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "bold",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 1,
+                "pragmatic": 0
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 1,
+                "cautious": 0
+              },
+              "pProbabilities": {
+                "activelyMediate": 0,
+                "disengage": 1
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "STRAINED",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.049515566048790455,
+                "STABLE": 0.9504844339512097
+              },
+              "currencyA": {
+                "WEAKENING": 0.06698729810778066,
+                "RESILIENT": 0.9330127018922195
+              },
+              "currencyB": {
+                "ROBUST": 0,
+                "STRAINED": 1.0000000000000002
+              },
+              "global": {
+                "SURGING": 0.024471741852423217,
+                "CALM": 0.9755282581475769
+              }
+            },
+            "primaryDelta": -1.6,
+            "currencyADelta": 1.11,
+            "currencyBDelta": -0.36,
+            "globalDelta": -0.44999999999999996,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 4,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 3.7,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 0.6,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 1.5,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 7,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 31,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 100,
+              "currencyA": 98,
+              "currencyB": 98,
+              "global": 102
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9kAqGLuzcTJaKYPj8S\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9kAnHn12vq6pNtsKfg\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9kAp2UP8HP1Q176p7y\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9kAoY2ijbn6GiPDi1x\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "activelyMediate",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -1,
+              "conflictEvents": 1,
+              "label": "entangled escalation (dampened by active US mediation)"
+            },
+            "peacekeeperIntervention": {
+              "dampened": true,
+              "original": {
+                "stability": -2,
+                "conflictEvents": 1,
+                "label": "entangled escalation"
+              }
+            },
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "WEAKENING",
+              "currencyB": "STRAINED",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5000000000000001
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5000000000000001
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5000000000000001
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": -0.44000000000000006,
+            "currencyADelta": -2,
+            "currencyBDelta": -2.1,
+            "globalDelta": 1.8199999999999998,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 1.1,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 2,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": -1,
+                "magnitude": 3.5,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 2.6,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 31,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 100,
+              "currencyA": 96,
+              "currencyB": 98,
+              "global": 102
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9kbdmZkH91MVFzwSR5\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9kbf1aeBvmbBo1cYsU\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9kbdXBuB29aLzCzp7G\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9kbgFb5WN3gpWfPtVs\"}"
+            }
+          },
+          "quantum": {
+            "iran": "pragmatic",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "activelyMediate",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.9463912329591105,
+                "pragmatic": 0.05360876704088954
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0,
+                "cautious": 1
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.964307701070509,
+                "disengage": 0.03569229892949135
+              }
+            },
+            "entangledEffect": null,
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0,
+                "STABLE": 1.0000000000000004
+              },
+              "currencyA": {
+                "WEAKENING": 1.0000000000000004,
+                "RESILIENT": 0
+              },
+              "currencyB": {
+                "ROBUST": 0.0954915028125263,
+                "STRAINED": 0.9045084971874741
+              },
+              "global": {
+                "SURGING": 1.0000000000000004,
+                "CALM": 0
+              }
+            },
+            "primaryDelta": -0.24,
+            "currencyADelta": -1.6,
+            "currencyBDelta": 0.2,
+            "globalDelta": 0.21,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 0.6,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 1.6,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 0.4,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 0.3,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 8,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 30,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 105,
+              "currencyA": 92,
+              "currencyB": 100,
+              "global": 104
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9m2Au5u2gQAACD2JrL\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9m2BPrvVnhWpG2kqVM\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9m2B9cmZ139jgKDWcw\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9m2Ecm2vMhVvVQHTvG\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5000000000000001
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5000000000000001
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5000000000000001
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": 4.9,
+            "currencyADelta": -8.4,
+            "currencyBDelta": 0.1,
+            "globalDelta": 3.7099999999999995,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 4.9,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 8.4,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 0.2,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 5.3,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 28,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 6,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 108,
+              "currencyA": 91,
+              "currencyB": 101,
+              "global": 106
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9mSvvHh1WNrHHPWfme\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9mASV74sCHQS6nkpDw\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9mStSLUzR81NvzwvvE\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9mATECzht3evyGuJQd\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.9463912329591105,
+                "pragmatic": 0.05360876704088954
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.03453580344153214,
+                "cautious": 0.9654641965584678
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.03569229892949135,
+                "disengage": 0.964307701070509
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": [
+              {
+                "driver": "rial_weakening",
+                "target": "iran",
+                "theta": -0.23365595361074085,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "riyal_windfall",
+                "target": "saudi_arabia",
+                "theta": 0.1869247628885927,
+                "amplifiedBy": 1.19
+              },
+              {
+                "driver": "gas_surge",
+                "target": "us",
+                "theta": 0.19006635554218249,
+                "amplifiedBy": 1.21
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "WEAKENING",
+              "currencyB": "ROBUST",
+              "global": "SURGING"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.9504844339512099,
+                "STABLE": 0.04951556604879047
+              },
+              "currencyA": {
+                "WEAKENING": 0.9330127018922195,
+                "RESILIENT": 0.06698729810778069
+              },
+              "currencyB": {
+                "ROBUST": 0.9045084971874741,
+                "STRAINED": 0.09549150281252634
+              },
+              "global": {
+                "SURGING": 0.975528258147577,
+                "CALM": 0.024471741852423224
+              }
+            },
+            "primaryDelta": 2.8,
+            "currencyADelta": -1.1,
+            "currencyBDelta": 1.1,
+            "globalDelta": 2.17,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "SOFTENING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 2.8,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": 1,
+                "magnitude": 1.1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 2.2,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": 1,
+                "magnitude": 3.1,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trialIndex": 9,
+      "cycles": [
+        {
+          "cycle": 1,
+          "committed": {
+            "stability": 30,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 5,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 100,
+              "currencyA": 101,
+              "currencyB": 100,
+              "global": 99
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9msmf6EsJp55Ny6qf4\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9mskAoEBwzcY4QZihv\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9msjRaCYWZiGSUwHxV\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9mjquczw3S27kM9Sqn\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 0.7999999999999999,
+                "pragmatic": 0.20000000000000004
+              },
+              "bProbabilities": {
+                "hawkish": 0.7999999999999999,
+                "dovish": 0.20000000000000004
+              },
+              "entanglementStrength": 0.20000000000000007,
+              "cProbabilities": {
+                "bold": 0.55,
+                "cautious": 0.45
+              },
+              "pProbabilities": {
+                "activelyMediate": 0.6000000000000001,
+                "disengage": 0.4
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": null,
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "SPIKING",
+              "currencyA": "RESILIENT",
+              "currencyB": "ROBUST",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.5000000000000002,
+                "STABLE": 0.5000000000000001
+              },
+              "currencyA": {
+                "WEAKENING": 0.5000000000000002,
+                "RESILIENT": 0.5000000000000001
+              },
+              "currencyB": {
+                "ROBUST": 0.5000000000000002,
+                "STRAINED": 0.5000000000000001
+              },
+              "global": {
+                "SURGING": 0.5000000000000002,
+                "CALM": 0.5
+              }
+            },
+            "primaryDelta": 0.1,
+            "currencyADelta": 0.66,
+            "currencyBDelta": 0.05,
+            "globalDelta": -0.96,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": 1,
+                "magnitude": 0.1,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 2.2,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 0.1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 3.2,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        },
+        {
+          "cycle": 2,
+          "committed": {
+            "stability": 28,
+            "proxy": 48,
+            "trade": 110,
+            "conflicts": 6,
+            "dealIntegrity": 42,
+            "market": {
+              "primary": 98,
+              "currencyA": 101,
+              "currencyB": 101,
+              "global": 98
+            }
+          },
+          "decisions": {
+            "israel": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9nJVwW5xnt9ABVri6c\"}"
+            },
+            "iran": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9n1zWnsCTvfD6NPQqH\"}"
+            },
+            "saudi_arabia": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9n24UudHKVfe61JZn2\"}"
+            },
+            "us": {
+              "error": "401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cef9nJWvxcHpXoEgN9sfK\"}"
+            }
+          },
+          "quantum": {
+            "iran": "hardline",
+            "israel": "hawkish",
+            "saudi_arabia": "cautious",
+            "us": "disengage",
+            "preCollapse": {
+              "aProbabilities": {
+                "hardline": 1,
+                "pragmatic": 0
+              },
+              "bProbabilities": {
+                "hawkish": 1,
+                "dovish": 0
+              },
+              "entanglementStrength": 0,
+              "cProbabilities": {
+                "bold": 0.03453580344153214,
+                "cautious": 0.9654641965584678
+              },
+              "pProbabilities": {
+                "activelyMediate": 0,
+                "disengage": 1
+              }
+            },
+            "entangledEffect": {
+              "stability": -2,
+              "conflictEvents": 1,
+              "label": "entangled escalation"
+            },
+            "peacekeeperIntervention": null,
+            "retrogradeFeedback": [
+              {
+                "driver": "riyal_windfall",
+                "target": "saudi_arabia",
+                "theta": 0.1869247628885927,
+                "amplifiedBy": 1.19
+              }
+            ],
+            "collapseSource": "classical"
+          },
+          "market": {
+            "outcomes": {
+              "primary": "STABLE",
+              "currencyA": "RESILIENT",
+              "currencyB": "ROBUST",
+              "global": "CALM"
+            },
+            "preCollapse": {
+              "primary": {
+                "SPIKING": 0.9504844339512099,
+                "STABLE": 0.04951556604879046
+              },
+              "currencyA": {
+                "WEAKENING": 0.06698729810778069,
+                "RESILIENT": 0.9330127018922195
+              },
+              "currencyB": {
+                "ROBUST": 0.9045084971874741,
+                "STRAINED": 0.09549150281252633
+              },
+              "global": {
+                "SURGING": 0.02447174185242322,
+                "CALM": 0.9755282581475772
+              }
+            },
+            "primaryDelta": -1.52,
+            "currencyADelta": 0.27,
+            "currencyBDelta": 0.5,
+            "globalDelta": -0.96,
+            "derivedNote": {
+              "label": "Dollar Direction",
+              "value": "FIRMING"
+            },
+            "speculation": {
+              "primary": {
+                "direction": -1,
+                "magnitude": 3.8,
+                "interferenceWeight": 3.63,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.23
+              },
+              "currencyA": {
+                "direction": -1,
+                "magnitude": 0.9,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "currencyB": {
+                "direction": 1,
+                "magnitude": 1,
+                "interferenceWeight": 3.39,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.19
+              },
+              "global": {
+                "direction": -1,
+                "magnitude": 3.2,
+                "interferenceWeight": 3.52,
+                "classicalWeight": 2.27,
+                "tailWeight": 0.21
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "chain": "cda124c5f50b5bf2533f447d81cc38f0ec5b672764e1ebdc481e33559d107773"
+}

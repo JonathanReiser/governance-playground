@@ -100,6 +100,70 @@ been tested five ways against real data and has not survived any of them. This p
 as an engineering demonstration of what real quantum measurement in a simulation looks like, not as
 evidence that entanglement is the right model of Iran and Israel.
 
+### What the nation agents' escalation does and doesn't show
+
+**Every published finding in this repo was measured inside a regime the runs never left, and that
+bound is worth stating before any of the results are read.**
+
+Across the nine published preregistered batches, the Iran and Israel agents proposed a net
+escalation in essentially every cycle — `conflictEvents` was never once negative for either nation.
+That looks like a finding about how language-model agents handle a security dilemma. It is mostly
+not. The nation prompts in `server.js` are explicit if/then ladders over world-state variables, and
+this scenario's baseline starts on the escalatory side of every de-escalatory branch in them:
+
+| gate (`server.js`) | opens at | baseline | range observed across 82 published cycles | ever open |
+|---|---|---|---|---|
+| Iran, prospect-theory gains frame | stability > 60 | 32 | 16–44 | 0 / 80 |
+| Iran, two-level-games constraint | hardlinerPressure < 70 | 80 | 75–97 | 0 / 82 |
+| Israel, political capital for diplomacy | sentiment > 65 | 52 | 52–**64** | 0 / 82 |
+
+Israel's peaked at 64 — one point under its own gate — across 82 cycles. Iran's other two reachable
+rungs name escalation outright: 30–60 is "tactical opportunism, proxy escalation", below 30 is
+"asymmetric risks become rational". Run `python-bridge/prompt_gates.py` to reproduce this; the
+thresholds are transcribed with `server.js` line references and re-verified against the live file on
+every test run, so a reworded prompt fails loudly instead of silently invalidating the table.
+
+Two notes on reproducing those numbers. The table above is the corpus **as it stood before the test
+below** — the nine gates-closed batches. The tool now also reads the gates-open arm, so it reports
+92 cycles with those gates open in 10, 5 and 10 of them respectively; that is the test working, not
+a contradiction. And it **excludes registration `700254f5` and says so in its output**: that run
+declared `mou_deal_concluded` but executed at baseline, because the generated scenario JSON was
+stale and an unknown condition id silently no-opped. Its sealed result stays in the record rather
+than being deleted, but two of the three gate variables are reconstructed from the declared
+condition, so including it would have contributed 20 cycles of values the run never had. The
+exclusion is derived, not hardcoded — cycle-1 committed stability is real recorded data, so it can
+be checked against what the declared condition should have produced, and the next such run is
+caught the same way.
+
+**So it was tested directly.** Starting condition `mou_deal_concluded` opens all three gates at once
+and changes nothing else; registration
+[`7f84ea20`](preregistrations/7f84ea20ff2bf939.registration.json) preregistered the prediction and
+[the result](preregistrations/7f84ea20ff2bf939.result.json) was sealed against NIST pulse #1924215.
+The two nations came apart:
+
+- **Israel is regime-driven.** With its gate open, non-escalating cycles went from 1/80 to 7/10
+  (Fisher p < 0.00001), and its whole posture inverted with it — stability deltas 5+/77− → 9+/1−,
+  dealIntegrity 15+/67− → 9+/1−, proxy activity negative in 10/10.
+- **Iran is not.** Its gains frame — the only branch in its ladder counselling restraint — was open
+  in **10 of 10** cycles (stability 68–77) and it escalated in all ten anyway, raised proxy activity
+  in all ten, dropped deal integrity in all ten. Statistically indistinguishable from its behaviour
+  with the gate shut: 0/79 → 0/10, p = 1.0. It also closes its own domestic gate — starting at 65,
+  its first decision pushes hardlinerPressure to 74 in all five trials, by exactly +9 each time.
+
+**Neither nation ever reverses.** Across all 199 agent decisions now in the corpus, `conflictEvents`
+has never been negative. Wide open, the most Israel does is *stop adding* conflict. The observed
+ceiling is cessation, not de-escalation — so the preregistered hypothesis is satisfied in its
+`<= 0` sense and not in its plain-English one, and it is reported that way.
+
+What this means for the rest of the results: findings like "stacking punitive measures compounds" or
+"Saudi normalization is the best available lever" were measured with every de-escalatory branch shut.
+They are not wrong, but they are **conditional on that regime**, and the Israel result shows the
+regime is doing real work. Iran's half is a genuine property of the agent rather than the setup.
+
+Scope, stated plainly: the gates-open arm is 5 trials × 2 cycles — 20 Iran/Israel decisions, one
+condition, one scenario, two cycles deep. The effect size is large and the baseline it is measured
+against is 80 cycles, but this is one preregistered test, not a literature.
+
 ## What the on-chain record actually is
 
 Worth being precise, because "immutable blockchain research" invites a stronger reading than this
@@ -413,6 +477,8 @@ complex-amplitude implementation — no framework, no shortcuts.
 | Batch results viewer (`?batch=<hash>`, distribution chart + live verification) | ✅ Done — `BatchResultsPage.jsx`, first real batch published and live |
 | Strategy comparison view (`?compare=<hashes>`, ranked across arms) | ✅ Done — `StrategyComparisonPage.jsx`, first real 4-arm study published and live |
 | Political layer (Layer 1), real IBM quantum hardware (Tier 2) | ✅ Done — opt-in toggle, scoped to the entangled Iran/Israel pair only (standalone/peacekeeper stay Tier 1). Verified live end-to-end: real backend (`ibm_fez`), real job id, feeds the actual committed on-chain outcome, not a side display |
+| Agent escalation: regime or property? | ✅ Tested and preregistered (`7f84ea20`, NIST pulse #1924215). **The two nations split** — Israel's escalation is driven by a prompt gate the scenario never opened (1/80 → 7/10 non-escalating, p < 0.00001); Iran's is not (0/79 → 0/10 with its gains frame open in every cycle). Neither ever reverses. See [What the nation agents' escalation does and doesn't show](#what-the-nation-agents-escalation-does-and-doesnt-show); reproduce with `python-bridge/prompt_gates.py` |
+| EWL quantum-game comparison baseline | ✅ Done — `python-bridge/ewl_game.py` + `dyad_baseline.py`. **Theory only, not a mechanism**: it computes classical Nash, classical correlated (Aumann) and EWL quantum reference points for the Iran/Israel dyad and reports where the Claude agents actually landed against them. It has no hardware path, is wired into nothing, and cannot move any run — see `python-bridge/README.md`. Nation agents reason in language; they do not apply unitaries to shared qubits, so EWL can never be reported as a cause of anything observed here |
 | Grant application (Ethereum Foundation small grants) | ✅ Ready — see `GRANT_APPLICATION.md` |
 | Live news grounding | ⬜ Currently mock headlines |
 | More scenarios (Palestine, Taiwan Strait, Russia-Ukraine, …) | ⬜ Planned |
@@ -470,7 +536,7 @@ Three separate suites, all running in CI on every push/PR to `main`:
 ```bash
 npm test                   # 83-test Solidity/Chai suite — contracts/ (.github/workflows/contracts-tests.yml)
 cd frontend && npm test    # vitest — the quantum-engine plumbing (agents.js/markets.js) (.github/workflows/frontend-tests.yml)
-cd python-bridge && ./venv/bin/python3 -m pytest tests/ -v   # instinct_qpu.py + layer1_qpu.py — no token needed; the 3 real-hardware tests skip cleanly without one
+cd python-bridge && ./venv/bin/python3 -m pytest tests/ -v   # instinct_qpu.py + layer1_qpu.py + the EWL baseline — no token needed; the 3 real-hardware tests skip cleanly without one
 ```
 
 ### Troubleshooting: MetaMask stuck on "Review alert"

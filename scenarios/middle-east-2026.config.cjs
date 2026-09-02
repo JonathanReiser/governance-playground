@@ -733,6 +733,139 @@ const MIDDLE_EAST_2026 = {
         metrics: { stability_index: 36, trade_volume: 140 },
       },
     },
+
+    {
+      // RESTORED TO SOURCE 2026-09-02. This condition existed ONLY in the
+      // generated frontend/src/scenarios/middle-east-2026.json and had no
+      // entry in this file at all — it was presumably hand-edited into the
+      // JSON and never written back here. Published batch 853a7c92 ran on
+      // it, so a plain `node scripts/generate-scenario-json.cjs` would have
+      // silently deleted the starting condition behind an already-published
+      // preregistered result. Copied back verbatim from that JSON, values
+      // unchanged, so regeneration is now lossless.
+      //
+      // Note it sets Israel's sentiment in BOTH places —
+      // governance.publicSentiment and population.sentiment. agents.js:319
+      // reads population.sentiment; the governance one is inert. Left
+      // exactly as it ran so 853a7c92 stays reproducible byte-for-byte.
+      id: "eisenkot_wins_election",
+      name: "Eisenkot wins the October 27 election instead of Netanyahu",
+      description:
+        "Real opposition figure (former IDF Chief of Staff, 'Yashar' party) whose bloc is polling " +
+        "ahead of Netanyahu's as of this scenario's own baseline. Deliberately narrow: this does " +
+        "NOT model a shift toward Palestinian statehood \u2014 Eisenkot has categorically rejected it " +
+        "('There is no Palestinian state, and under a government we form, no Palestinian state will " +
+        "be established,' Haaretz, Aug 22 2026), a position shared by every other leading contender " +
+        "(Bennett, Lapid); the only mainstream figure raising statehood is Mansour Abbas (Ra'am), a " +
+        "potential coalition partner, not a PM contender. What plausibly differs from Netanyahu isn't " +
+        "the Palestinian-statehood posture but domestic legitimacy \u2014 an accountability-era platform " +
+        "(a state commission of inquiry into October 7, a new national security doctrine) and a " +
+        "coalition not dependent on his far-right partners. Modeled here as a moderate rise in public " +
+        "sentiment reflecting the real polling momentum this scenario's baseline already cites, not a " +
+        "substantive foreign-policy shift.",
+      source: "Haaretz (Aug 22, 2026); Middle East Eye; Arab News; i24NEWS; Times of Israel",
+      overrides: {
+        nations: {
+          israel: {
+            governance: { publicSentiment: 60 },
+            population: { sentiment: 60 },
+          },
+        },
+      },
+    },
+
+    // ── INSTRUMENT-TEST CONDITIONS ──────────────────────────────
+    //
+    // The three below differ from every proposal above in WHY they
+    // exist, and that difference is stated here rather than buried,
+    // because it changes how a result from them should be read.
+    //
+    // The proposals above each deploy a specific contested real-world
+    // question (does Congress block relief; does Saudi normalize).
+    // These three exist to test the INSTRUMENT: across all 9 published
+    // preregistered batches, Iran's and Israel's agents proposed a net
+    // escalation in essentially every cycle — conflictEvents is never
+    // negative in any published cycle for either nation, and that holds
+    // in cycle 1, before any agent-caused decline, so it is not a
+    // spiral. The reason appears to be that the scenario's own baseline
+    // starts past the escalatory side of the thresholds in the agents'
+    // system prompts (server.js):
+    //
+    //   Iran hardlinerPressure baseline 80, prompt branches at > 70
+    //     ("any deal concession triggers a legitimacy crisis. You must
+    //     compensate with visible defiance elsewhere"). Lowest value
+    //     reached in any of 41 published trials: 72. Never opened.
+    //   Regional stability baseline 32, prompt's only de-escalatory
+    //     branch is the gains frame at > 60 ("defend what you have,
+    //     avoid reckless moves"). Highest value observed across 80
+    //     published cycles: 44. Never reached.
+    //
+    // So the published finding "the agents escalate" may be a restatement
+    // of where the scenario starts rather than a discovered property of
+    // the agents. These conditions open those gates and nothing else, so
+    // the two explanations come apart. A result either way is publishable:
+    // if the agents de-escalate once the gates are open, the escalation
+    // was regime-driven; if they escalate anyway, it is not, and that is
+    // the stronger claim.
+    //
+    // These are grounded, not arbitrary sliders — the MOU actually
+    // producing a comprehensive deal is the real counterfactual this
+    // whole scenario is built around, and is the one path that would
+    // plausibly move both variables at once. But the specific VALUES
+    // were chosen to sit just past the prompt's own thresholds rather
+    // than derived from any source, and that is a methodological choice,
+    // not a reasoned estimate of a real quantity. Stated plainly here so
+    // no writeup can present it as the latter.
+    {
+      id: "mou_deal_concluded",
+      name: "The MOU produces a comprehensive deal (both gates open)",
+      description:
+        "The June 2026 US-Iran MOU committed both sides to negotiate a comprehensive deal within " +
+        "60 days. Every proposal above deploys some version of that window failing. This one " +
+        "deploys it succeeding: a deal concluded, IAEA inspectors readmitted, sanctions relief " +
+        "delivered. Values are set just past the escalation thresholds in both agents' system " +
+        "prompts (hardlinerPressure below 70, stability above 60) so that the prompt's " +
+        "de-escalatory branches are reachable for the first time — see the note above this block.",
+      source:
+        "Congress.gov CRS IF13247 (the MOU and its 60-day window); threshold values are a " +
+        "methodological choice, not a sourced estimate",
+      overrides: {
+        nations: {
+          iran: {
+            economy: { sanctionsReliefPending: false, sanctioned: false },
+            governance: { hardlinerPressure: 65 },
+          },
+          israel: { population: { sentiment: 68 } }, // population.sentiment, NOT governance — see agents.js:319
+          us: { governance: { diplomaticCapital: 78 } },
+        },
+        metrics: { deal_integrity: 82, stability_index: 62, conflict_events: 1 },
+      },
+    },
+    {
+      id: "gate_stability_only",
+      name: "Stability gate only (isolates the prospect-theory branch)",
+      description:
+        "Half of mou_deal_concluded: regional stability above the gains-frame threshold, but " +
+        "Iran's hardlinerPressure left at its escalatory baseline. Isolates which of the two " +
+        "gates is actually binding. Only worth running if the combined condition comes back " +
+        "escalatory — see the note above this block.",
+      source: "methodological probe, not a sourced scenario",
+      overrides: {
+        metrics: { stability_index: 62 },
+      },
+    },
+    {
+      id: "gate_hardliner_only",
+      name: "Hardliner gate only (isolates the two-level-games branch)",
+      description:
+        "The other half: Iran's hardlinerPressure below the 'visible defiance' threshold, but " +
+        "regional stability left at its baseline. Paired with gate_stability_only to attribute " +
+        "any effect to one branch or the other rather than to the pair.",
+      source: "methodological probe, not a sourced scenario",
+      overrides: {
+        nations: { iran: { governance: { hardlinerPressure: 65 } } },
+      },
+    },
   ],
 
 
