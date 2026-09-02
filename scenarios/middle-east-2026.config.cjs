@@ -734,6 +734,46 @@ const MIDDLE_EAST_2026 = {
       },
     },
 
+    {
+      // RESTORED TO SOURCE 2026-09-02. This condition existed ONLY in the
+      // generated frontend/src/scenarios/middle-east-2026.json and had no
+      // entry in this file at all — it was presumably hand-edited into the
+      // JSON and never written back here. Published batch 853a7c92 ran on
+      // it, so a plain `node scripts/generate-scenario-json.cjs` would have
+      // silently deleted the starting condition behind an already-published
+      // preregistered result. Copied back verbatim from that JSON, values
+      // unchanged, so regeneration is now lossless.
+      //
+      // Note it sets Israel's sentiment in BOTH places —
+      // governance.publicSentiment and population.sentiment. agents.js:319
+      // reads population.sentiment; the governance one is inert. Left
+      // exactly as it ran so 853a7c92 stays reproducible byte-for-byte.
+      id: "eisenkot_wins_election",
+      name: "Eisenkot wins the October 27 election instead of Netanyahu",
+      description:
+        "Real opposition figure (former IDF Chief of Staff, 'Yashar' party) whose bloc is polling " +
+        "ahead of Netanyahu's as of this scenario's own baseline. Deliberately narrow: this does " +
+        "NOT model a shift toward Palestinian statehood \u2014 Eisenkot has categorically rejected it " +
+        "('There is no Palestinian state, and under a government we form, no Palestinian state will " +
+        "be established,' Haaretz, Aug 22 2026), a position shared by every other leading contender " +
+        "(Bennett, Lapid); the only mainstream figure raising statehood is Mansour Abbas (Ra'am), a " +
+        "potential coalition partner, not a PM contender. What plausibly differs from Netanyahu isn't " +
+        "the Palestinian-statehood posture but domestic legitimacy \u2014 an accountability-era platform " +
+        "(a state commission of inquiry into October 7, a new national security doctrine) and a " +
+        "coalition not dependent on his far-right partners. Modeled here as a moderate rise in public " +
+        "sentiment reflecting the real polling momentum this scenario's baseline already cites, not a " +
+        "substantive foreign-policy shift.",
+      source: "Haaretz (Aug 22, 2026); Middle East Eye; Arab News; i24NEWS; Times of Israel",
+      overrides: {
+        nations: {
+          israel: {
+            governance: { publicSentiment: 60 },
+            population: { sentiment: 60 },
+          },
+        },
+      },
+    },
+
     // ── INSTRUMENT-TEST CONDITIONS ──────────────────────────────
     //
     // The three below differ from every proposal above in WHY they
