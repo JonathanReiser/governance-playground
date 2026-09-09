@@ -8,3 +8,4 @@ cache/
 .env.*
 *.log
 .vercel
+research-data/

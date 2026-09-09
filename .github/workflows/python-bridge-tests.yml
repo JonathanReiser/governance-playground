@@ -24,7 +24,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run test suite
-        run: python -m pytest tests/ -v
+        run: python -m pytest tests/ ttt_lab/tests/ -v
         # No IBM_QUANTUM_TOKEN secret configured here on purpose — this
         # exercises the local-simulator path only, same as every other
         # test in this project that touches a credentialed external
