@@ -28,6 +28,7 @@ function validationScoresFor(decisions) {
     ["Legacy amplitude", "quantum_style"],
     ["Classical context v2", "classical_context"],
     ["Amplitude constraint v3", "quantum_context"],
+    ["Heuristic baseline · 0 fitted parameters", "heuristic_baseline"],
   ].filter(([, key]) => predicted.every((decision) => Number.isFinite(decision.modelPredictions[key])));
   return candidates.map(([name, key]) => ({
     name,

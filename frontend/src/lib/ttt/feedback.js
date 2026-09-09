@@ -236,12 +236,16 @@ export function analyzeValidationSessions(sessions) {
     const contextOnlyV4 = contextual && decisions.every((decision) => decision.modelPredictions.contextual_version === "ttt-context-models/v4-context-only");
     const classical = error(contextual ? "classical_context" : "classical_strategy");
     const quantum = error(contextual ? "quantum_context" : "quantum_style");
+    // The unfitted floor. Reported alongside, never as one of the two compared arms.
+    const hasHeuristic = decisions.every((decision) => Number.isFinite(decision.modelPredictions.heuristic_baseline));
+    const heuristic = hasHeuristic ? error("heuristic_baseline") : null;
     const envelope = null;
     return {
       sessionId: session.session_id,
       moves: decisions.length,
       classical,
       quantum,
+      heuristic,
       envelope,
       difference: quantum - classical,
       envelopeGap: null,
@@ -275,6 +279,7 @@ export function analyzeValidationSessions(sessions) {
       rows: groupRows,
       classical: weighted("classical"),
       quantum: weighted("quantum"),
+      heuristic: groupRows.every((row) => row.heuristic !== null) ? weighted("heuristic") : null,
       envelope: hasEnvelope ? weighted("envelope") : null,
       difference: weighted("difference"),
       envelopeGap: hasEnvelope ? weighted("envelopeGap") : null,

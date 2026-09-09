@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import featureFixture from "./feature-policy-fixture.json";
 import {
   amplitudeWeight, contextFeatures, contextualProbabilities, expandedAmplitudeWeight, fitContextualModels,
   fitEnvelopeModel, freeEnvelopeWeight, predictContextual,
+  HEURISTIC_WEIGHTS, heuristicProbabilities,
 } from "../contextual";
 import { actionValues, isTerminal, legalMoves, reachableStates } from "../game";
 
@@ -94,4 +96,87 @@ describe("contextual models", () => {
       expect(fitEnvelopeModel(synthetic, counts).coupling).toBeCloseTo(coupling, 1);
     }
   }, 60000);
+});
+
+describe("fixed-weight heuristic baseline", () => {
+  it("agrees with the Python feature policy on every fixture case", () => {
+    expect(featureFixture.cases).toHaveLength(100);
+    expect(HEURISTIC_WEIGHTS).toEqual([
+      featureFixture.weights.immediate_win,
+      featureFixture.weights.immediate_block,
+      featureFixture.weights.creates_fork,
+      featureFixture.weights.center,
+      featureFixture.weights.corner,
+    ]);
+    for (const testCase of featureFixture.cases) {
+      const event = {
+        board_before: testCase.board,
+        player: testCase.toMove === 1 ? "X" : "O",
+        legal_moves: Object.keys(testCase.probabilities).map(Number),
+        minimax_action_values: Object.fromEntries(Object.keys(testCase.probabilities).map((move) => [move, 0])),
+      };
+      const actual = heuristicProbabilities(event, featureFixture.temperature);
+      event.legal_moves.forEach((move, index) => {
+        expect(actual[index]).toBeCloseTo(testCase.probabilities[String(move)], 12);
+      });
+    }
+  });
+
+  it("suppresses the fork feature on a move that already wins", () => {
+    // The one place the heuristic diverges from contextFeatures, matching
+    // features.py. Board -1,0,0,0,1,0,1,0,-1 with X to move: square 2 wins outright.
+    const position = {
+      board_before: [-1, 0, 0, 0, 1, 0, 1, 0, -1], player: "X",
+      legal_moves: [1, 2, 3, 5, 7],
+      minimax_action_values: { 1: 0, 2: 1, 3: 0, 5: 0, 7: 0 },
+    };
+    const [, winNow, , createFork] = contextFeatures(position, 2);
+    expect(winNow).toBe(1);
+    expect(createFork).toBe(1); // contextFeatures counts it; the heuristic must not
+    const probabilities = heuristicProbabilities(position);
+    // Scored as a win (6.0), not a win plus a fork (9.0).
+    const scores = position.legal_moves.map((move) => {
+      const [, w, b, f, c, k] = contextFeatures(position, move);
+      return 6 * w + 5 * b + 3 * (w ? 0 : f) + 1.5 * c + 0.8 * k;
+    });
+    const peak = Math.max(...scores);
+    const weights = scores.map((score) => Math.exp(score - peak));
+    const total = weights.reduce((a, b) => a + b, 0);
+    probabilities.forEach((value, index) => expect(value).toBeCloseTo(weights[index] / total, 12));
+  });
+
+  it("reuses contextFeatures for the four features that do agree", () => {
+    // Win, block, centre and corner must BE contextFeatures'. If those drift, this
+    // fails rather than the divergence going unnoticed.
+    const position = {
+      board_before: [1, 1, 0, -1, -1, 0, 0, 0, 0], player: "X",
+      legal_moves: [2, 5, 6, 7, 8],
+      minimax_action_values: { 2: 1, 5: 0, 6: -1, 7: -1, 8: -1 },
+    };
+    const scores = position.legal_moves.map((move) => {
+      const [, w, b, f, c, k] = contextFeatures(position, move);
+      return 6 * w + 5 * b + 3 * (w ? 0 : f) + 1.5 * c + 0.8 * k;
+    });
+    const peak = Math.max(...scores);
+    const weights = scores.map((score) => Math.exp(score - peak));
+    const total = weights.reduce((a, b) => a + b, 0);
+    const expected = weights.map((weight) => weight / total);
+    heuristicProbabilities(position).forEach((value, index) => expect(value).toBeCloseTo(expected[index], 12));
+  });
+
+  it("carries no fitted parameters, so it cannot be tuned on the session it scores", () => {
+    const position = {
+      board_before: [1, 1, 0, -1, -1, 0, 0, 0, 0], player: "X",
+      legal_moves: [2, 5, 6, 7, 8], selected_move: 2,
+      minimax_action_values: { 2: 1, 5: 0, 6: -1, 7: -1, 8: -1 },
+    };
+    // Two snapshots fitted on completely different histories must still produce an
+    // identical heuristic score, because the baseline reads nothing from them.
+    const a = fitContextualModels([position, position]);
+    const b = fitContextualModels([{ ...position, selected_move: 8 }, { ...position, selected_move: 7 }]);
+    expect(predictContextual(position, a).heuristic_baseline)
+      .toBe(predictContextual(position, b).heuristic_baseline);
+    expect(predictContextual(position, a).classical_context)
+      .not.toBe(predictContextual(position, b).classical_context);
+  });
 });
