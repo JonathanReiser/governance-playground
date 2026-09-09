@@ -1,0 +1,87 @@
+{
+  "kind": "quantum-arena/hardware-validation-preregistration",
+  "version": 1,
+  "createdAt": "2026-09-09T20:55:01.870Z",
+  "protocolVersion": "1.0",
+  "hypothesis": "For every registered cell, the total variation distance between the backend's empirical distribution over [CC, CD, DC, DD] and the protocol's exact Born distribution is at most tvdThreshold.",
+  "falsifiedIf": "Any single registered cell exceeds tvdThreshold. Not a majority, not an average — an average over cells would let a clean cell pay for a broken one.",
+  "claimBoundary": "This tests whether the device reproduces the predicted distributions. It is NOT a test of quantum advantage, of any equilibrium, or of human behaviour, and release 1 claims none of those.",
+  "backend": "ibm_marrakesh",
+  "backendSelection": "pinned; least_busy is not used, so every cell runs on the same device",
+  "cells": [
+    {
+      "operationX": "C",
+      "operationO": "D",
+      "gamma": 0
+    },
+    {
+      "operationX": "C",
+      "operationO": "D",
+      "gamma": 1.5707963267948966
+    },
+    {
+      "operationX": "D",
+      "operationO": "C",
+      "gamma": 0
+    },
+    {
+      "operationX": "D",
+      "operationO": "C",
+      "gamma": 1.5707963267948966
+    },
+    {
+      "operationX": "M",
+      "operationO": "M",
+      "gamma": 0.7853981633974483
+    },
+    {
+      "operationX": "M",
+      "operationO": "Q",
+      "gamma": 1.5707963267948966
+    },
+    {
+      "operationX": "Q",
+      "operationO": "Q",
+      "gamma": 1.5707963267948966
+    }
+  ],
+  "shotsPerCell": 4096,
+  "statistic": "total variation distance, 0.5 * sum |empirical - exact| over the four profiles",
+  "tvdThreshold": 0.18,
+  "thresholdBasis": {
+    "method": "Aer noise-model prediction, computed and committed BEFORE registration",
+    "model": {
+      "one_qubit_depolarizing": 0.003,
+      "two_qubit_depolarizing": 0.012,
+      "readout_error": [
+        [
+          0.985,
+          0.015
+        ],
+        [
+          0.02,
+          0.98
+        ]
+      ]
+    },
+    "calibrated_from_device": false,
+    "why_not_calibrated": "No IBM token was configured when the threshold was derived, so a generic superconducting model stands in. Generic and stated is honest; a threshold tuned to the device after seeing its calibration would not be.",
+    "shots_per_cell": 4096,
+    "predicted_tvd_per_cell": {
+      "C|D|0.000000": 0.037842,
+      "D|C|0.000000": 0.030518,
+      "C|D|1.570796": 0.060791,
+      "D|C|1.570796": 0.062988,
+      "Q|Q|1.570796": 0.058838,
+      "M|M|0.785398": 0.011963,
+      "M|Q|1.570796": 0.040283
+    },
+    "worst_predicted_tvd": 0.062988,
+    "threshold": 0.18,
+    "threshold_rule": "min(0.25, 2 * worst predicted TVD + 0.05). Doubling absorbs the gap between a generic model and a real device; the cap keeps a pathological prediction from setting a threshold nothing could fail."
+  },
+  "readoutMitigation": "Raw counts only. Mitigated figures, if computed, are published as a separate record and never substituted for these.",
+  "drawAfter": "2026-09-09T22:55:01.870Z",
+  "beaconUri": "https://beacon.nist.gov/beacon/2.0/pulse/time/next/1788994501870",
+  "commitment": "Every registered cell will be executed at or after drawAfter on the named backend, and every cell's raw counts published whatever they say — not the cells that came out well. If the backend is unavailable the run is abandoned and reported as abandoned; it is not silently re-pointed at another device, and simulator output is never published here."
+}

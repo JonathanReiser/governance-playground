@@ -1,0 +1,32 @@
+{
+  "method": "Aer noise-model prediction, computed and committed BEFORE registration",
+  "model": {
+    "one_qubit_depolarizing": 0.003,
+    "two_qubit_depolarizing": 0.012,
+    "readout_error": [
+      [
+        0.985,
+        0.015
+      ],
+      [
+        0.02,
+        0.98
+      ]
+    ]
+  },
+  "calibrated_from_device": false,
+  "why_not_calibrated": "No IBM token was configured when the threshold was derived, so a generic superconducting model stands in. Generic and stated is honest; a threshold tuned to the device after seeing its calibration would not be.",
+  "shots_per_cell": 4096,
+  "predicted_tvd_per_cell": {
+    "C|D|0.000000": 0.037842,
+    "D|C|0.000000": 0.030518,
+    "C|D|1.570796": 0.060791,
+    "D|C|1.570796": 0.062988,
+    "Q|Q|1.570796": 0.058838,
+    "M|M|0.785398": 0.011963,
+    "M|Q|1.570796": 0.040283
+  },
+  "worst_predicted_tvd": 0.062988,
+  "threshold": 0.18,
+  "threshold_rule": "min(0.25, 2 * worst predicted TVD + 0.05). Doubling absorbs the gap between a generic model and a real device; the cap keeps a pathological prediction from setting a threshold nothing could fail."
+}
