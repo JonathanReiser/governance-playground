@@ -18,6 +18,56 @@ on-chain transactions, no wallet needed). Everything in it is independently chec
 **More field reports:**
 - **[Taiwan Strait, 10 cycles →](https://claude.ai/code/artifact/1baaa2d4-060d-44ef-b237-fec7769aabb6)** — China, Taiwan, and Japan; stability collapses to zero by cycle 5 and stays there.
 
+---
+
+## Two separate lines of work live here
+
+The nation-agent simulation above is one. The other is a pair of tic-tac-toe experiments
+that share none of its machinery and make much smaller claims. Nothing below is
+evidence that cognition is quantum, and none of it is wired into the on-chain record.
+
+### 1. Human Decision Laboratory (Phase 0) — no quantum mechanism
+
+**[Play it →](https://governance-playground.vercel.app/?ttt=play)** · works in any browser,
+nothing to install, data stays on your machine.
+
+A person plays tic-tac-toe against a perfect minimax opponent while their choices are
+scored against several predictors: random guessing, two legacy models, two fitted context
+models, and a zero-parameter heuristic baseline that cannot overfit by construction. Model
+parameters are chosen on held-out loss, not training fit — on structureless data the
+richer model's *training* score beats chance while its held-out score correctly does not.
+
+Code: [`frontend/src/lib/ttt/`](frontend/src/lib/ttt) · [`python-bridge/ttt_lab/`](python-bridge/ttt_lab)
+
+### 2. Quantum Policy Tic-Tac-Toe — an Eisert-Wilkens-Lewenstein game
+
+Two tic-tac-toe policies become the two strategies of a quantum game. Players apply
+unitaries to entangled qubits; one measurement selects which policy pair plays the board.
+
+- **[Protocol v1.0](preregistrations/quantum-policy-tic-tac-toe.protocol-v1.md)** — the design,
+  frozen. Includes its own record of being wrong: an entangler generated from the wrong
+  operator, which inverted the classical game at maximal entanglement, and a validation list
+  that tested at exactly the gamma where that was invisible.
+- **[Frozen policy and payoff spec](preregistrations/frozen-policy-payoff-spec.md)** — the two
+  policies and the payoff matrix, which is affinely equivalent to the canonical EWL
+  Prisoner's Dilemma `(5,3,1,0)`.
+- **[Live preregistration](preregistrations/arena/)** — a hardware-validation hypothesis bound
+  to a NIST beacon pulse, committed publicly before that pulse existed.
+- **[Implementation](python-bridge/quantum_arena/)** — circuit, payoffs, and the protocol's ten
+  validation items as executable checks.
+
+**What it claims:** a correct implementation with an exact classical limit, running in
+simulation and on pinned IBM hardware. **What it does not claim:** quantum advantage, any
+result about human cognition, or that ordinary tic-tac-toe is no longer solved. The
+equilibrium it can exhibit holds within a four-option menu and does not survive an
+unrestricted strategy space.
+
+⚠️ **The arena does not run on the live site.** It needs a local Python bridge that the
+serverless deployment cannot host, so `?arena=play` will error there. Run it locally:
+`python-bridge/quantum_arena/README.md` has the steps.
+
+---
+
 **Related project — [civic-lottery-demo](https://github.com/JonathanReiser/civic-lottery-demo):**
 the same real-entropy pattern built here for the instinct layer (`quantumRng.js`), applied to a
 different problem — provably-fair civic lottery selection (jury pools, housing/visa lotteries)
