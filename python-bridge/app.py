@@ -11,6 +11,7 @@ import os
 
 from flask import Flask, jsonify, request
 
+from dyad_baseline import build_report as build_ewl_report
 from instinct_qpu import read_instinct
 from layer1_qpu import collapse_entangled_pair
 from q_ai_engine import NationQuantumDeliberationEngine
@@ -70,6 +71,18 @@ def layer1_collapse():
         return jsonify({"error": str(err)}), 400
 
     return jsonify(reading)
+
+
+@app.get("/ewl-baseline")
+def ewl_baseline():
+    # The odd one out among these routes, and deliberately a GET with no
+    # body: the other three compute something about a live run, this one
+    # returns a fixed theoretical comparison that does not depend on any
+    # run state. Nothing it returns feeds simState or the on-chain commit
+    # — it cannot, and must not be described as if it could. See
+    # ewl_game.py's module docstring; the payload carries that constraint
+    # in its own `label` field so it survives being read on its own.
+    return jsonify(build_ewl_report())
 
 
 @app.get("/health")

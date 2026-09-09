@@ -634,6 +634,66 @@
           }
         }
       }
+    },
+    {
+      "id": "mou_deal_concluded",
+      "name": "The MOU produces a comprehensive deal (both gates open)",
+      "description": "The June 2026 US-Iran MOU committed both sides to negotiate a comprehensive deal within 60 days. Every proposal above deploys some version of that window failing. This one deploys it succeeding: a deal concluded, IAEA inspectors readmitted, sanctions relief delivered. Values are set just past the escalation thresholds in both agents' system prompts (hardlinerPressure below 70, stability above 60) so that the prompt's de-escalatory branches are reachable for the first time — see the note above this block.",
+      "source": "Congress.gov CRS IF13247 (the MOU and its 60-day window); threshold values are a methodological choice, not a sourced estimate",
+      "overrides": {
+        "nations": {
+          "iran": {
+            "economy": {
+              "sanctionsReliefPending": false,
+              "sanctioned": false
+            },
+            "governance": {
+              "hardlinerPressure": 65
+            }
+          },
+          "israel": {
+            "population": {
+              "sentiment": 68
+            }
+          },
+          "us": {
+            "governance": {
+              "diplomaticCapital": 78
+            }
+          }
+        },
+        "metrics": {
+          "deal_integrity": 82,
+          "stability_index": 62,
+          "conflict_events": 1
+        }
+      }
+    },
+    {
+      "id": "gate_stability_only",
+      "name": "Stability gate only (isolates the prospect-theory branch)",
+      "description": "Half of mou_deal_concluded: regional stability above the gains-frame threshold, but Iran's hardlinerPressure left at its escalatory baseline. Isolates which of the two gates is actually binding. Only worth running if the combined condition comes back escalatory — see the note above this block.",
+      "source": "methodological probe, not a sourced scenario",
+      "overrides": {
+        "metrics": {
+          "stability_index": 62
+        }
+      }
+    },
+    {
+      "id": "gate_hardliner_only",
+      "name": "Hardliner gate only (isolates the two-level-games branch)",
+      "description": "The other half: Iran's hardlinerPressure below the 'visible defiance' threshold, but regional stability left at its baseline. Paired with gate_stability_only to attribute any effect to one branch or the other rather than to the pair.",
+      "source": "methodological probe, not a sourced scenario",
+      "overrides": {
+        "nations": {
+          "iran": {
+            "governance": {
+              "hardlinerPressure": 65
+            }
+          }
+        }
+      }
     }
   ],
   "citizenDistribution": {
