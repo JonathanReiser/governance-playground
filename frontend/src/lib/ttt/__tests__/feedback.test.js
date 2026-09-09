@@ -67,4 +67,34 @@ describe("feedback analysis", () => {
     expect(result.version).toBe("v3 envelope quarantined");
     expect(result.envelopeGap).toBeNull();
   });
+
+  it("selects parameters on held-out loss, not training fit", () => {
+    // Structureless choices: uniform (log 9 = 2.1972) is the truth, so any model
+    // that beats it is fitting noise.
+    let seed = 20260909;
+    const random = () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 2 ** 32; };
+    const legal = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    const noise = Array.from({ length: 60 }, () => ({
+      schema: "ttt-decision/v1",
+      legal_moves: legal,
+      selected_move: legal[Math.floor(random() * 9)],
+      minimax_action_values: Object.fromEntries(legal.map((move) => [move, [0, 1, -1][Math.floor(random() * 3)]])),
+      response_ms: 100,
+    }));
+    const result = analyzeFeedback(noise);
+    const amplitude = result.models.find((model) => model.name.startsWith("Legacy amplitude"));
+
+    expect(amplitude.selection).toMatch(/cross-validated/);
+    // The overfit is real: training fit beats chance on data with no structure.
+    expect(amplitude.meanLogLoss).toBeLessThan(Math.log(9));
+    // Held-out does not, which is the whole point of the change.
+    expect(amplitude.heldOutLogLoss).toBeGreaterThan(amplitude.meanLogLoss);
+    expect(amplitude.heldOutLogLoss).toBeGreaterThan(Math.log(9));
+  });
+
+  it("announces the in-sample fallback instead of silently using it", () => {
+    const single = fitFrozenModels([event(1)]);
+    expect(single.selection.classical).toMatch(/in-sample fallback/);
+    expect(single.held_out_log_loss.classical).toBeNull();
+  });
 });

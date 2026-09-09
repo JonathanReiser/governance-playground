@@ -258,8 +258,17 @@ export function TttLabPage({ onBack }) {
             <article key={model.name}>
               <span>Historical descriptive fit</span>
               <h2>{model.name}</h2>
-              <strong>{model.meanLogLoss === null ? "—" : model.meanLogLoss.toFixed(3)}</strong>
-              <small>prediction error · lower is better</small>
+              {/* Show the held-out number when there is one. Training fit is not
+                  comparable across these models — the classical grid carries one
+                  parameter and the amplitude grid two, so on training fit the
+                  richer grid wins by construction rather than by predicting better. */}
+              <strong>{model.heldOutLogLoss !== null
+                ? model.heldOutLogLoss.toFixed(3)
+                : model.meanLogLoss === null ? "—" : model.meanLogLoss.toFixed(3)}</strong>
+              <small>{model.heldOutLogLoss !== null
+                ? "held-out prediction error · lower is better"
+                : "training fit · not comparable between models"}</small>
+              {model.selection && <code className="ttt-selection-note">{model.selection}</code>}
               <p>Typical probability the model assigned to the square you chose: {model.geometricProbability === null ? "—" : `${(100 * model.geometricProbability).toFixed(1)}%`}</p>
               {model.parameters.tau && <code>τ = {model.parameters.tau}</code>}
               {model.parameters.phase !== undefined && <code>κ = {model.parameters.kappa} · φ = {model.parameters.phase.toFixed(2)}</code>}
