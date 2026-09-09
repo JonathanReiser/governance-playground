@@ -55,7 +55,15 @@ describe("contextual models", () => {
     const prediction = predictContextual(position, snapshot);
     expect(Object.values(prediction).every((value) => value > 0 && value <= 1)).toBe(true);
     expect(prediction.classical_envelope).toBeUndefined();
+    // Same freeze property as feedback.test.js: the snapshot must be inert under
+    // use. Score every other legal choice in this position, then re-score the
+    // original and require both the prediction and the snapshot to be unchanged.
+    const before = JSON.parse(JSON.stringify(snapshot));
+    for (const selected_move of position.legal_moves) {
+      predictContextual({ ...position, selected_move }, snapshot);
+    }
     expect(predictContextual(position, snapshot)).toEqual(prediction);
+    expect(snapshot).toEqual(before);
   });
 
   it("recovers known couplings at the synthetic population limit", () => {

@@ -25,7 +25,13 @@ describe("feedback analysis", () => {
     const prediction = predictFrozen(event(2), snapshot);
     expect(snapshot.training_decisions).toBe(3);
     expect(Object.values(prediction).filter(Number.isFinite).every((value) => value > 0 && value <= 1)).toBe(true);
+    // The real freeze property: scoring further choices must not move the model.
+    // Calling the same pure function twice with the same argument cannot show this;
+    // observing a run of new decisions in between can.
+    const before = JSON.parse(JSON.stringify(snapshot));
+    for (const move of [0, 1, 2, 2, 2, 0, 1, 2]) predictFrozen(event(move), snapshot);
     expect(predictFrozen(event(2), snapshot)).toEqual(prediction);
+    expect(snapshot).toEqual(before);
     expect(prediction.classical_context).toBeGreaterThan(0);
     expect(prediction.quantum_context).toBeGreaterThan(0);
     expect(prediction.classical_envelope).toBeUndefined();
