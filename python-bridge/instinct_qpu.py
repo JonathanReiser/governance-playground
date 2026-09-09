@@ -110,6 +110,40 @@ def _run_on_simulator(circuit: QuantumCircuit, detail: str | None = None) -> dic
     return reading
 
 
+# ─────────────────────────────────────────────────────────────
+# BACKEND PINNING
+#
+# Pinned rather than selected by least_busy. least_busy returns whichever
+# device is free at that moment, so two runs of the same circuit can land on
+# different hardware with different qubit counts, coupling maps, gate errors
+# and readout errors — a confound baked into the research record that cannot
+# be removed afterwards, because nothing in the result says the device was
+# chosen for availability rather than for the experiment.
+#
+# ibm_marrakesh is chosen on evidence, not preference: it is the backend this
+# project has actually executed on (verified live 2026-08-23, real job id
+# da5j2s6aa69c739ku7a0). Override with IBM_QUANTUM_BACKEND when a run is
+# deliberately targeting different hardware — and record which, because the
+# reading carries it either way.
+#
+# If the pinned backend is unavailable the call FAILS rather than quietly
+# substituting another QPU. The caller's existing except-clause then falls
+# back to the local simulator with an honest label. Degrading to a simulator
+# and saying so is fine; degrading to a different QPU and not saying so is
+# the thing this exists to prevent.
+# ─────────────────────────────────────────────────────────────
+
+DEFAULT_BACKEND = "ibm_marrakesh"
+
+
+def _pinned_backend(service):
+    name = os.environ.get("IBM_QUANTUM_BACKEND", DEFAULT_BACKEND)
+    backend = service.backend(name)
+    if backend is None:
+        raise RuntimeError(f"pinned backend {name!r} is not available to this account")
+    return backend, name
+
+
 def _run_on_real_hardware(circuit: QuantumCircuit, token: str) -> dict:
     # Imported lazily — qiskit_ibm_runtime pulls in a network client; no
     # reason to import it (or require it be installed) on the pure-
@@ -124,7 +158,7 @@ def _run_on_real_hardware(circuit: QuantumCircuit, token: str) -> dict:
     # Cloud IAM-based auth; "ibm_quantum_platform" is the current default
     # (qiskit_ibm_runtime.accounts.management._DEFAULT_CHANNEL_TYPE).
     service = QiskitRuntimeService(channel="ibm_quantum_platform", token=token)
-    backend = service.least_busy(simulator=False, operational=True)
+    backend, requested = _pinned_backend(service)
     transpiled = transpile(circuit, backend)
 
     sampler = SamplerV2(mode=backend)
@@ -137,7 +171,16 @@ def _run_on_real_hardware(circuit: QuantumCircuit, token: str) -> dict:
     # pinning the name there specifically so this lookup isn't guessing.
     counts = result[0].data.c.get_counts()
     reading = _outcome_from_counts(counts)
-    reading.update({"backend": backend.name, "simulator": False, "job_id": job_id})
+    reading.update({
+        "backend": backend.name,
+        "backend_requested": requested,
+        # False would mean the pin was not honoured. It cannot currently be
+        # False — _pinned_backend raises instead — but a reading that carries
+        # the answer explicitly cannot later be misread as "whatever ran".
+        "backend_pinned": backend.name == requested,
+        "simulator": False,
+        "job_id": job_id,
+    })
     return reading
 
 
