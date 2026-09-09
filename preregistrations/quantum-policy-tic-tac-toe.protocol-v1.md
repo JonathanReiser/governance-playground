@@ -25,14 +25,18 @@ decision:
    about record-keeping and are stated rather than reported as passing — no unit
    test can certify that a future operator kept simulator and hardware
    observations apart.
-3. **No participant interface exists.** The menu is implemented; presenting it to
-   a person, with the neutral labels this protocol requires, is unbuilt.
+3. ~~No participant interface exists.~~ **Built** — `?arena=play`, served by
+   `frontend/src/components/QuantumArenaPage.jsx` over `/api/arena/*`. Neutral
+   labels, opponent operation hidden until submission, the selected game animated
+   move by move, and explanation-mode shots kept under a separate schema so they
+   cannot pool with research observations. Arena plays are stored under their own
+   key, never the Phase 0 lab's.
 4. **The pinned backend is unconfirmed.** `ibm_marrakesh` was verified live on
    2026-08-23. IBM retires devices, and no token is configured in this repository,
    so its current availability is unknown here.
 
-Collection unblocks when a participant interface exists and the backend is
-confirmed live — not when this file says 1.0.
+One gate remains: the pinned backend is unconfirmed. Everything else the
+protocol requires before human use is in place.
 
 ## What changed from 0.1
 
@@ -238,12 +242,22 @@ because `gamma = 0` is precisely where a wrong entangler generator is invisible.
 ## What the human does
 
 The research interface must not tell a participant that a particular setting
-is intelligent, optimal, or “more quantum.” It initially presents two controls:
+is intelligent, optimal, or “more quantum.”
 
-- **blend** controls `theta`, changing the balance between the two policies;
-- **phase** controls `phi`, changing interference when entanglement is enabled.
+It presents the four-operation menu of question 5 under neutral labels —
+Setting I to IV, in frozen menu order. The theoretical names ARE the leak:
+`C`/`D`/`M`/`Q` announce the structure, and "cooperate"/"defect" announce a
+moral reading the payoff matrix does not carry. The mapping is written into
+every run record and shown nowhere.
+
+(Draft 0.1 specified continuous **blend** and **phase** controls here. Question 5
+replaced them with the menu; this paragraph outlived that decision and was
+corrected when the interface was built.)
 
 The participant submits one operation without seeing the opponent's operation.
+The opponent's operation is drawn uniformly from the same menu using Web Crypto,
+and the draw's entropy source is recorded — release 1 makes no behavioural claim,
+so the opponent is deliberately not a strategy.
 The circuit is measured once to select the policy pair, and the resulting
 ordinary Tic-Tac-Toe game is animated move by move. A separate explanation mode
 may show estimated outcome probabilities from many shots, but those explanatory

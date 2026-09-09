@@ -1409,6 +1409,44 @@ app.post("/api/q-ai/deliberate", qpuReadingLimiter, async (req, res) => {
 });
 
 
+// ─── Quantum Policy Tic-Tac-Toe arena ───────────────────────────────────────
+// Thin proxies to python-bridge/quantum_arena. Deliberately thin: the protocol
+// and its validation live in Python, and a second implementation here would be
+// a second thing to keep correct. See preregistrations/
+// quantum-policy-tic-tac-toe.protocol-v1.md.
+async function proxyToArena(path, body, res, timeoutMs = 60_000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${PYTHON_BRIDGE_URL}${path}`, {
+      method: body ? "POST" : "GET",
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+    const payload = await response.json();
+    return res.status(response.status).json(payload);
+  } catch (error) {
+    return res.status(502).json({
+      error: `python-bridge unreachable at ${PYTHON_BRIDGE_URL}${path}: ${error.message}`,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+app.get("/api/arena/menu", (_req, res) => proxyToArena("/arena/menu", null, res, 10_000));
+
+app.post("/api/arena/play", qpuReadingLimiter, (req, res) => {
+  const { operationX, operationO, gamma } = req.body ?? {};
+  return proxyToArena("/arena/play", { operationX, operationO, gamma }, res);
+});
+
+app.post("/api/arena/explain", qpuReadingLimiter, (req, res) => {
+  const { operationX, operationO, gamma, shots } = req.body ?? {};
+  return proxyToArena("/arena/explain", { operationX, operationO, gamma, shots }, res);
+});
+
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
 

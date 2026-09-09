@@ -12,6 +12,8 @@ import os
 from flask import Flask, jsonify, request
 
 from dyad_baseline import build_report as build_ewl_report
+from quantum_arena.protocol import MAX_ENTANGLEMENT, MENU
+from quantum_arena.session import explain as arena_explain, play as arena_play
 from instinct_qpu import read_instinct
 from layer1_qpu import collapse_entangled_pair
 from q_ai_engine import NationQuantumDeliberationEngine
@@ -83,6 +85,60 @@ def ewl_baseline():
     # ewl_game.py's module docstring; the payload carries that constraint
     # in its own `label` field so it survives being read on its own.
     return jsonify(build_ewl_report())
+
+
+def _arena_request(body):
+    operation_x = body.get("operationX")
+    operation_o = body.get("operationO")
+    gamma = body.get("gamma")
+    if operation_x not in MENU or operation_o not in MENU:
+        raise ValueError(f"operations must come from the frozen menu {sorted(MENU)}")
+    if not isinstance(gamma, (int, float)) or isinstance(gamma, bool):
+        raise ValueError("gamma must be a number")
+    if not 0 <= float(gamma) <= MAX_ENTANGLEMENT + 1e-12:
+        raise ValueError("gamma must lie in [0, pi/2]")
+    return operation_x, operation_o, float(gamma)
+
+
+@app.post("/arena/play")
+def arena_play_route():
+    # ONE research observation: a single shot selects the policy pair. Records
+    # carry quantum-arena-play/v1 and must never be appended to the Phase 0
+    # decision-lab dataset (protocol validation item 10).
+    try:
+        operation_x, operation_o, gamma = _arena_request(request.get_json(silent=True) or {})
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+    return jsonify(arena_play(operation_x, operation_o, gamma))
+
+
+@app.post("/arena/explain")
+def arena_explain_route():
+    # Many-shot estimates for the explanation mode. A DIFFERENT schema, so these
+    # cannot be pooled with research observations by a loader that forgot to
+    # filter — the protocol requires the two never mix.
+    body = request.get_json(silent=True) or {}
+    try:
+        operation_x, operation_o, gamma = _arena_request(body)
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+    shots = body.get("shots", 4096)
+    if not isinstance(shots, int) or isinstance(shots, bool) or not 2 <= shots <= 20000:
+        return jsonify({"error": "shots must be an integer between 2 and 20000"}), 400
+    return jsonify(arena_explain(operation_x, operation_o, gamma, shots=shots))
+
+
+@app.get("/arena/menu")
+def arena_menu_route():
+    return jsonify({
+        "menu": {name: list(params) for name, params in MENU.items()},
+        "max_entanglement": MAX_ENTANGLEMENT,
+        "note": (
+            "Frozen by protocol v1.0 question 5. The participant interface must not "
+            "show these keys, nor cooperate/defect, nor identify Q as the quantum "
+            "option — neutral labels only, mapping recorded in the run record."
+        ),
+    })
 
 
 @app.get("/health")
