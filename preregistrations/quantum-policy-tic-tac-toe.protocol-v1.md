@@ -15,20 +15,24 @@ buys, and it is all it buys.
 Three things stand between this document and human use, and none of them is a
 decision:
 
-1. **No implementation exists.** `python-bridge/ewl_game.py` is the theory module
-   — payoff matrices and equilibria — not this protocol's circuit or interface.
-   Nothing yet builds `J(gamma)`, applies the menu operations, or executes on a
-   backend.
-2. **The validation list has therefore never been run.** Items 1 to 7 require an
-   implementation to validate; items 8 to 10 are runtime disciplines for a system
-   that does not exist. "Required validation before human use" means required,
-   and none of it is done.
-3. **The pinned backend is unconfirmed.** `ibm_marrakesh` was verified live on
+1. ~~No implementation exists.~~ **Built** — `python-bridge/quantum_arena/`.
+   `protocol.py` is the exact reference (numpy), `hardware.py` the qiskit circuit
+   run against a pinned backend or a labelled simulator, deliberately separate
+   implementations so the circuit is checked against something it does not share
+   code with.
+2. ~~The validation list has never been run.~~ **Items 1 to 7 pass**, worst
+   deviation `4.4e-16`, and run in CI. Items 8 to 10 are runtime disciplines
+   about record-keeping and are stated rather than reported as passing — no unit
+   test can certify that a future operator kept simulator and hardware
+   observations apart.
+3. **No participant interface exists.** The menu is implemented; presenting it to
+   a person, with the neutral labels this protocol requires, is unbuilt.
+4. **The pinned backend is unconfirmed.** `ibm_marrakesh` was verified live on
    2026-08-23. IBM retires devices, and no token is configured in this repository,
    so its current availability is unknown here.
 
-Collection unblocks when an implementation exists, the ten validation items pass
-against it, and the backend is confirmed live — not when this file says 1.0.
+Collection unblocks when a participant interface exists and the backend is
+confirmed live — not when this file says 1.0.
 
 ## What changed from 0.1
 
