@@ -1,19 +1,28 @@
 # Quantum Policy Tic-Tac-Toe — protocol
 
-**Status:** design frozen  
+**Status:** design frozen; implementation validated; cleared for release-1 collection  
 **Version:** 1.0 (frozen 2026-09-09; supersedes draft 0.1)  
 **Scope of release 1:** implementation-only. No payoff comparison, no advantage
 claim, no behavioural claim.
 
-**Data collection: still prohibited — and this version does not lift that.**
+**Data collection: permitted, within the scope of release 1.**
 
-What v1.0 settles is the *design*. All six open questions are resolved and the
-choices behind them are frozen, so nothing about this experiment is still up for
-negotiation and no later choice can be made from the data. That is what freezing
-buys, and it is all it buys.
+Every gate this document set has been closed. The design is frozen — all six
+questions resolved, so nothing is still up for negotiation and no later choice
+can be made from the data. The implementation exists and its validation list
+passes. The participant interface exists. The pinned backend is confirmed live.
 
-Three things stand between this document and human use, and none of them is a
-decision:
+What is permitted is what release 1 claims and no more: an implementation-only
+demonstration. **No payoff comparison, no advantage claim, no behavioural claim.**
+Collecting plays is now in scope; concluding anything from them about strategy,
+cognition or quantum advantage is not, and would require a new protocol version
+with its own preregistration.
+
+Note also that a preregistration is still a separate act. This document freezes
+a design; binding a specific run to a specific hypothesis before entropy is drawn
+is what `scripts/prereg.js` is for, and it has not been done.
+
+The four gates, and how each closed:
 
 1. ~~No implementation exists.~~ **Built** — `python-bridge/quantum_arena/`.
    `protocol.py` is the exact reference (numpy), `hardware.py` the qiskit circuit
@@ -31,12 +40,19 @@ decision:
    move by move, and explanation-mode shots kept under a separate schema so they
    cannot pool with research observations. Arena plays are stored under their own
    key, never the Phase 0 lab's.
-4. **The pinned backend is unconfirmed.** `ibm_marrakesh` was verified live on
-   2026-08-23. IBM retires devices, and no token is configured in this repository,
-   so its current availability is unknown here.
+4. ~~The pinned backend is unconfirmed.~~ **Confirmed live 2026-09-09.**
+   `ibm_marrakesh`, 156 qubits, operational. The account's other operational
+   devices at that moment were `ibm_fez` and `ibm_kingston`, recorded so a future
+   repin has an evidenced list to choose from rather than a guess.
 
-One gate remains: the pinned backend is unconfirmed. Everything else the
-protocol requires before human use is in place.
+   Two operational notes. The account is on the **open plan**, which caps monthly
+   runtime — a single play is one shot and cheap, but queue time and per-job
+   overhead are not, so a session's hardware budget must be planned rather than
+   assumed. And confirmation is perishable: IBM retires devices, so a run
+   separated from this date by any meaningful interval should re-check before
+   trusting the pin.
+
+No gates remain.
 
 ## What changed from 0.1
 
