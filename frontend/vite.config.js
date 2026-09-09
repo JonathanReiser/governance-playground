@@ -14,6 +14,11 @@ export default defineConfig({
     },
   },
   server: {
+    // Honour the port the environment assigns. Vite does not read PORT on its own,
+    // and nothing here needs 5173 specifically — server.js allows any localhost
+    // origin (`/^http:\/\/localhost:\d+$/`) and the persistence plugin's routes are
+    // same-origin and relative. Falls back to Vite's default when PORT is unset.
+    port: process.env.PORT ? Number(process.env.PORT) : undefined,
     proxy: {
       "/api": {
         target: "http://localhost:3001",
