@@ -12,12 +12,19 @@ function validEvents(events) {
   );
 }
 
-function summarize(name, probabilities, parameters = {}) {
+function summarize(name, probabilities, parameters = {}, fit = {}) {
   const safe = probabilities.map((value) => Math.max(value, 1e-12));
   return {
     name,
+    // Training fit. NOT comparable across models with different parameter counts —
+    // use heldOutLogLoss for that. Kept because geometricProbability below is the
+    // "typical confidence in the square you chose" the interface reports.
     meanLogLoss: safe.length ? -safe.reduce((sum, value) => sum + Math.log(value), 0) / safe.length : null,
     geometricProbability: safe.length ? Math.exp(safe.reduce((sum, value) => sum + Math.log(value), 0) / safe.length) : null,
+    // The comparable number: mean log loss on decisions the parameters never saw.
+    // null when there was too little data to hold any out.
+    heldOutLogLoss: fit.heldOutLogLoss ?? null,
+    selection: fit.selection ?? null,
     parameters,
   };
 }
@@ -66,11 +73,97 @@ function amplitudeProbability(event, counts, kappa, phase) {
   return weights[event.legal_moves.indexOf(event.selected_move)] / weights.reduce((a, b) => a + b, 0);
 }
 
-function bestGrid(candidates, evaluate) {
-  return candidates
-    .map((parameters) => ({ parameters, probabilities: evaluate(parameters) }))
-    .map((entry) => ({ ...entry, score: summarize("", entry.probabilities).meanLogLoss }))
-    .sort((a, b) => a.score - b.score)[0];
+const CV_FOLDS = 5;
+
+/**
+ * Mean log loss under k-fold cross-validation.
+ *
+ * `probabilitiesForSplit(train, test)` must derive EVERYTHING it needs from
+ * `train` and score only `test`. That matters for the amplitude model, whose
+ * square-propensity counts are learned from data: computing them over the whole
+ * set would let each held-out choice contribute to its own prediction, which is
+ * the leak this function exists to avoid.
+ *
+ * Folds are assigned by index modulo k — deterministic, no RNG, and it
+ * interleaves rather than splitting by time, so every fold spans the whole
+ * session history instead of one contiguous block of it.
+ *
+ * Returns null when there is too little data to hold anything out. Callers must
+ * treat null as "cannot cross-validate", not as a score.
+ */
+function crossValidatedLogLoss(events, probabilitiesForSplit, folds = CV_FOLDS) {
+  const k = Math.min(folds, events.length);
+  if (k < 2) return null;
+  let total = 0;
+  let scored = 0;
+  for (let fold = 0; fold < k; fold += 1) {
+    const test = events.filter((_, index) => index % k === fold);
+    const train = events.filter((_, index) => index % k !== fold);
+    if (!train.length || !test.length) continue;
+    for (const probability of probabilitiesForSplit(train, test)) {
+      total -= Math.log(Math.max(probability, 1e-12));
+      scored += 1;
+    }
+  }
+  return scored ? total / scored : null;
+}
+
+/**
+ * Choose parameters by held-out performance rather than by training fit.
+ *
+ * Selecting on in-sample log loss favours whichever candidate has the most
+ * freedom, and these grids do not have equal freedom: the classical model
+ * carries one parameter (tau) and the amplitude model two (kappa, phase). Ranked
+ * on training fit, the richer grid wins by construction rather than by
+ * predicting anything better. Cross-validation prices that freedom.
+ *
+ * `selection` records which rule actually applied. Below two observations
+ * nothing can be held out, so the in-sample fallback runs and says so — a
+ * comparison drawn from a fallback score is not a model comparison.
+ */
+function bestGrid(candidates, evaluate, evaluateSplit, events) {
+  const scored = candidates.map((parameters) => ({
+    parameters,
+    heldOutLogLoss: crossValidatedLogLoss(events, (train, test) => evaluateSplit(parameters, train, test)),
+  }));
+  const crossValidated = scored.filter((entry) => entry.heldOutLogLoss !== null);
+  const ranked = crossValidated.length
+    ? [...crossValidated].sort((a, b) => a.heldOutLogLoss - b.heldOutLogLoss)
+    : candidates
+      .map((parameters) => ({ parameters, heldOutLogLoss: null, inSample: summarize("", evaluate(parameters)).meanLogLoss }))
+      .sort((a, b) => a.inSample - b.inSample);
+  const chosen = ranked[0];
+  return {
+    parameters: chosen.parameters,
+    probabilities: evaluate(chosen.parameters),
+    heldOutLogLoss: chosen.heldOutLogLoss,
+    selection: crossValidated.length ? `cross-validated (${Math.min(CV_FOLDS, events.length)}-fold)` : "in-sample fallback (too few decisions to hold any out)",
+  };
+}
+
+function fitClassicalGrid(events) {
+  // Stateless in the training data: tau alone determines the distribution, so the
+  // split scorer ignores `train` and simply scores the held-out fold.
+  return bestGrid(
+    TAUS.map((tau) => ({ tau })),
+    ({ tau }) => softmaxLikelihood(events, tau),
+    ({ tau }, _train, test) => softmaxLikelihood(test, tau),
+    events,
+  );
+}
+
+function fitAmplitudeGrid(events) {
+  // Stateful: counts are learned. They must come from `train` only, or each
+  // held-out choice inflates the propensity of its own square.
+  return bestGrid(
+    KAPPAS.flatMap((kappa) => PHASES.map((phase) => ({ kappa, phase }))),
+    ({ kappa, phase }) => amplitudeLikelihood(events, kappa, phase),
+    ({ kappa, phase }, train, test) => {
+      const counts = learnedCounts(train);
+      return test.map((event) => amplitudeProbability(event, counts, kappa, phase));
+    },
+    events,
+  );
 }
 
 export function analyzeFeedback(rawEvents) {
@@ -78,15 +171,12 @@ export function analyzeFeedback(rawEvents) {
   const uniform = summarize("Random guessing", events.map((event) => 1 / event.legal_moves.length));
   if (!events.length) return { decisions: 0, models: [uniform], bestModel: null, meanResponseMs: null };
 
-  const classical = bestGrid(TAUS.map((tau) => ({ tau })), ({ tau }) => softmaxLikelihood(events, tau));
-  const amplitude = bestGrid(
-    KAPPAS.flatMap((kappa) => PHASES.map((phase) => ({ kappa, phase }))),
-    ({ kappa, phase }) => amplitudeLikelihood(events, kappa, phase),
-  );
+  const classical = fitClassicalGrid(events);
+  const amplitude = fitAmplitudeGrid(events);
   const models = [
     uniform,
-    summarize("Legacy classical · value only", classical.probabilities, classical.parameters),
-    summarize("Legacy amplitude · value plus habits", amplitude.probabilities, amplitude.parameters),
+    summarize("Legacy classical · value only", classical.probabilities, classical.parameters, classical),
+    summarize("Legacy amplitude · value plus habits", amplitude.probabilities, amplitude.parameters, amplitude),
   ];
   return {
     decisions: events.length,
@@ -99,14 +189,13 @@ export function analyzeFeedback(rawEvents) {
 export function fitFrozenModels(rawEvents) {
   const events = validEvents(rawEvents);
   if (!events.length) return null;
-  const classical = bestGrid(TAUS.map((tau) => ({ tau })), ({ tau }) => softmaxLikelihood(events, tau));
-  const amplitude = bestGrid(
-    KAPPAS.flatMap((kappa) => PHASES.map((phase) => ({ kappa, phase }))),
-    ({ kappa, phase }) => amplitudeLikelihood(events, kappa, phase),
-  );
+  const classical = fitClassicalGrid(events);
+  const amplitude = fitAmplitudeGrid(events);
   return {
     schema: "ttt-frozen-models/v4",
     training_decisions: events.length,
+    selection: { classical: classical.selection, amplitude: amplitude.selection },
+    held_out_log_loss: { classical: classical.heldOutLogLoss, amplitude: amplitude.heldOutLogLoss },
     classical: classical.parameters,
     amplitude: { ...amplitude.parameters, counts: learnedCounts(events) },
     contextual: fitContextualModels(events),
