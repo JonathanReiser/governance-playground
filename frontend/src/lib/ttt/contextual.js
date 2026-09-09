@@ -42,6 +42,63 @@ export function contextFeatures(event, move) {
   ];
 }
 
+/**
+ * Fixed-weight heuristic baseline, mirroring python-bridge/ttt_lab/policies/features.py.
+ *
+ * Its five features are exactly contextFeatures(...).slice(1) — the same five in the
+ * same order — so this reuses that verified implementation rather than carrying a
+ * second copy that could drift. Only the game-value term is dropped: this baseline
+ * deliberately knows nothing about the minimax oracle.
+ *
+ * WHY IT IS NOT FITTED, and must not be. The classical context model already uses
+ * these five features plus game value plus square propensity, all fitted. A fitted
+ * feature policy would be a strictly weaker duplicate of it and would tell us
+ * nothing new. The value of this baseline is precisely that it carries ZERO free
+ * parameters: it cannot overfit, its held-out score equals its training score by
+ * construction, and it is a genuine out-of-sample predictor from the first move.
+ *
+ * That makes it the honest floor for the fitted models to clear. If seven fitted
+ * parameters cannot beat a stipulated textbook heuristic, the fitting is not
+ * earning its place.
+ *
+ * The weights are stipulated, not estimated, and ttt_lab/README.md is explicit
+ * that they "must be fit and evaluated out of sample before drawing conclusions".
+ * Fitting them is a separate, preregisterable decision — not something to slip in
+ * by editing these constants.
+ */
+export const HEURISTIC_WEIGHTS = [6.0, 5.0, 3.0, 1.5, 0.8];
+export const HEURISTIC_TEMPERATURE = 1.0;
+
+export function heuristicProbabilities(event, temperature = HEURISTIC_TEMPERATURE) {
+  if (!(typeof temperature === "number") || Number.isNaN(temperature) || temperature <= 0) {
+    throw new Error("temperature must be positive");
+  }
+  const scores = event.legal_moves.map((move) => {
+    const [, winNow, blockLoss, createFork, center, corner] = contextFeatures(event, move);
+    // One deliberate divergence from contextFeatures, and it is not a typo.
+    // features.py evaluates forks on the position AFTER the move, where a winning
+    // move has already ended the game — so legal_moves is empty there and the fork
+    // feature is 0. contextFeatures instead scans empty squares without checking
+    // for termination, so a winning move scores BOTH win and fork.
+    //
+    // Both conventions are defensible and the difference is invisible to a fitted
+    // model, which simply redistributes weight between two co-occurring features.
+    // It is NOT invisible here: the weights are stipulated, so a winning move would
+    // score 6.0 + 3.0 instead of 6.0 and this baseline would stop matching the
+    // Python policy it claims to mirror.
+    //
+    // Suppressed here rather than fixed in contextFeatures on purpose. Changing
+    // that function would alter the fitted classical/amplitude context features and
+    // silently break comparability with every session already recorded.
+    const features = [winNow, blockLoss, winNow ? 0 : createFork, center, corner];
+    return features.reduce((sum, value, index) => sum + HEURISTIC_WEIGHTS[index] * value, 0) / temperature;
+  });
+  const peak = Math.max(...scores);
+  const weights = scores.map((score) => Math.exp(score - peak));
+  const total = weights.reduce((a, b) => a + b, 0);
+  return weights.map((weight) => weight / total);
+}
+
 function dot(weights, features) {
   return weights.reduce((sum, weight, index) => sum + weight * features[index], 0);
 }
@@ -361,5 +418,8 @@ export function predictContextual(event, snapshot) {
   return {
     classical_context: contextualProbabilities(event, snapshot.classical, snapshot.counts)[chosen],
     quantum_context: contextualProbabilities(event, snapshot.amplitude ?? snapshot.quantum, snapshot.counts)[chosen],
+    // Zero fitted parameters, so it needs nothing from the snapshot and cannot
+    // have been tuned on the session it is scoring.
+    heuristic_baseline: heuristicProbabilities(event)[chosen],
   };
 }

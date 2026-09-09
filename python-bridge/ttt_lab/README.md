@@ -52,6 +52,24 @@ a choice kept the outcome class but reached it more slowly. The two are reported
 side by side and must never be summed: they answer different questions, and only
 `decision_regret` carries the "human error" reading described above.
 
+`policies/features.py` is wired into the browser lab as `heuristic_baseline`, a
+**zero-parameter reference**. Its weights stay stipulated rather than fitted, and
+that is the point: with nothing estimated it cannot overfit, its held-out score
+equals its training score by construction, and it predicts out of sample from the
+first move. It is the floor the fitted models must clear — seven fitted parameters
+that cannot beat a textbook heuristic are not earning their place. Fitting these
+weights remains a separate, preregisterable decision.
+
+One convention differs between the two feature implementations, deliberately.
+`features.py` evaluates forks on the position after the move, where a winning move
+has already ended the game, so a winning move scores no fork. `contextFeatures` in
+the JS scans empty squares without checking for termination, so a winning move
+scores both. The difference is invisible to a fitted model, which just
+redistributes weight between two co-occurring features, but not to the stipulated
+baseline — so the baseline suppresses the fork on a winning move to match Python,
+and `contextFeatures` is left alone because changing it would alter the fitted
+context features and break comparability with sessions already recorded.
+
 The JS implementation in `frontend/src/lib/ttt/game.js` mirrors
 `policies/depth_aware.py`. A committed fixture of 120 positions
 (`frontend/src/lib/ttt/__tests__/depth-aware-fixture.json`) pins the two together,
