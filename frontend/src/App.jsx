@@ -10,6 +10,7 @@ import { ViewRunPage }    from "./components/ViewRunPage";
 import { BatchResultsPage } from "./components/BatchResultsPage";
 import { StrategyComparisonPage } from "./components/StrategyComparisonPage";
 import { TttLabPage } from "./components/TttLabPage";
+import { QuantumArenaPage } from "./components/QuantumArenaPage";
 import "./App.css";
 
 const STEPS = ["Connect", "Scenario", "Deploy", "Run", "Results"];
@@ -43,8 +44,13 @@ export default function App() {
     // see StrategyComparisonPage.jsx.
     const compareHashes = params.get("compare");
     const tttLab = params.has("ttt");
-    return { registryAddress, deployBlock, batchHash, compareHashes, tttLab };
+    const arena = params.has("arena");
+    return { registryAddress, deployBlock, batchHash, compareHashes, tttLab, arena };
   });
+
+  if (viewParams.arena) {
+    return <QuantumArenaPage onBack={() => { window.location.href = window.location.pathname; }} />;
+  }
 
   if (viewParams.tttLab) {
     return <TttLabPage onBack={() => { window.location.href = window.location.pathname; }} />;
