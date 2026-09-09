@@ -1,6 +1,6 @@
 # Frozen policy and payoff specification
 
-**Replaces:** the placeholder text at `preregistrations/quantum-policy-tic-tac-toe.protocol-draft.md:53-57`
+**Replaces:** the placeholder policy text in `preregistrations/quantum-policy-tic-tac-toe.protocol-v1.md`
 and the zero-sum stipulation at `:51-52`.
 
 **Status when committed:** frozen. Nothing in this section may be revised after any
