@@ -5,10 +5,10 @@
 **Scope of release 1:** implementation-only. No payoff comparison, no advantage
 claim, no behavioural claim.  
 **Data collection:** still prohibited. Independent review is done and questions
-1, 2, 3 and 6 are settled, but **4 and 5 remain open** — the hardware backend is
-unpinned and the participant control scheme is unchosen. Neither can be decided
-after the fact without deciding it from the data. Collection unblocks when both
-are frozen and a v1.0 is committed.
+1, 2, 3, 4 and 6 are settled. **Question 5 remains open** — the participant
+control scheme is unchosen, and it cannot be decided after the fact without
+deciding it from the data. Collection unblocks when it is frozen and a v1.0 is
+committed.
 
 ## Why this document exists
 
@@ -266,10 +266,16 @@ the quantum observations must exceed with a stated uncertainty procedure.
    the moment a payoff comparison is proposed — and the answer should then be
    yes, since excluding correlated randomness would mean choosing a weakened
    opponent.
-4. **Open.** Which quantum provider and backend will run the hardware circuit?
-   Required before any hardware execution: the backend must be *pinned*, not
-   selected by `least_busy`, or each run silently samples a different noise
-   profile.
+4. ~~Which quantum provider and backend?~~ **Resolved — IBM Quantum,
+   `ibm_marrakesh`, pinned.** Chosen on evidence rather than preference: it is
+   the backend this project has actually executed on (verified live 2026-08-23,
+   real job id `da5j2s6aa69c739ku7a0`). `least_busy` selection is removed from
+   `python-bridge/layer1_qpu.py` and `instinct_qpu.py`; every hardware reading
+   now carries `backend`, `backend_requested` and `backend_pinned`. If the
+   pinned device is unavailable the call fails and falls back to the labelled
+   local simulator — it never substitutes a different QPU. Override for a run
+   deliberately targeting other hardware with `IBM_QUANTUM_BACKEND`; the
+   reading records which device answered either way.
 5. **Open.** Will participants choose continuous controls or a small
    preregistered menu of operations?
 6. ~~What observations constitute learning?~~ **Not applicable to this release.**
