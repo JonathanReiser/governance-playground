@@ -2,8 +2,13 @@
 
 **Status:** design draft only  
 **Version:** 0.1  
-**Data collection:** prohibited until this document is independently reviewed,
-the unresolved choices are frozen, and a new version is committed.
+**Scope of release 1:** implementation-only. No payoff comparison, no advantage
+claim, no behavioural claim.  
+**Data collection:** still prohibited. Independent review is done and questions
+1, 2, 3 and 6 are settled, but **4 and 5 remain open** — the hardware backend is
+unpinned and the participant control scheme is unchosen. Neither can be decided
+after the fact without deciding it from the data. Collection unblocks when both
+are frozen and a v1.0 is committed.
 
 ## Why this document exists
 
@@ -14,9 +19,14 @@ quantum-game data.
 
 The first objective is modest and testable: implement player strategies as
 unitary quantum operations while preserving a precisely defined classical
-limit. A later experiment may test for a quantum strategic advantage, but only
-after the classical comparison set and the relevant inequality or payoff bound
-have been fixed in advance.
+limit. **Release 1 is implementation-only** (question 2, resolved). It claims a
+correct construction and nothing about payoffs, advantage, or human behaviour.
+
+A later experiment may test for a quantum strategic advantage, but only after
+the classical comparison set and the relevant payoff bound have been fixed in
+advance. Note what such a test could and could not reach: a *nonclassical
+correlation* bound is unavailable in this design at any point, because the
+protocol has no Bell/CHSH structure. Adding one is a redesign, not a follow-up.
 
 ## Claim boundary
 
@@ -38,9 +48,15 @@ It would **not** by itself establish:
 - a payoff advantage over every classical correlated strategy; or
 - that ordinary Tic-Tac-Toe is no longer solved.
 
-The non-zero-sum payoff makes a quantum advantage *possible* to ask about; it
-does not make one true. Two limits are known in advance and must be reported
-alongside any positive result. First, the `(Q, Q)` equilibrium exists only
+**Release 1 claims items 1 to 3 and nothing further.** The three claims above are
+the whole of it: a correct construction, an exact classical limit, and the same
+circuit running in simulation and on hardware. No payoff is compared, so no
+advantage is claimed, so the non-claims below are not hedges against a result
+this release could produce — they are the boundary of what it is even asking.
+
+The non-zero-sum payoff makes a quantum advantage *possible* to ask about later;
+it does not make one true, and release 1 does not ask. Two limits are known in
+advance and must be reported alongside any future positive result. First, the `(Q, Q)` equilibrium exists only
 inside the restricted two-parameter strategy family; under full SU(2) it does
 not survive (Benjamin & Hayden, reproduced in `python-bridge/ewl_game.py`'s
 `best_response_over_su2`). Second, the referee measures a fixed basis once, so
@@ -237,19 +253,28 @@ the quantum observations must exceed with a stated uncertainty procedure.
    `frozen-policy-payoff-spec.md` (`positional` / `heuristic`, with `c = d = 1/3`,
    giving a strict Prisoner's Dilemma affinely equivalent to the canonical EWL
    matrix `(5, 3, 1, 0)`).
-2. Is the first release claiming only a correct quantum-game implementation, or
-   testing a preregistered payoff bound? Note a *nonclassical correlation* bound
-   is **not** available — the protocol has no Bell/CHSH structure (see Claim
-   boundary). The live options are implementation-only, or a preregistered
-   payoff comparison against the strongest classical comparator of question 3.
-3. Does the classical comparison permit shared correlated randomness? If not,
-   why is excluding it scientifically appropriate?
-4. Which quantum provider and backend will run the hardware circuit?
-5. Will participants choose continuous controls or a small preregistered menu of
-   operations?
-6. What observations constitute learning: payoff improvement, convergence
-   toward a best response, recovery of phase sensitivity, or another frozen
-   measure?
+2. ~~Implementation-only, or a preregistered payoff bound?~~ **Resolved —
+   implementation-only.** The first release claims a correct EWL-form
+   implementation and nothing else: a valid quantum state, unitary player
+   operations, an entangling referee operation, Born-rule measurement, an exact
+   classical limit at every gamma, and the same circuit running on a simulator
+   and on hardware. It makes **no** payoff comparison and **no** advantage claim.
+3. ~~Does the classical comparison permit shared correlated randomness?~~ **Not
+   applicable to this release.** There is no classical comparison in an
+   implementation-only release, so there is nothing for a comparator to be
+   strong or weak against. This question returns, unanswered and load-bearing,
+   the moment a payoff comparison is proposed — and the answer should then be
+   yes, since excluding correlated randomness would mean choosing a weakened
+   opponent.
+4. **Open.** Which quantum provider and backend will run the hardware circuit?
+   Required before any hardware execution: the backend must be *pinned*, not
+   selected by `least_busy`, or each run silently samples a different noise
+   profile.
+5. **Open.** Will participants choose continuous controls or a small
+   preregistered menu of operations?
+6. ~~What observations constitute learning?~~ **Not applicable to this release.**
+   An implementation-only release makes no learning claim, so there is no
+   learning measure to freeze. Returns with any behavioural claim.
 
 ## Independent-review request
 
