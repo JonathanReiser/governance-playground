@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { tttResearchPersistence } from './tttPersistencePlugin.js'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tttResearchPersistence()],
   build: {
     rollupOptions: {
       output: {

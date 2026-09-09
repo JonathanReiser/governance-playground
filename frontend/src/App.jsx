@@ -9,6 +9,7 @@ import { AIResultsStep }  from "./components/AIResultsStep";
 import { ViewRunPage }    from "./components/ViewRunPage";
 import { BatchResultsPage } from "./components/BatchResultsPage";
 import { StrategyComparisonPage } from "./components/StrategyComparisonPage";
+import { TttLabPage } from "./components/TttLabPage";
 import "./App.css";
 
 const STEPS = ["Connect", "Scenario", "Deploy", "Run", "Results"];
@@ -41,8 +42,13 @@ export default function App() {
     // ?compare=<hash1>,<hash2>,... — several batches ranked side by side,
     // see StrategyComparisonPage.jsx.
     const compareHashes = params.get("compare");
-    return { registryAddress, deployBlock, batchHash, compareHashes };
+    const tttLab = params.has("ttt");
+    return { registryAddress, deployBlock, batchHash, compareHashes, tttLab };
   });
+
+  if (viewParams.tttLab) {
+    return <TttLabPage onBack={() => { window.location.href = window.location.pathname; }} />;
+  }
 
   if (viewParams.compareHashes) {
     return (
@@ -122,6 +128,7 @@ export default function App() {
             )}
           </div>
           <nav className="stepper">
+            <a className="lab-link" href={`${window.location.pathname}?ttt=play`}>Decision Lab</a>
             {STEPS.map((s, i) => (
               <div key={s} className={`step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}>
                 <span className="step-num">{i < step ? "✓" : i + 1}</span>
