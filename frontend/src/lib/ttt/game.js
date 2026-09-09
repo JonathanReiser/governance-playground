@@ -76,6 +76,39 @@ export function samplePerfectMove(state, randomValue) {
   return { move: moves[randomValue % moves.length], optimalMoves: moves };
 }
 
+/**
+ * Discounted-outcome value, mirroring python-bridge/ttt_lab/policies/depth_aware.py
+ * exactly. Terminal states keep their {-1, 0, 1} utility; every ply back multiplies
+ * by DISCOUNT, so a win taken sooner scores higher than the same win taken later and
+ * a loss delayed scores higher than the same loss taken at once. Outcome classes are
+ * preserved: every win stays positive, every draw exactly 0, every loss negative —
+ * verified over all 16,167 (state, move) pairs.
+ */
+export const DISCOUNT = 0.9;
+
+const discountedCache = new Map();
+
+export function discountedValue(state) {
+  const key = `${state.toMove}:${state.board.join(",")}`;
+  if (discountedCache.has(key)) return discountedCache.get(key);
+  if (isTerminal(state)) return utility(state, state.toMove);
+  const computed = Math.max(...legalMoves(state).map((move) => -DISCOUNT * discountedValue(applyMove(state, move))));
+  const value = Object.is(computed, -0) ? 0 : computed;
+  discountedCache.set(key, value);
+  return value;
+}
+
+export function discountedActionValues(state) {
+  if (isTerminal(state)) throw new Error("A terminal state has no actions.");
+  return Object.fromEntries(legalMoves(state).map((move) => {
+    // Negating a drawn child yields -0, which compares equal to 0 but is a distinct
+    // value under Object.is and to any exact-equality grouping. stateValue() and
+    // discountedValue() already normalise it; this negation happens outside both.
+    const value = -DISCOUNT * discountedValue(applyMove(state, move));
+    return [move, Object.is(value, -0) ? 0 : value];
+  }));
+}
+
 export function analyzeChoice(state, move) {
   const values = actionValues(state);
   if (!(move in values)) throw new Error("Choice must be a legal move.");
@@ -90,7 +123,39 @@ export function analyzeChoice(state, move) {
     else if (bestValue === 0 && selectedValue === -1) errorType = "surrendered-draw";
     else throw new Error(`Unexpected minimax transition ${bestValue} -> ${selectedValue}.`);
   }
-  return { move, optimalMoves, selectedValue, bestValue, regret, errorType };
+
+  // Tempo is reported ALONGSIDE outcome regret, never folded into it. Outcome-class
+  // regret deliberately ignores how quickly a forced win is taken or how long a
+  // forced loss is delayed (see python-bridge/ttt_lab/README.md); this is the
+  // separate measure of exactly that, and it must never be summed with `regret` or
+  // labelled as outcome regret. Every session recorded before this field existed
+  // remains directly comparable on `regret`, which is unchanged.
+  const tempoValues = discountedActionValues(state);
+  const bestTempo = Math.max(...Object.values(tempoValues));
+  const selectedTempo = tempoValues[move];
+  const tempoOptimalMoves = Object.entries(tempoValues)
+    .filter(([, value]) => Math.abs(value - bestTempo) < 1e-12)
+    .map(([index]) => Number(index));
+  const tempoRegret = bestTempo - selectedTempo;
+
+  return {
+    move,
+    optimalMoves,
+    selectedValue,
+    bestValue,
+    regret,
+    errorType,
+    tempo: {
+      discount: DISCOUNT,
+      bestValue: bestTempo,
+      selectedValue: selectedTempo,
+      optimalMoves: tempoOptimalMoves,
+      // > 0 only when the choice was outcome-optimal but slower; a choice that also
+      // changed the outcome class already shows up in `regret`.
+      regret: tempoRegret,
+      slowerWithinOutcomeClass: regret === 0 && tempoRegret > 1e-12,
+    },
+  };
 }
 
 export function softmaxDistribution(state, temperature) {

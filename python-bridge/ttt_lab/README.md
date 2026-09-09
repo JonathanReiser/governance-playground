@@ -42,7 +42,21 @@ python -m pytest tests/ ttt_lab/tests/ -v
 
 Outcome-class regret deliberately ignores how quickly a forced win is taken or
 how long a forced loss is delayed. The discounted-outcome policy models those
-preferences separately and is never described as outcome regret. The feature
+preferences separately and is never described as outcome regret.
+
+The browser lab now records both. `decision_regret` is the outcome-class regret
+above and is unchanged, so every session recorded before this field existed stays
+directly comparable. Alongside it, `tempo_regret` is the discounted-outcome gap at
+`tempo_discount` (0.9), with `tempo_slower_within_outcome_class` true exactly when
+a choice kept the outcome class but reached it more slowly. The two are reported
+side by side and must never be summed: they answer different questions, and only
+`decision_regret` carries the "human error" reading described above.
+
+The JS implementation in `frontend/src/lib/ttt/game.js` mirrors
+`policies/depth_aware.py`. A committed fixture of 120 positions
+(`frontend/src/lib/ttt/__tests__/depth-aware-fixture.json`) pins the two together,
+so the engines cannot drift apart silently. Regenerate it from this package if the
+discount or the scoring rule ever changes. The feature
 policy is a transparent comparison model, not a psychological claim: its five
 weights must be fit and evaluated out of sample before drawing conclusions.
 

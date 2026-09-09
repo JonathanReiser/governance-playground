@@ -153,7 +153,7 @@ export function TttLabPage({ onBack }) {
 
   function playHumanMove(move) {
     if (!humanTurn || !legalMoves(state).includes(move)) return;
-    const { selectedValue, bestValue, optimalMoves, regret, errorType } = analyzeChoice(state, move);
+    const { selectedValue, bestValue, optimalMoves, regret, errorType, tempo } = analyzeChoice(state, move);
     const predictionInput = {
       board_before: [...state.board],
       player: mark(state.toMove),
@@ -170,6 +170,7 @@ export function TttLabPage({ onBack }) {
       bestValue,
       regret,
       errorType,
+      tempo,
       modelPredictions,
     };
     setSessionDecisions((current) => [...current, decision]);
@@ -195,6 +196,12 @@ export function TttLabPage({ onBack }) {
         minimax_optimal_moves: optimalMoves,
         minimax_action_values: values,
         decision_regret: regret,
+        // Reported separately from decision_regret and never summed with it.
+        tempo_regret: tempo.regret,
+        tempo_discount: tempo.discount,
+        tempo_best_value: tempo.bestValue,
+        tempo_selected_value: tempo.selectedValue,
+        tempo_slower_within_outcome_class: tempo.slowerWithinOutcomeClass,
         error_type: errorType,
         frozen_model: frozenModels.current ? {
           schema: frozenModels.current.schema,
