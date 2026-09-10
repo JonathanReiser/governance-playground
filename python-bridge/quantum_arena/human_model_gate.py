@@ -101,7 +101,9 @@ def structural_observability(seed: int = 0, draws: int = 20000) -> dict:
     gauge_spread = float(max(gauge))
 
     # 3. With delta held at zero for both considerations the order effect is
-    #    identically zero. This is the sharp point prediction of the nested null.
+    #    zero to machine precision — max 2e-16 across 20,000 draws, against a
+    #    ~0.16 mean gap when delta is free. This is the sharp point prediction of
+    #    the nested null; the residual is one ULP and is platform-dependent.
     null_gaps = []
     for _ in range(draws):
         a1, a2 = rng.uniform(-math.pi, math.pi, 2)
@@ -425,6 +427,21 @@ def held_out_log_loss(probabilities: np.ndarray, data: SyntheticDataset) -> floa
 #   3. delta <-> pi - delta is NOT a symmetry of the model itself (predictions
 #      differ by up to 0.99). The near-mirror appearance of the profile comes
 #      from beta absorbing delta during the refit. That is the mechanism.
+#
+# SWEEP, 2026-09-10 — the question "does any feasible design work?" is now
+# answered, and the answer is no. Recovery error against participant count:
+#
+#     10 participants x  48 trials -> 1.9012 rad
+#     30 participants x  96 trials -> 1.9058 rad
+#     60 participants x 192 trials -> 1.7933 rad
+#    200 participants x 192 trials -> 1.8491 rad
+#    500 participants x 384 trials -> 1.8474 rad
+#
+# Flat across a 50-fold increase in participants. Sampling noise would fall as
+# 1/sqrt(N). Over the same range the true-positive rate climbs 0.00 -> 0.50 ->
+# 1.00 while false positives stay at 0.00, so detection improves with data
+# exactly as expected and estimation does not improve at all.
+# Artifact: preregistrations/human-model-gate/design-sweep-2026-09-10.json
 #
 # CONSEQUENCE, and it is a useful one rather than a dead end: delta is
 # DETECTABLE but not ESTIMABLE under this design. Discrimination is perfect

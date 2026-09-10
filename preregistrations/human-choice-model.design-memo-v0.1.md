@@ -125,6 +125,30 @@ roughly `[0.8, 2.4]`. **`beta` absorbs `delta`.**
   or any interpretation of its magnitude is **not** supportable at any design
   tested here.
 
+### The sweep, completed 2026-09-10
+
+"Does any feasible design recover `delta`?" is now answered. No.
+
+| participants | trials/participant | worst \|δ\| error | FPR | TPR |
+|---|---|---|---|---|
+| 10 | 48 | 1.9012 | 0.00 | 0.00 |
+| 30 | 96 | 1.9058 | 0.00 | 0.50 |
+| 60 | 192 | 1.7933 | 0.00 | 1.00 |
+| 200 | 192 | 1.8491 | 0.00 | 1.00 |
+| 500 | 384 | 1.8474 | 0.00 | 1.00 |
+
+The error is **flat across a 50-fold increase in participants**. Sampling noise
+would fall as `1/sqrt(N)`; this does not move, which is the signature of
+structural non-identifiability rather than insufficient data. The largest design
+tested — 500 participants at 384 trials each — is well past anything fundable and
+recovers `delta` no better than the smallest.
+
+Over the same range the true-positive rate climbs `0.00 -> 0.50 -> 1.00` while
+false positives stay at `0.00`. **Detection improves with data exactly as
+expected. Estimation does not improve at all.** That contrast is the finding.
+
+Artifact: `preregistrations/human-model-gate/design-sweep-2026-09-10.json`.
+
 ### Consequence for the recommendation above
 
 Option 1 (binary `C²` task) stands, and the case for it strengthens: the extra
