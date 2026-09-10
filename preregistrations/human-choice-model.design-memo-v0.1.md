@@ -167,14 +167,54 @@ At 10⁷ trials per cell and zero sampling noise, `delta` is still not recovered
 below about 1.1. So the sweep's flat error is not a sample-size limit — **no
 budget reaches it.**
 
-Two refinements worth keeping rather than rounding off:
+### Correction: what the small errors at 1.5 and 2.0 actually mean
 
-- **Larger `delta` does recover** (0.076 and 0.134 at 1.5 and 2.0). The honest
-  claim is not "unidentifiable" but "unidentifiable below roughly 1.1".
-- **Every estimate lands in about `[1.6, 2.7]` regardless of the truth.** That is
-  the profiled-likelihood plateau seen from a third angle. Large `delta` recovers
-  largely because the true value happens to fall inside that band, which is not
-  the same as being identified.
+The five rows above invite two readings, and **both are wrong.** The first is
+"`delta` recovers above about 1.1." The second — asserted in an earlier draft of
+this memo, and withdrawn here — is that every estimate lands in a fixed band of
+about `[1.6, 2.7]` regardless of the truth, so the small errors are coincidence.
+
+Small error at one or two values cannot distinguish them, because an estimator
+with a fixed output band produces small error wherever the truth happens to fall
+inside it. The discriminating question is whether the estimate **moves** with the
+truth. Regressing fitted on true answers it directly: slope 1 is full
+identification, slope 0 is no information.
+
+Ten values from 0.2 to 2.9, noiseless, full reoptimisation at each point:
+
+| true `delta` | fitted \|δ\| | \|error\| |
+|---|---|---|
+| 0.20 | 2.9499 | 2.7499 |
+| 0.50 | 2.4957 | 1.9957 |
+| 0.80 | 2.0874 | 1.2874 |
+| 1.10 | 1.9915 | 0.8915 |
+| 1.40 | 1.2398 | 0.1602 |
+| 1.70 | 1.5224 | 0.1776 |
+| 2.00 | 1.8656 | 0.1344 |
+| 2.30 | 1.7319 | 0.5681 |
+| 2.60 | 1.9060 | 0.6940 |
+| 2.90 | 2.7113 | 0.1887 |
+
+```
+OVERALL          slope -0.165   corr -0.281
+ABOVE 1.1        slope +0.441   corr +0.623   (n = 7)
+fully identified slope +1.000   corr +1.000
+```
+
+The honest reading is between the two:
+
+- **Above 1.1, `delta` is partially identified and severely attenuated.** Slope
+  `+0.44` is not zero — there is real information — but the estimate moves less
+  than half as fast as the truth. The "fixed band" claim is falsified: estimates
+  span `[1.24, 2.95]` and do track.
+- **It is not "recovered" above 1.1 either.** Three of the seven points above the
+  threshold miss the 0.25 criterion (errors 0.57 and 0.69). The small errors at
+  1.4 / 1.7 / 2.0 are where the attenuated line crosses the identity line.
+- **Below 1.1 there is no useful tracking at all** — the relationship inverts.
+
+Whether an estimator with slope 0.44 and a 3-in-7 failure rate can support a study
+is a judgement call, not a fact this memo settles. It is recorded here as the
+open question it is.
 
 ### Consequence for the recommendation above
 

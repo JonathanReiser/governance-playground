@@ -34,5 +34,5 @@
     1.5755055903206134,
     2.710441838502362
   ],
-  "reading": "Recovery fails at infinite data for the smaller true values, so the design sweep's flat error is structural rather than a sample-size limit. Note the fitted estimates cluster in a narrow band regardless of the generating value: that is the profiled-likelihood plateau seen from another angle. Larger true deltas 'recover' largely because they happen to fall inside that band, which is not the same as being identified."
+  "reading": "Recovery fails at infinite data for the smaller true values, so the design sweep's flat error is structural rather than a sample-size limit. Do NOT read the small errors at the larger true values as recovery, and do not read them as coincidence either: five points cannot tell those apart. See tracking_slope, which regresses fitted on true over ten points and finds partial, heavily attenuated identifiability above about 1.1 (slope +0.44 where full identification would give 1.0) and none below it."
 }

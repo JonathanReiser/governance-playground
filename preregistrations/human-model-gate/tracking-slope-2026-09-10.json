@@ -1,0 +1,69 @@
+{
+  "schema": "human-choice-identifiability-gate/v0.1",
+  "engineering_only": true,
+  "trials_per_cell": 10000000.0,
+  "tracking_threshold": 1.1,
+  "rows": [
+    {
+      "true_delta": 0.2,
+      "fitted_absolute_delta": 2.949866416693525,
+      "absolute_error": 2.749866416693525
+    },
+    {
+      "true_delta": 0.5,
+      "fitted_absolute_delta": 2.4956694562764565,
+      "absolute_error": 1.9956694562764565
+    },
+    {
+      "true_delta": 0.8,
+      "fitted_absolute_delta": 2.0874231205382405,
+      "absolute_error": 1.2874231205382405
+    },
+    {
+      "true_delta": 1.1,
+      "fitted_absolute_delta": 1.9914654736403814,
+      "absolute_error": 0.8914654736403813
+    },
+    {
+      "true_delta": 1.4,
+      "fitted_absolute_delta": 1.2398207509302193,
+      "absolute_error": 0.16017924906978065
+    },
+    {
+      "true_delta": 1.7,
+      "fitted_absolute_delta": 1.5224270039623278,
+      "absolute_error": 0.17757299603767218
+    },
+    {
+      "true_delta": 2.0,
+      "fitted_absolute_delta": 1.8656158151130962,
+      "absolute_error": 0.13438418488690385
+    },
+    {
+      "true_delta": 2.3,
+      "fitted_absolute_delta": 1.7318795335840123,
+      "absolute_error": 0.5681204664159876
+    },
+    {
+      "true_delta": 2.6,
+      "fitted_absolute_delta": 1.9060276643974836,
+      "absolute_error": 0.6939723356025165
+    },
+    {
+      "true_delta": 2.9,
+      "fitted_absolute_delta": 2.711325181803467,
+      "absolute_error": 0.18867481819653298
+    }
+  ],
+  "slope_overall": -0.16458634978755982,
+  "correlation_overall": -0.28133380113981177,
+  "slope_above_threshold": 0.44064827155303204,
+  "correlation_above_threshold": 0.6234670998618542,
+  "points_above_threshold": 7,
+  "estimate_range": [
+    1.2398207509302193,
+    2.949866416693525
+  ],
+  "identified_slope_would_be": 1.0,
+  "reading": "Above the threshold the slope is positive but well under 1, so delta is partially identified there and severely attenuated: the estimate moves less than half as fast as the truth. Two simpler readings are both wrong. It is not 'recovered above 1.1' \u2014 several points above the threshold still miss the recovery criterion, and the small errors occur where the attenuated line crosses the identity line. It is also not a fixed band independent of the truth \u2014 the estimates do move with it. Below the threshold there is no useful tracking at all."
+}
