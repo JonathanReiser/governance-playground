@@ -213,10 +213,12 @@ class TaskDesign:
         return self.conditions * self.trials_per_ordering
 
     def is_identifiable_in_principle(self) -> bool:
-        """Whether a generic local Jacobian has full column rank.
+        """Whether the effective Jacobian rank reaches the free-parameter count.
 
         Nominal condition counting is insufficient here: six orderings contain
-        only two independent prediction directions per triple.
+        only two independent prediction directions per triple.  Thus the
+        effective Jacobian has at most 2T rows against 3T+1 free parameters, so
+        the shipped shared-delta model is structurally non-identifiable.
         """
         return quantum_jacobian_rank(self.triples) == self.free_parameters
 
@@ -333,8 +335,10 @@ def quantum_jacobian_rank(triples: int) -> int:
     """Generic local rank of the shipped quantum prediction map.
 
     This is a deterministic analytic diagnostic at an interior, nonsymmetric
-    point. It checks local full-rank identifiability without a finite-difference
-    step or a hand-tuned absolute tolerance.
+    point. Comparing this effective rank with the free-parameter count diagnoses
+    local identifiability without a finite-difference step or a hand-tuned
+    absolute tolerance.  For T triples, rank is bounded by 2T while the model
+    has 3T+1 free parameters.
     """
     betas = np.linspace(0.61, 2.41, 3 * triples)
     jacobian = quantum_two_observable_jacobian(betas.reshape(triples, 3), 0.83)

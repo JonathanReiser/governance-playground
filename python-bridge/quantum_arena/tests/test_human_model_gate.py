@@ -75,17 +75,16 @@ class TestTheseFactsForceTheDesign:
             ])
 
         step = 1e-6
-        gradient = np.array([
-            (pair_probabilities(point + np.eye(3)[column] * step)[0]
-             - pair_probabilities(point - np.eye(3)[column] * step)[0]) / (2 * step)
+        jacobian = np.column_stack([
+            (pair_probabilities(point + np.eye(3)[column] * step)
+             - pair_probabilities(point - np.eye(3)[column] * step)) / (2 * step)
             for column in range(3)
         ])
         assert pair_probabilities(point)[0] == pytest.approx(
             pair_probabilities(point)[1], abs=1e-14
         )
-        assert np.linalg.norm(gradient) > 0.1
-        # The exact reversal equality makes both Jacobian rows this same gradient.
-        jacobian = np.vstack((gradient, gradient))
+        assert np.linalg.norm(jacobian[0]) > 0.1
+        assert jacobian[0] == pytest.approx(jacobian[1], abs=1e-9)
         effective_rank = np.linalg.matrix_rank(jacobian)
         assert effective_rank == 1
         assert effective_rank < point.size
