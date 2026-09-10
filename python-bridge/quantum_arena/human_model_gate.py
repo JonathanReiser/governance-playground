@@ -186,11 +186,10 @@ def structural_observability(seed: int = 0, draws: int = 20000) -> dict:
 class TaskDesign:
     """Triples of considerations, every ordering presented.
 
-    Pairs will not do. A pair yields two conditions, so two observed proportions,
-    and any model with two or more free parameters saturates them — nothing is
-    identified however many participants are recruited. A triple yields six
-    orderings against three strength parameters plus one shared delta, which is
-    the smallest design where the parameter count is below the condition count.
+    The six nominal orderings collapse to two distinct predictions under the
+    shipped shared-delta restriction.  Consequently triples do not escape the
+    saturation problem that motivated them: the generic Jacobian rank is 2T
+    against 3T+1 free parameters.
     """
 
     triples: int = 4
@@ -214,7 +213,14 @@ class TaskDesign:
         return self.conditions * self.trials_per_ordering
 
     def is_identifiable_in_principle(self) -> bool:
-        return self.free_parameters < self.conditions
+        """Whether the effective Jacobian rank reaches the free-parameter count.
+
+        Nominal condition counting is insufficient here: six orderings contain
+        only two independent prediction directions per triple.  Thus the
+        effective Jacobian has at most 2T rows against 3T+1 free parameters, so
+        the shipped shared-delta model is structurally non-identifiable.
+        """
+        return quantum_jacobian_rank(self.triples) == self.free_parameters
 
 
 def _orderings() -> list[tuple[int, int, int]]:
@@ -235,6 +241,108 @@ def quantum_probabilities(betas: np.ndarray, delta: float) -> np.ndarray:
             operations = [su2(0.0, triple[i], deltas[i]) for i in order]
             out[triple_index, order_index] = choice_probability(list(reversed(operations)))
     return out
+
+
+def quantum_two_observables(betas: np.ndarray, delta: float) -> np.ndarray:
+    """Analytic reduction of each triple to its two distinct probabilities.
+
+    Column 0 is the probability when consideration 0 is at either end; column 1
+    is the probability when it is in the middle.  The reduction is exact for the
+    substantive ``deltas=(0, delta, delta)`` restriction, not for independently
+    varying deltas.
+    """
+    betas = np.atleast_2d(betas)
+    x = betas[:, 0] / 2.0
+    u = betas[:, 1] / 2.0
+    v = betas[:, 2] / 2.0
+    y = u + v
+    common = (np.cos(x) * np.cos(y) - np.sin(x) * np.sin(y) * np.cos(delta)) ** 2
+    scale = np.sin(x) ** 2 * np.sin(delta) ** 2
+    end = common + scale * np.sin(y) ** 2
+    middle = common + scale * np.sin(u - v) ** 2
+    return np.column_stack((end, middle))
+
+
+def quantum_two_observable_jacobian(betas: np.ndarray, delta: float) -> np.ndarray:
+    """Analytic Jacobian of :func:`quantum_two_observables`.
+
+    Columns are the flattened beta values followed by the shared ``delta``.
+    Using the closed-form reduction avoids manufacturing small nonzero singular
+    values at the finite-difference roundoff floor.
+    """
+    betas = np.atleast_2d(np.asarray(betas, dtype=float))
+    triples = len(betas)
+    jacobian = np.zeros((2 * triples, 3 * triples + 1))
+
+    sine_delta = math.sin(delta)
+    cosine_delta = math.cos(delta)
+    for triple_index, (beta0, beta1, beta2) in enumerate(betas):
+        x, u, v = beta0 / 2.0, beta1 / 2.0, beta2 / 2.0
+        y, z = u + v, u - v
+        sine_x, cosine_x = math.sin(x), math.cos(x)
+        sine_y, cosine_y = math.sin(y), math.cos(y)
+        sine_z, cosine_z = math.sin(z), math.cos(z)
+
+        amplitude = (
+            cosine_x * cosine_y
+            - sine_x * sine_y * cosine_delta
+        )
+        scale = sine_x ** 2 * sine_delta ** 2
+
+        amplitude_x = -sine_x * cosine_y - cosine_x * sine_y * cosine_delta
+        amplitude_y = -cosine_x * sine_y - sine_x * cosine_y * cosine_delta
+        amplitude_delta = sine_x * sine_y * sine_delta
+        scale_x = 2.0 * sine_x * cosine_x * sine_delta ** 2
+        scale_delta = 2.0 * sine_x ** 2 * sine_delta * cosine_delta
+
+        end_factor = sine_y ** 2
+        middle_factor = sine_z ** 2
+        end_factor_y = 2.0 * sine_y * cosine_y
+        middle_factor_z = 2.0 * sine_z * cosine_z
+
+        row_end = 2 * triple_index
+        row_middle = row_end + 1
+        beta_column = 3 * triple_index
+
+        # x, u and v are half-angles, hence the factor 0.5 in beta derivatives.
+        jacobian[row_end, beta_column] = 0.5 * (
+            2.0 * amplitude * amplitude_x + scale_x * end_factor
+        )
+        jacobian[row_middle, beta_column] = 0.5 * (
+            2.0 * amplitude * amplitude_x + scale_x * middle_factor
+        )
+        jacobian[row_end, beta_column + 1] = 0.5 * (
+            2.0 * amplitude * amplitude_y + scale * end_factor_y
+        )
+        jacobian[row_end, beta_column + 2] = jacobian[row_end, beta_column + 1]
+        jacobian[row_middle, beta_column + 1] = 0.5 * (
+            2.0 * amplitude * amplitude_y + scale * middle_factor_z
+        )
+        jacobian[row_middle, beta_column + 2] = 0.5 * (
+            2.0 * amplitude * amplitude_y - scale * middle_factor_z
+        )
+        jacobian[row_end, -1] = (
+            2.0 * amplitude * amplitude_delta + scale_delta * end_factor
+        )
+        jacobian[row_middle, -1] = (
+            2.0 * amplitude * amplitude_delta + scale_delta * middle_factor
+        )
+
+    return jacobian
+
+
+def quantum_jacobian_rank(triples: int) -> int:
+    """Generic local rank of the shipped quantum prediction map.
+
+    This is a deterministic analytic diagnostic at an interior, nonsymmetric
+    point. Comparing this effective rank with the free-parameter count diagnoses
+    local identifiability without a finite-difference step or a hand-tuned
+    absolute tolerance.  For T triples, rank is bounded by 2T while the model
+    has 3T+1 free parameters.
+    """
+    betas = np.linspace(0.61, 2.41, 3 * triples)
+    jacobian = quantum_two_observable_jacobian(betas.reshape(triples, 3), 0.83)
+    return int(np.linalg.matrix_rank(jacobian))
 
 
 def markov_probabilities(rates: np.ndarray, asymmetry: float = 0.9) -> np.ndarray:
@@ -420,13 +528,14 @@ def held_out_log_loss(probabilities: np.ndarray, data: SyntheticDataset) -> floa
 #      got WORSE — the search found a better likelihood at a delta further from
 #      the truth. An underpowered optimiser cannot do that.
 #
-#   2. The profiled likelihood is broad. Refitting beta at each fixed delta gives
-#      a plateau spanning roughly delta in [0.8, 2.4] with no resolvable minimum,
-#      while delta near 0 or pi is rejected by several hundred nll units.
+#   2. The six nominal orderings reduce exactly to two probabilities per triple,
+#      so the generic Jacobian rank is 2T against 3T+1 parameters.  At delta=0
+#      or pi, and at other special beta values, the rank is lower still.
 #
-#   3. delta <-> pi - delta is NOT a symmetry of the model itself (predictions
-#      differ by up to 0.99). The near-mirror appearance of the profile comes
-#      from beta absorbing delta during the refit. That is the mechanism.
+#   3. delta <-> pi-delta IS an exact symmetry after refitting beta, but that
+#      reflection does not determine the endpoints of the identified set.  The
+#      feasible set depends on the observed probability pair and nuisance betas;
+#      it is generically non-singleton even when the truth is pi/2.
 #
 # SWEEP, 2026-09-10 — the question "does any feasible design work?" is now
 # answered, and the answer is no. Recovery error against participant count:
@@ -585,7 +694,7 @@ def run_gate(design: TaskDesign, replicates: int = 8, restarts: int = 6, seed: i
         "passed": all(checks.values()),
         "estimation_verdict": (
             "delta ESTIMABLE" if worst_recovery <= thresholds.max_delta_recovery_error
-            else "delta NOT estimable — beta absorbs it; report no delta point estimate"
+            else "delta NOT estimable — the prediction map is rank-deficient; report no delta point estimate"
         ),
         "detection_verdict": (
             "delta DETECTABLE — the zero versus non-zero contrast is answerable"
@@ -642,12 +751,68 @@ def noiseless_limit_recovery(triples: int = 4, seed: int = 2020, restarts: int =
         "worst_absolute_error": float(max(errors)),
         "estimate_range": [float(min(estimates)), float(max(estimates))],
         "reading": (
-            "Recovery fails at infinite data for the smaller true values, so the design "
-            "sweep's flat error is structural rather than a sample-size limit. Note the "
-            "fitted estimates cluster in a narrow band regardless of the generating value: "
-            "that is the profiled-likelihood plateau seen from another angle. Larger true "
-            "deltas 'recover' largely because they happen to fall inside that band, which "
-            "is not the same as being identified."
+            "Recovery fails at infinite data because the shared-delta prediction map has "
+            "generic Jacobian rank 2T against 3T+1 parameters. Small point-estimate errors "
+            "at selected true values do not establish recovery: an optimizer chooses one "
+            "representative from a data-dependent feasible set. The slope of those chosen "
+            "representatives is not an identifiability diagnostic."
+        ),
+    }
+
+
+def tracking_slope(triples: int = 4, seed: int = 2020, restarts: int = 6,
+                   true_deltas: tuple[float, ...] = (0.2, 0.5, 0.8, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6, 2.9),
+                   trials_per_cell: float = 1e7,
+                   tracking_threshold: float = 1.1) -> dict:
+    """Historical point-estimate diagnostic retained to reproduce the artifact.
+
+    Small recovery error at one or two values proves nothing on its own: an
+    estimator with a fixed output band produces small error wherever the truth
+    happens to fall inside that band. The discriminating question is whether the
+    estimate MOVES with the truth.
+
+    The slope does not diagnose identification.  In a structurally nonidentified
+    model, the feasible set can move with truth and an optimizer-selected member
+    can therefore have a positive slope even though no unique delta is recovered.
+    """
+    rng = np.random.default_rng(seed)
+    betas = rng.uniform(0.4, math.pi - 0.4, size=(triples, 3))
+    rows = []
+    for true_delta in true_deltas:
+        probabilities = quantum_probabilities(betas, true_delta)
+        trials = np.full((triples, 6), float(trials_per_cell))
+        data = SyntheticDataset(probabilities * trials, trials, "quantum", true_delta)
+        fit = fit_quantum(data, triples, delta_free=True, restarts=restarts, seed=1)
+        estimate = abs(_wrap(fit["delta"]))
+        rows.append({
+            "true_delta": float(true_delta),
+            "fitted_absolute_delta": float(estimate),
+            "absolute_error": float(abs(estimate - true_delta)),
+        })
+
+    truth = np.array([row["true_delta"] for row in rows])
+    fitted = np.array([row["fitted_absolute_delta"] for row in rows])
+    upper = truth >= tracking_threshold
+    slope_all = float(np.polyfit(truth, fitted, 1)[0])
+    slope_upper = float(np.polyfit(truth[upper], fitted[upper], 1)[0])
+    return {
+        "schema": SCHEMA,
+        "engineering_only": ENGINEERING_ONLY,
+        "trials_per_cell": float(trials_per_cell),
+        "tracking_threshold": float(tracking_threshold),
+        "rows": rows,
+        "slope_overall": slope_all,
+        "correlation_overall": float(np.corrcoef(truth, fitted)[0, 1]),
+        "slope_above_threshold": slope_upper,
+        "correlation_above_threshold": float(np.corrcoef(truth[upper], fitted[upper])[0, 1]),
+        "points_above_threshold": int(upper.sum()),
+        "estimate_range": [float(fitted.min()), float(fitted.max())],
+        "identified_slope_would_be": 1.0,
+        "reading": (
+            "These slopes describe which representatives the optimizer selected from "
+            "data-dependent feasible sets. A positive slope does not imply partial or "
+            "attenuated identification, and the apparent threshold at 1.1 has no structural "
+            "status. Use the analytic two-observable reduction and Jacobian rank instead."
         ),
     }
 

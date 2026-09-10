@@ -102,17 +102,16 @@ informative rather than fatal.**
 
 | check | result |
 |---|---|
-| identifiable in principle | pass — 24 conditions vs 13 parameters |
+| **identifiable in principle** | **FAIL — generic Jacobian rank 8 vs 13 parameters** |
 | **delta recovered** | **FAIL** — worst \|error\| 1.79 rad against a declared 0.25 |
 | delta detectable | pass — false positives 0.000, true positives 1.000 |
 | profile not flat | pass — ~900 nll units between delta = 0 and the optimum |
 
-The cause is the design, not the optimiser. More restarts do not help: on
-identical data the error was unchanged from 4 to 48 restarts on four of six
-seeds, and on two seeds it got *worse* — the search found a better likelihood
-further from the truth, which an underpowered optimiser cannot do. Profiling
-confirms why: refitting `beta` at each fixed `delta` produces a plateau across
-roughly `[0.8, 2.4]`. **`beta` absorbs `delta`.**
+The cause is structural, not merely an optimiser shortfall. Under the shipped
+restriction `deltas = (0, delta, delta)`, the six orderings collapse exactly to
+two probabilities per triple. The generic Jacobian therefore has rank `2T`
+against `3T+1` parameters; for the four-triple design that is rank 8 against 13.
+At `delta = 0` or `pi`, and at other special beta values, the rank is lower.
 
 ### What this permits and forbids
 
@@ -167,22 +166,81 @@ At 10⁷ trials per cell and zero sampling noise, `delta` is still not recovered
 below about 1.1. So the sweep's flat error is not a sample-size limit — **no
 budget reaches it.**
 
-Two refinements worth keeping rather than rounding off:
+### Structural correction: why the fitted-value slope cannot identify `delta`
 
-- **Larger `delta` does recover** (0.076 and 0.134 at 1.5 and 2.0). The honest
-  claim is not "unidentifiable" but "unidentifiable below roughly 1.1".
-- **Every estimate lands in about `[1.6, 2.7]` regardless of the truth.** That is
-  the profiled-likelihood plateau seen from a third angle. Large `delta` recovers
-  largely because the true value happens to fall inside that band, which is not
-  the same as being identified.
+The five rows above do not support a recovery threshold. A fitted-versus-true
+slope describes which representative an optimiser selected from a nonidentified
+manifold; a moving feasible set can produce a positive slope without a unique
+estimand. The earlier inference of "partial, attenuated identifiability above
+1.1" is withdrawn.
+
+Ten values from 0.2 to 2.9, noiseless, full reoptimisation at each point:
+
+| true `delta` | fitted \|δ\| | \|error\| |
+|---|---|---|
+| 0.20 | 2.9499 | 2.7499 |
+| 0.50 | 2.4957 | 1.9957 |
+| 0.80 | 2.0874 | 1.2874 |
+| 1.10 | 1.9915 | 0.8915 |
+| 1.40 | 1.2398 | 0.1602 |
+| 1.70 | 1.5224 | 0.1776 |
+| 2.00 | 1.8656 | 0.1344 |
+| 2.30 | 1.7319 | 0.5681 |
+| 2.60 | 1.9060 | 0.6940 |
+| 2.90 | 2.7113 | 0.1887 |
+
+The historical slopes remain reproducibility outputs, not identification tests:
+
+```
+OVERALL          slope -0.165   corr -0.281
+ABOVE 1.1        slope +0.441   corr +0.623   (n = 7)
+```
+
+The exact reduction explains what those summaries cannot. Put
+`x=beta_0/2`, `u=beta_1/2`, and `v=beta_2/2`. If `p_E` denotes either ordering
+with consideration 0 at an end and `p_M` an ordering with it in the middle, then
+
+```
+B   = (cos(x) cos(u+v) - sin(x) sin(u+v) cos(delta))^2
+p_E = B + sin(x)^2 sin(u+v)^2 sin(delta)^2
+p_M = B + sin(x)^2 sin(u-v)^2 sin(delta)^2
+```
+
+and therefore
+
+```
+p_E - p_M = sin(x)^2 sin(delta)^2 sin(2u) sin(2v).
+```
+
+This proves four points that the slope does not:
+
+1. first and last positions are exactly equivalent for all parameter values;
+2. the six orderings contain only two prediction directions per triple;
+3. `delta <-> pi-delta` is an exact symmetry after refitting beta, but symmetry
+   does not determine the endpoints of the feasible set;
+4. the feasible delta set depends on the observed pair `(p_E, p_M)` and the
+   nuisance betas. It is generally non-singleton even when the generating delta
+   is `pi/2`.
+
+Accordingly there is no supported closed form
+`[min(delta, pi-delta), max(delta, pi-delta)]`. The generating parameter cannot
+appear as an endpoint inferred from observations, and a direct counterexample
+reproduces generic `delta=pi/2` predictions at `delta=0.8` after refitting beta.
+
+The two-value collapse is caused by the substantive shared-delta restriction,
+not by gauge fixing. With `deltas = (0, d1, d2)`, the six orderings generically
+form three reversal-paired probabilities and the one-triple Jacobian has rank 3
+against five parameters. That variant is also nonidentified, but it is not the
+same rank-2 geometry.
 
 ### Consequence for the recommendation above
 
-Option 1 (binary `C²` task) stands, and the case for it strengthens: the extra
-parameters of Options 2 and 3 would be absorbed the same way, with less warning.
-The revision the gate forces is not to the state space but to the **claim** — the
-eventual preregistration should register a directional order-effect hypothesis,
-not a parameter recovery.
+Option 1 remains useful only for the sharp directional order-effect question,
+not for a `delta` point estimate. Nothing here establishes that the extra
+parameters of Options 2 and 3 "would be absorbed the same way"; that earlier
+generalisation exceeded what this rank calculation tests. Any eventual
+preregistration should register an order-effect hypothesis, not parameter
+recovery.
 
 This document remains an engineering proposal. The gate has not passed on its own
 declared terms, and the thresholds were not adjusted to make it pass.

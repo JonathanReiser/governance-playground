@@ -122,11 +122,14 @@ assumed, constrain any design built on it:
 | `delta = 0` predicts **exactly zero** order effect | A reliable order effect falsifies the null without a fitted comparison |
 | A free `delta` generically produces an order effect | The order effect *is* `delta`'s signature; no order manipulation means no identification |
 
-Those facts force the task shape. A **pair** of considerations yields two
-conditions and therefore two observed proportions, which any model with two or
-more parameters saturates — nothing is identified however many people are
-recruited. **Triples** yield six orderings against four parameters, and are the
-smallest design where parameters are fewer than conditions.
+Those facts do not rescue the proposed triple task. Under the shipped
+`deltas=(0, delta, delta)` restriction, the six nominal orderings collapse
+exactly to two probabilities: one when consideration 0 is in the middle and one
+when it is at either end. The generic Jacobian rank is therefore `2T` against
+`3T+1` parameters (and is lower at special points such as `delta=0`). The task
+can test the sharp zero-order-effect null, but it cannot support a `delta` point
+estimate. Giving considerations 1 and 2 independent deltas restores a third
+generic direction, not full identification.
 
 The gate is built to fail. Its thresholds live in one dataclass so that tuning
 them to obtain a pass shows up in a diff, and a finding that `delta` is

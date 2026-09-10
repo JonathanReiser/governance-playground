@@ -34,5 +34,5 @@
     1.5755055903206134,
     2.710441838502362
   ],
-  "reading": "Recovery fails at infinite data for the smaller true values, so the design sweep's flat error is structural rather than a sample-size limit. Note the fitted estimates cluster in a narrow band regardless of the generating value: that is the profiled-likelihood plateau seen from another angle. Larger true deltas 'recover' largely because they happen to fall inside that band, which is not the same as being identified."
+  "reading": "Recovery fails at infinite data because the shared-delta prediction map has generic Jacobian rank 2T against 3T+1 parameters. Small point-estimate errors at selected true values do not establish recovery: an optimizer chooses one representative from a data-dependent feasible set. The slope of those chosen representatives is not an identifiability diagnostic."
 }
