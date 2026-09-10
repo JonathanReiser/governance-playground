@@ -1,0 +1,134 @@
+{
+  "schema": "human-choice-identifiability-gate/v0.1",
+  "engineering_only": true,
+  "results": [
+    {
+      "participants": 10,
+      "trials_per_ordering": 2,
+      "trials_per_participant": 48,
+      "passed": false,
+      "worst_delta_error": 1.90123939469396,
+      "false_positive_rate": 0.0,
+      "true_positive_rate": 0.0,
+      "profile_drop": 46.32626856404039,
+      "checks": {
+        "identifiable_in_principle": true,
+        "delta_recovered": false,
+        "delta_detectable": false,
+        "false_positive_rate_acceptable": true,
+        "true_positive_rate_acceptable": false,
+        "profile_is_not_flat": true
+      }
+    },
+    {
+      "participants": 30,
+      "trials_per_ordering": 4,
+      "trials_per_participant": 96,
+      "passed": false,
+      "worst_delta_error": 1.9058485889750236,
+      "false_positive_rate": 0.0,
+      "true_positive_rate": 0.5,
+      "profile_drop": 245.19322361330615,
+      "checks": {
+        "identifiable_in_principle": true,
+        "delta_recovered": false,
+        "delta_detectable": false,
+        "false_positive_rate_acceptable": true,
+        "true_positive_rate_acceptable": false,
+        "profile_is_not_flat": true
+      }
+    },
+    {
+      "participants": 60,
+      "trials_per_ordering": 8,
+      "trials_per_participant": 192,
+      "passed": false,
+      "worst_delta_error": 1.7932541914751199,
+      "false_positive_rate": 0.0,
+      "true_positive_rate": 1.0,
+      "profile_drop": 932.4607415017454,
+      "checks": {
+        "identifiable_in_principle": true,
+        "delta_recovered": false,
+        "delta_detectable": true,
+        "false_positive_rate_acceptable": true,
+        "true_positive_rate_acceptable": true,
+        "profile_is_not_flat": true
+      }
+    },
+    {
+      "participants": 200,
+      "trials_per_ordering": 8,
+      "trials_per_participant": 192,
+      "passed": false,
+      "worst_delta_error": 1.8490528783932514,
+      "false_positive_rate": 0.0,
+      "true_positive_rate": 1.0,
+      "profile_drop": 3178.4571397060317,
+      "checks": {
+        "identifiable_in_principle": true,
+        "delta_recovered": false,
+        "delta_detectable": true,
+        "false_positive_rate_acceptable": true,
+        "true_positive_rate_acceptable": true,
+        "profile_is_not_flat": true
+      }
+    },
+    {
+      "participants": 500,
+      "trials_per_ordering": 16,
+      "trials_per_participant": 384,
+      "passed": false,
+      "worst_delta_error": 1.847437044868196,
+      "false_positive_rate": 0.0,
+      "true_positive_rate": 1.0,
+      "profile_drop": 15650.701284840863,
+      "checks": {
+        "identifiable_in_principle": true,
+        "delta_recovered": false,
+        "delta_detectable": true,
+        "false_positive_rate_acceptable": true,
+        "true_positive_rate_acceptable": true,
+        "profile_is_not_flat": true
+      }
+    }
+  ],
+  "any_feasible_design_passes": false,
+  "smallest_passing_design": null,
+  "verdict": "No tested design recovers delta. Do not build a participant study on this model.",
+  "generated_at": "2026-09-10T15:55:23.017862+00:00",
+  "preregistration": false,
+  "run_parameters": {
+    "triples": 4,
+    "replicates": 3,
+    "restarts": 4,
+    "seed": 0,
+    "configurations": [
+      [
+        10,
+        2
+      ],
+      [
+        30,
+        4
+      ],
+      [
+        60,
+        8
+      ],
+      [
+        200,
+        8
+      ],
+      [
+        500,
+        16
+      ]
+    ],
+    "wall_clock_seconds": 836
+  },
+  "reading": "The worst |delta| recovery error is flat at roughly 1.8-1.9 radians across a 50-fold increase in participants and an 8-fold increase in trials. Sampling noise would fall as 1/sqrt(N); this does not move. That is the signature of structural non-identifiability rather than insufficient data. Over the same range the true-positive rate climbs 0.00 -> 0.50 -> 1.00 and the false-positive rate stays at 0.00, so detection improves with data exactly as expected while estimation does not improve at all.",
+  "permits": "A study built on the delta = 0 versus delta != 0 contrast, which is the order-effect test and requires no parameter estimate. At 60 or more participants that contrast discriminates perfectly in simulation.",
+  "forbids": "A study reporting a delta point estimate, a credible interval on delta, or any interpretation of its magnitude. No tested design supports one, including 500 participants x 384 trials.",
+  "boundary": "Synthetic data only. No participant was involved, no human observation was used, and nothing here is evidence about human cognition or about quantum processes in the brain."
+}
