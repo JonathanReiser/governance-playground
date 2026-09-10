@@ -5,6 +5,7 @@
     "Q"
   ],
   "claim_boundary": "Engineering-only exact-simulator sweep. It is not participant data, hardware evidence, a quantum-advantage claim, or evidence for or against quantum cognition.",
+  "classical_limit_note": "At gamma = 0 the entangler is the identity, Q is indistinguishable from C, and the i*sigma_x deviation reduces to playing D against a cooperating opponent \u2014 ordinary defection in a classical Prisoner's Dilemma, with no quantum content. The full-SU(2) exploitability is therefore constant across the domain for two different reasons, and only its value above the (Q,Q) stability threshold is information the frozen menu does not already supply.",
   "engineering_only": true,
   "full_su2_certificate": {
     "certified_at_every_grid_point": true,
@@ -22,7 +23,70 @@
     "maximum": 1.5707963267948966,
     "minimum": 0.0
   },
-  "generated_at": "2026-09-10T13:33:08.651786+00:00",
+  "generated_at": "2026-09-10T15:05:17.979627+00:00",
+  "grid_versus_exact": {
+    "exact_values_source": "Brent root-finding on best-response crossings",
+    "grid_resolves_transition_to": "the interval between adjacent grid points only",
+    "note": "Every gamma reported to more precision than the grid spacing comes from a Brent root, not from reading the plotted curve. The two must not be quoted as though they carry the same precision.",
+    "plotted_grid_points": 65
+  },
+  "menu_equilibrium_regimes": {
+    "boundaries": {
+      "asymmetric_to_qq": {
+        "crossing": "D stops beating Q as a best reply to Q",
+        "gamma": 0.684719203002283,
+        "gamma_fraction_of_max": 0.43590578315102513
+      },
+      "dd_to_asymmetric": {
+        "crossing": "Q overtakes D as a best reply to D",
+        "gamma": 0.4636476090008063,
+        "gamma_fraction_of_max": 0.2951672353008667
+      }
+    },
+    "method": "Brent roots of frozen-menu best-response crossings; boundaries are exact, not grid readings",
+    "regimes": [
+      {
+        "description": "Mutual defection is the unique pure equilibrium.",
+        "equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
+        "gamma_max": 0.4636476090008063,
+        "gamma_min": 0.0,
+        "label": "low entanglement"
+      },
+      {
+        "description": "Two asymmetric pure equilibria. This is a coordination regime: the players must agree which of them plays which operation.",
+        "equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
+        "gamma_max": 0.684719203002283,
+        "gamma_min": 0.4636476090008063,
+        "label": "middle band"
+      },
+      {
+        "description": "(Q,Q) is the unique pure equilibrium within the menu.",
+        "equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
+        "gamma_max": 1.5707963267948966,
+        "gamma_min": 0.684719203002283,
+        "label": "high entanglement"
+      }
+    ]
+  },
   "points": [
     {
       "candidate": {
@@ -92,6 +156,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.6666666666666666,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -188,6 +258,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.6656628801709769,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -284,6 +360,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.6626539388934974,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -380,6 +462,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.6576470916373175,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -476,6 +564,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.6506544003360254,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -572,6 +666,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.6416927109954533,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -668,6 +768,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.630783613110174,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -764,6 +870,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.6179533876525172,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -860,6 +972,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.6032329437594057,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -956,6 +1074,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.5866577442695362,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1052,6 +1176,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.5682677202902957,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1148,6 +1278,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.5481071750002267,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1244,6 +1380,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.5262246769187877,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1340,6 +1482,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.5026729429005374,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1436,6 +1584,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.47750871113561405,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1532,6 +1686,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.4507926044624657,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1628,6 +1788,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.42258898432212294,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1724,6 +1890,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.3929657957058486,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1820,6 +1992,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.3619944034697047,
+        "menu_equilibria": [
+          [
+            "D",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -1916,6 +2094,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.3297494204103612,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2012,6 +2200,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.2963085275163352,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2108,6 +2306,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.2617522868276847,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2204,6 +2412,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.22616394735499806,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2300,6 +2518,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.18962924452523505,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2396,6 +2624,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.15223619363757485,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2492,6 +2730,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.11407487782685,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2588,6 +2836,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.07523723104538504,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2684,6 +2942,16 @@
       "restricted_menu": {
         "candidate_is_equilibrium": false,
         "exploitability": 0.035816816586053235,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2780,6 +3048,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2876,6 +3150,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -2972,6 +3252,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3068,6 +3354,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3164,6 +3456,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3260,6 +3558,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3356,6 +3660,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3452,6 +3762,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3548,6 +3864,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3644,6 +3966,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3740,6 +4068,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3836,6 +4170,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -3932,6 +4272,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4028,6 +4374,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4124,6 +4476,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4220,6 +4578,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4316,6 +4680,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4412,6 +4782,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4508,6 +4884,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4604,6 +4986,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4700,6 +5088,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4796,6 +5190,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4892,6 +5292,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -4988,6 +5394,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5084,6 +5496,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5180,6 +5598,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5276,6 +5700,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5372,6 +5802,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5468,6 +5904,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5564,6 +6006,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5660,6 +6108,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5756,6 +6210,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5852,6 +6312,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -5948,6 +6414,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -6044,6 +6516,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -6140,6 +6618,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -6236,6 +6720,12 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 0.0,
+        "menu_equilibria": [
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {
@@ -6339,6 +6829,20 @@
       "restricted_menu": {
         "candidate_is_equilibrium": true,
         "exploitability": 6.842277657836021e-49,
+        "menu_equilibria": [
+          [
+            "D",
+            "Q"
+          ],
+          [
+            "Q",
+            "D"
+          ],
+          [
+            "Q",
+            "Q"
+          ]
+        ],
         "responses": {
           "O": {
             "all_payoffs": {

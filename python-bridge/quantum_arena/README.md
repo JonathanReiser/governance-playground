@@ -99,3 +99,40 @@ setting and measured-policy labels, hides the opponent operation until submissio
 and stores single-shot plays separately from many-shot explanations and Phase 0 data.
 The public version uses the labelled Node simulator; local Python runs can use this
 reference simulator or the separately identified Qiskit/hardware path.
+
+## Human-choice identifiability gate
+
+`human_model_gate.py` is **not** part of the arena protocol. It asks whether a
+possible *human* study could work, before anyone builds one.
+
+```bash
+cd python-bridge && python run_human_model_gate.py --sweep
+```
+
+The parameter in question is `delta`, the third SU(2) angle — the exact coordinate
+separating the frozen EWL family (`delta = 0`) from the full local space that
+`i*sigma_x` inhabits. Five structural facts, each verified numerically rather than
+assumed, constrain any design built on it:
+
+| fact | consequence |
+|---|---|
+| One consideration from the initial state exposes `beta` alone | A single-consideration task cannot identify `delta` at any sample size |
+| Only `delta` **differences** are observable | Individual deltas are gauge; one must be fixed at zero |
+| `delta` is identified only up to **sign** | The estimand is `|delta|` (absolute value); scoring against a signed target invents a spurious error mode |
+| `delta = 0` predicts **exactly zero** order effect | A reliable order effect falsifies the null without a fitted comparison |
+| A free `delta` generically produces an order effect | The order effect *is* `delta`'s signature; no order manipulation means no identification |
+
+Those facts force the task shape. A **pair** of considerations yields two
+conditions and therefore two observed proportions, which any model with two or
+more parameters saturates — nothing is identified however many people are
+recruited. **Triples** yield six orderings against four parameters, and are the
+smallest design where parameters are fewer than conditions.
+
+The gate is built to fail. Its thresholds live in one dataclass so that tuning
+them to obtain a pass shows up in a diff, and a finding that `delta` is
+unidentifiable at every feasible design is a legitimate result — see
+`preregistrations/human-choice-model.design-memo-v0.1.md` for why the model is
+`C²` rather than `C⁴`.
+
+**None of this is a preregistration**, and no participant data may be collected
+under it.

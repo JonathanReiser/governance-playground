@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import sweepArtifact from "../data/arenaEntanglementSweep.json";
-import { linePath, validateSweepRecord } from "../lib/ttt/arenaSweep";
+import { linePath, menuRegimes, regimeAt, validateSweepRecord } from "../lib/ttt/arenaSweep";
 
 const SWEEP = validateSweepRecord(sweepArtifact);
 const WIDTH = 760;
@@ -30,6 +30,9 @@ function gammaLabel(point) {
   return `${point.gamma.toFixed(3)} rad · ${(point.gamma_fraction_of_max * 100).toFixed(1)}% of maximum`;
 }
 
+// Derived once: SWEEP is a static build-time artifact, so its regimes are too.
+const REGIMES = menuRegimes(SWEEP);
+
 function LegendItem({ className, children }) {
   return <span className="arena-chart-legend-item"><i className={className} />{children}</span>;
 }
@@ -40,6 +43,7 @@ export function ArenaStressTestPage({ onBack, onPlay }) {
   const restricted = selected.restricted_menu.responses.X;
   const full = selected.full_su2.responses.X;
   const transition = SWEEP.restricted_menu_transition;
+  const activeRegime = regimeAt(SWEEP, selected.gamma_fraction_of_max);
 
   const paths = useMemo(() => ({
     restricted: linePath(SWEEP.points, (point) => point.restricted_menu.exploitability,
@@ -62,27 +66,35 @@ export function ArenaStressTestPage({ onBack, onPlay }) {
         <div className="ttt-kicker">Quantum Policy Arena · engineering analysis</div>
         <h1>The same candidate. Two strategy spaces.</h1>
         <p>
-          Entanglement eventually protects <code>Q vs Q</code> inside the four-setting menu.
-          Give either player every local SU(2) operation, however, and an explicit response
-          breaks it across the entire range.
+          Above a threshold, no listed setting beats <code>Q</code> against <code>Q</code>
+          inside the four-setting menu. Give either player every local SU(2) operation and an
+          explicit response, <code>iσx</code>, beats it at every entanglement value.
+        </p>
+        <p className="arena-hero-qualifier">
+          That response exists across the whole range, but it only <em>adds</em> information
+          above the threshold. Below it the menu already supplies a profitable deviation, so
+          both curves sit at two thirds and the wider space reveals nothing further.
         </p>
       </div>
 
       <div className="arena-summary-grid">
         <article>
-          <span>Four-setting menu · at maximum</span>
+          <span><code>Q vs Q</code> under the four-setting menu · at maximum</span>
           <strong className="arena-good">Stable</strong>
-          <p>No listed setting gives one player a better payoff.</p>
+          <p>No listed setting gives one player a better payoff. A property of this candidate
+            under this domain, not of the game.</p>
         </article>
         <article>
-          <span>Full SU(2) · at maximum</span>
+          <span><code>Q vs Q</code> under full SU(2) · at maximum</span>
           <strong className="arena-broken">Broken</strong>
-          <p><code>iσx</code> improves either player's payoff by +0.667.</p>
+          <p><code>iσx</code> improves either player's payoff by +0.667. Same candidate, wider
+            domain of allowed operations.</p>
         </article>
         <article>
-          <span>Menu stability begins</span>
+          <span><code>Q vs Q</code> becomes stable within the menu</span>
           <strong>{transition.gamma.toFixed(3)} rad</strong>
-          <p>{(transition.gamma_fraction_of_max * 100).toFixed(1)}% of maximum entanglement.</p>
+          <p>{(transition.gamma_fraction_of_max * 100).toFixed(2)}% of maximum entanglement.
+            Exact Brent root, not a plotted grid point.</p>
         </article>
       </div>
 
@@ -103,8 +115,11 @@ export function ArenaStressTestPage({ onBack, onPlay }) {
             aria-labelledby="arena-chart-title arena-chart-desc">
             <title id="arena-chart-title">Exploitability over entanglement strength</title>
             <desc id="arena-chart-desc">
-              The four-setting exploitability falls from two thirds to zero around 43.6 percent
-              of maximum entanglement. Full SU(2) exploitability remains two thirds throughout.
+              The four-setting exploitability falls from two thirds to zero at 43.59 percent of
+              maximum entanglement, a value obtained by Brent root-finding; the plotted curve has
+              65 points and brackets that transition without resolving it. Full SU(2)
+              exploitability remains two thirds throughout, though at zero entanglement that
+              constancy reflects ordinary classical defection rather than any quantum effect.
             </desc>
             {[0, 1 / 3, 2 / 3].map((value) => (
               <g key={value}>
@@ -117,7 +132,7 @@ export function ArenaStressTestPage({ onBack, onPlay }) {
             <line className="arena-threshold-line" x1={xFor(transition.gamma_fraction_of_max)}
               x2={xFor(transition.gamma_fraction_of_max)} y1={MARGIN.top} y2={HEIGHT - MARGIN.bottom} />
             <text className="arena-threshold-label" x={xFor(transition.gamma_fraction_of_max) + 7}
-              y={MARGIN.top + 13}>menu stabilizes</text>
+              y={MARGIN.top + 13}>{"Q vs Q becomes stable"}</text>
             <path className="arena-line arena-line-restricted" d={paths.restricted} />
             <path className="arena-line arena-line-full" d={paths.full} />
             <line className="arena-selected-line" x1={xFor(selected.gamma_fraction_of_max)}
@@ -159,7 +174,50 @@ export function ArenaStressTestPage({ onBack, onPlay }) {
         </article>
       </div>
 
+      <article className="arena-chart-card arena-regimes">
+        <div className="arena-chart-header">
+          <div>
+            <span className="arena-eyebrow">Menu equilibria across the domain</span>
+            <h2>The menu is never without an equilibrium — it changes which one.</h2>
+          </div>
+        </div>
+        <p className="arena-regime-note">
+          The threshold above marks where <code>Q vs Q</code> becomes stable, not where the
+          menu acquires an equilibrium. It has one throughout; there are three regimes, and
+          the middle one has two.
+        </p>
+        <ol className="arena-regime-list">
+          {REGIMES.map((regime) => (
+            <li key={regime.label} className={regime === activeRegime ? "active" : ""}>
+              <span className="arena-regime-band">
+                {(regime.startFraction * 100).toFixed(2)}% – {(regime.endFraction * 100).toFixed(2)}%
+              </span>
+              <strong>{regime.equilibriaLabel}</strong>
+              <small>{regime.description}</small>
+            </li>
+          ))}
+        </ol>
+        <p className="arena-regime-note">
+          Boundaries are exact Brent roots of best-response crossings
+          ({SWEEP.menu_equilibrium_regimes.boundaries.dd_to_asymmetric.gamma.toFixed(6)} and
+          {` ${SWEEP.menu_equilibrium_regimes.boundaries.asymmetric_to_qq.gamma.toFixed(6)}`} rad),
+          not readings from the {SWEEP.points.length}-point plotted grid.
+        </p>
+      </article>
+
       <div className="arena-explanation-grid">
+        <article className="arena-explanation">
+          <span className="arena-eyebrow">At zero entanglement</span>
+          <h2>The deviation is ordinary defection there.</h2>
+          <p>
+            With no entanglement the referee's operation is the identity, <code>Q</code> becomes
+            indistinguishable from <code>C</code>, and <code>iσx</code> lands on <code>D</code>.
+            The celebrated <code>+0.667</code> is then just defecting against a cooperating
+            opponent in a classical Prisoner's Dilemma — correct arithmetic, no quantum content.
+            The red line is flat across the domain for two different reasons, and only its value
+            above the threshold says something the menu does not already say.
+          </p>
+        </article>
         <article className="arena-explanation">
           <span className="arena-eyebrow">In plain language</span>
           <h2>Menu stability is not full-game stability.</h2>
