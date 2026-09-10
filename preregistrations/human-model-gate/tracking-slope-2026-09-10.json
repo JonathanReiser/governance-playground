@@ -65,5 +65,5 @@
     2.949866416693525
   ],
   "identified_slope_would_be": 1.0,
-  "reading": "Above the threshold the slope is positive but well under 1, so delta is partially identified there and severely attenuated: the estimate moves less than half as fast as the truth. Two simpler readings are both wrong. It is not 'recovered above 1.1' \u2014 several points above the threshold still miss the recovery criterion, and the small errors occur where the attenuated line crosses the identity line. It is also not a fixed band independent of the truth \u2014 the estimates do move with it. Below the threshold there is no useful tracking at all."
+  "reading": "These slopes describe which representatives the optimizer selected from data-dependent feasible sets. A positive slope does not imply partial or attenuated identification, and the apparent threshold at 1.1 has no structural status. Use the analytic two-observable reduction and Jacobian rank instead."
 }
