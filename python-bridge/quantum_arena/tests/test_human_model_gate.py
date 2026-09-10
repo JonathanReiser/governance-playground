@@ -150,3 +150,38 @@ class TestTheGateCanFail:
         design = TaskDesign(triples=1)
         assert design.conditions == 6 and design.free_parameters == 4
         assert design.is_identifiable_in_principle()
+
+
+class TestNoiselessLimit:
+    """The strongest available statement about identifiability.
+
+    Feeding expected counts instead of binomial draws is the infinite-data limit.
+    Failure there means no sample size succeeds — something no design sweep can
+    establish, however many participants it simulates.
+    """
+
+    def test_recovery_fails_at_infinite_data_for_small_delta(self):
+        from quantum_arena.human_model_gate import noiseless_limit_recovery
+
+        report = noiseless_limit_recovery(restarts=4, true_deltas=(0.4, 0.8))
+        # Not a threshold to be tuned: with zero sampling noise, a well-identified
+        # parameter would come back essentially exactly. These do not.
+        assert report["worst_absolute_error"] > 0.5
+
+    def test_estimates_cluster_regardless_of_the_generating_value(self):
+        """The profiled-likelihood plateau, seen from another angle. The optimiser
+        is not failing — it finds the true optimum, which sits in a band that does
+        not depend on what generated the data."""
+        from quantum_arena.human_model_gate import noiseless_limit_recovery
+
+        report = noiseless_limit_recovery(restarts=4, true_deltas=(0.4, 0.8, 1.1))
+        low, high = report["estimate_range"]
+        spread_of_truth = 1.1 - 0.4
+        assert (high - low) < spread_of_truth, "estimates vary less than the truth does"
+
+    def test_the_report_states_what_it_does_and_does_not_show(self):
+        from quantum_arena.human_model_gate import noiseless_limit_recovery
+
+        report = noiseless_limit_recovery(restarts=2, true_deltas=(0.8,))
+        assert report["engineering_only"] is True
+        assert "not the same as being identified" in report["reading"]
