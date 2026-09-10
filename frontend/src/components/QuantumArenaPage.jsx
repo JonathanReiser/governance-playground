@@ -3,6 +3,7 @@ import {
   MAX_ENTANGLEMENT, NEUTRAL_LABELS, appendArenaPlay, drawOpponentOperation,
   explainArena, labelFor, playArena, policyLabelFor, profileLabelFor, readArenaPlays,
 } from "../lib/ttt/arena";
+import { ArenaStressTestPage } from "./ArenaStressTestPage";
 
 const MARKS = ["X", "O"];
 
@@ -12,7 +13,8 @@ function boardAfter(moves, upTo) {
   return board;
 }
 
-export function QuantumArenaPage({ onBack }) {
+export function QuantumArenaPage({ onBack, initialView = "play" }) {
+  const [view, setView] = useState(initialView);
   const [gamma, setGamma] = useState(MAX_ENTANGLEMENT);
   const [choice, setChoice] = useState(null);
   const [record, setRecord] = useState(null);
@@ -89,9 +91,26 @@ export function QuantumArenaPage({ onBack }) {
   const board = record ? boardAfter(record.game.moves, revealed) : Array(9).fill("");
   const finished = record && revealed >= record.game.moves.length;
 
+  function changeView(nextView) {
+    setView(nextView);
+    const url = new URL(window.location.href);
+    url.searchParams.set("arena", nextView);
+    window.history.replaceState({}, "", url);
+  }
+
+  if (view === "stress") {
+    return <ArenaStressTestPage onBack={onBack} onPlay={() => changeView("play")} />;
+  }
+
   return (
     <section className="ttt-lab">
-      <button className="ttt-back" onClick={onBack}>← Governance Playground</button>
+      <div className="arena-topbar">
+        <button className="ttt-back" onClick={onBack}>← Governance Playground</button>
+        <div className="arena-view-toggle" role="group" aria-label="Quantum Arena view">
+          <button className="active" aria-current="page">Play arena</button>
+          <button onClick={() => changeView("stress")}>Strategy stress test</button>
+        </div>
+      </div>
       <div className="ttt-hero">
         <div className="ttt-kicker">Quantum Policy Arena · protocol v1.0</div>
         <h1>Choose a setting. A measurement chooses the game.</h1>

@@ -44,12 +44,16 @@ export default function App() {
     // see StrategyComparisonPage.jsx.
     const compareHashes = params.get("compare");
     const tttLab = params.has("ttt");
-    const arena = params.has("arena");
-    return { registryAddress, deployBlock, batchHash, compareHashes, tttLab, arena };
+    const arenaMode = params.get("arena");
+    const arena = arenaMode !== null;
+    return { registryAddress, deployBlock, batchHash, compareHashes, tttLab, arena, arenaMode };
   });
 
   if (viewParams.arena) {
-    return <QuantumArenaPage onBack={() => { window.location.href = window.location.pathname; }} />;
+    return <QuantumArenaPage
+      initialView={viewParams.arenaMode === "stress" ? "stress" : "play"}
+      onBack={() => { window.location.href = window.location.pathname; }}
+    />;
   }
 
   if (viewParams.tttLab) {
@@ -135,6 +139,7 @@ export default function App() {
           </div>
           <nav className="stepper">
             <a className="lab-link" href={`${window.location.pathname}?ttt=play`}>Decision Lab</a>
+            <a className="lab-link" href={`${window.location.pathname}?arena=play`}>Quantum Arena</a>
             {STEPS.map((s, i) => (
               <div key={s} className={`step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}>
                 <span className="step-num">{i < step ? "✓" : i + 1}</span>

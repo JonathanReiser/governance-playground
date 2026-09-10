@@ -56,6 +56,7 @@ unitaries to entangled qubits; one measurement selects which policy pair plays t
 - **[Implementation](python-bridge/quantum_arena/)** — circuit, payoffs, and the protocol's ten
   validation items as executable checks.
 - **[Strategy-space stress-test proposal](preregistrations/quantum-policy-tic-tac-toe.strategy-space-stress-test-v0.1.md)** — a separate draft that asks where the restricted-menu equilibrium breaks. Its first [engineering-only implementation](python-bridge/quantum_arena/su2_stress.py) searches one-sided full-`SU(2)` deviations and preserves v1 unchanged; it does not authorize data collection.
+- **[Interactive strategy-space visualization](frontend/src/components/ArenaStressTestPage.jsx)** — available at `?arena=stress`, with a Python-generated entanglement sweep comparing the frozen four-setting menu against the certified full-`SU(2)` counter-strategy. It is an engineering view, not participant data.
 
 **What it claims:** a correct implementation with an exact classical limit, running in
 simulation and on pinned IBM hardware. **What it does not claim:** quantum advantage, any

@@ -819,3 +819,111 @@ body {
 .metric-editor-input:focus {
   outline: none; border-color: var(--accent);
 }
+
+/* ── Quantum Arena strategy-space stress test ─────────────── */
+.arena-topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.arena-view-toggle {
+  display: inline-flex; padding: 3px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 999px;
+}
+.arena-view-toggle button {
+  border: 0; border-radius: 999px; padding: 0.4rem 0.8rem;
+  background: transparent; color: var(--muted); font: 600 11px inherit; cursor: pointer;
+}
+.arena-view-toggle button:hover { color: var(--text); }
+.arena-view-toggle button.active {
+  color: #fff; background: rgba(99,102,241,0.38);
+}
+.arena-stress { --arena-restricted: #60a5fa; --arena-full: #f472b6; }
+.arena-stress-hero { max-width: 850px; }
+.arena-stress-hero code { color: var(--accent2); font: 0.9em var(--font-mono); }
+.arena-summary-grid, .arena-inspector-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem; margin: 0 auto 1rem;
+}
+.arena-summary-grid article, .arena-inspector-grid article {
+  min-width: 0; padding: 1.1rem; background: linear-gradient(145deg, #171717, #111);
+  border: 1px solid var(--border); border-radius: 12px;
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.arena-summary-grid article > span, .arena-inspector-grid article > span {
+  color: var(--muted); font: 700 10px var(--font-mono); text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.arena-summary-grid article > strong, .arena-inspector-grid article > strong {
+  color: var(--text); font: 750 1.8rem var(--font-mono); letter-spacing: -0.04em;
+}
+.arena-summary-grid article > strong.arena-good { color: var(--green); }
+.arena-summary-grid article > strong.arena-broken { color: var(--arena-full); }
+.arena-summary-grid p, .arena-inspector-grid p { color: #888; font-size: 12px; }
+.arena-summary-grid code, .arena-inspector-grid code { color: var(--accent2); }
+
+.arena-chart-card {
+  margin: 1rem 0; padding: 1.35rem; background: #111;
+  border: 1px solid var(--border); border-radius: 16px;
+}
+.arena-chart-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+.arena-chart-header h2 { margin-top: 0.2rem; font-size: 1.15rem; }
+.arena-eyebrow {
+  color: var(--accent2); font: 700 9px var(--font-mono);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.arena-chart-legend { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.8rem; }
+.arena-chart-legend-item {
+  display: inline-flex; align-items: center; gap: 0.35rem; color: #999; font-size: 11px;
+}
+.arena-chart-legend-item i { width: 18px; height: 3px; border-radius: 4px; }
+.arena-chart-legend-item i.restricted { background: var(--arena-restricted); }
+.arena-chart-legend-item i.full { background: var(--arena-full); }
+.arena-chart-wrap { width: 100%; overflow-x: auto; }
+.arena-chart { display: block; width: 100%; min-width: 580px; height: auto; }
+.arena-gridline { stroke: #292929; stroke-width: 1; }
+.arena-axis-label, .arena-axis-title {
+  fill: #666; font: 10px var(--font-mono);
+}
+.arena-threshold-line { stroke: var(--green); stroke-width: 1; stroke-dasharray: 5 5; opacity: 0.65; }
+.arena-threshold-label { fill: var(--green); font: 9px var(--font-mono); }
+.arena-selected-line { stroke: #fff; stroke-width: 1; stroke-dasharray: 2 5; opacity: 0.22; }
+.arena-line { fill: none; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.arena-line-restricted { stroke: var(--arena-restricted); }
+.arena-line-full { stroke: var(--arena-full); }
+.arena-dot { stroke: #111; stroke-width: 3; }
+.arena-dot.restricted { fill: var(--arena-restricted); }
+.arena-dot.full { fill: var(--arena-full); }
+.arena-sweep-control {
+  display: flex; flex-direction: column; gap: 0.7rem; margin: 0.5rem 0.25rem 0;
+}
+.arena-sweep-control > span { display: flex; justify-content: space-between; gap: 1rem; }
+.arena-sweep-control strong { font-size: 12px; }
+.arena-sweep-control output { color: var(--accent2); font: 11px var(--font-mono); }
+.arena-sweep-control input { width: 100%; accent-color: var(--accent); cursor: ew-resize; }
+
+.arena-explanation-grid {
+  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 0.85rem; margin-top: 1rem;
+}
+.arena-explanation, .arena-certificate {
+  padding: 1.35rem; border: 1px solid var(--border); border-radius: 14px; background: var(--surface);
+}
+.arena-explanation h2 { margin: 0.35rem 0 0.6rem; font-size: 1.15rem; }
+.arena-explanation p, .arena-certificate p { color: #999; font-size: 13px; }
+.arena-explanation code, .arena-certificate code { color: var(--accent2); }
+.arena-certificate { background: rgba(244,114,182,0.055); border-color: rgba(244,114,182,0.25); }
+.arena-matrix {
+  display: flex; align-items: center; gap: 0.4rem; margin: 0.6rem 0;
+  color: var(--arena-full); font: 300 2.4rem/1 var(--font-mono);
+}
+.arena-matrix code { color: #fbcfe8; font: 1rem/1.6 var(--font-mono); }
+
+@media (max-width: 720px) {
+  .arena-topbar { align-items: flex-start; flex-direction: column; }
+  .arena-view-toggle { align-self: stretch; display: grid; grid-template-columns: 1fr 1fr; }
+  .arena-summary-grid, .arena-inspector-grid, .arena-explanation-grid { grid-template-columns: 1fr; }
+  .arena-chart-header { flex-direction: column; }
+  .arena-chart-legend { justify-content: flex-start; }
+  .arena-sweep-control > span { align-items: flex-start; flex-direction: column; gap: 0.2rem; }
+}
