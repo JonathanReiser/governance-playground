@@ -14,6 +14,7 @@ implementation-only.
 | `payoffs.py` | The frozen bimatrix, expected payoffs, pure-Nash search. |
 | `hardware.py` | The same protocol as a qiskit circuit, run on the pinned backend or a labelled local simulator. |
 | `validation.py` | The protocol's ten required-validation items, executable. |
+| `su2_stress.py` | Engineering-only Axis A4 search: one player stays at `Q` while the other can use every deterministic local `SU(2)` operation. |
 
 The public Vercel site cannot host this long-lived Python process. Its `/api/arena/*`
 routes use `server/quantumArena.js`, a small Node state-vector port checked against
@@ -38,6 +39,26 @@ Items 1-7 are properties of the implementation and run here. Items 8-10 are
 runtime disciplines about how records are kept — stated in `RUNTIME_DISCIPLINES`
 and deliberately not reported as passing, because no unit test can certify that a
 future operator kept simulator and hardware observations apart.
+
+## Running the full-SU(2) stress test
+
+```bash
+cd python-bridge
+python run_arena_su2_stress_test.py
+```
+
+The command prints a `quantum-arena-strategy-search/v0.1` engineering record.
+It searches both seats using the fixed Sobol, multi-start local, and differential-
+evolution budget in the strategy-space proposal, and records the known closed-form
+`i*sigma_x` witness separately. It does not use hardware or human observations and
+is not a preregistered experiment.
+
+To retain a durable engineering record without mixing it into the play or
+hardware archives, pass a separate path, for example:
+
+```bash
+python run_arena_su2_stress_test.py --output engineering-results/a4-su2-seed-0.json
+```
 
 ## Two things that must travel with any result
 

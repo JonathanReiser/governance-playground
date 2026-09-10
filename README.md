@@ -55,7 +55,7 @@ unitaries to entangled qubits; one measurement selects which policy pair plays t
   to a NIST beacon pulse, committed publicly before that pulse existed.
 - **[Implementation](python-bridge/quantum_arena/)** — circuit, payoffs, and the protocol's ten
   validation items as executable checks.
-- **[Strategy-space stress-test proposal](preregistrations/quantum-policy-tic-tac-toe.strategy-space-stress-test-v0.1.md)** — a separate draft that asks where the restricted-menu equilibrium breaks, beginning with a one-sided full-`SU(2)` deviation search. It does not modify v1 or authorize data collection.
+- **[Strategy-space stress-test proposal](preregistrations/quantum-policy-tic-tac-toe.strategy-space-stress-test-v0.1.md)** — a separate draft that asks where the restricted-menu equilibrium breaks. Its first [engineering-only implementation](python-bridge/quantum_arena/su2_stress.py) searches one-sided full-`SU(2)` deviations and preserves v1 unchanged; it does not authorize data collection.
 
 **What it claims:** a correct implementation with an exact classical limit, running in
 simulation and on pinned IBM hardware. **What it does not claim:** quantum advantage, any
