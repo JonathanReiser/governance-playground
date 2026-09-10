@@ -1,0 +1,109 @@
+{
+  "rows": 1709,
+  "people": 96,
+  "permutations": 200,
+  "seed": 870,
+  "momentary_linear": {
+    "rows": 1709,
+    "order_features": 6,
+    "zero_fraction": 0.36454066705675836,
+    "Problem": {
+      "baseline_auc": 0.875606998996959,
+      "ordered_auc": 0.8741661226894235,
+      "contribution": -0.0014408763075355324,
+      "permutation_p": 0.47761194029850745,
+      "null_mean": -0.0014373497428712646,
+      "verdict": "null"
+    },
+    "Emotion": {
+      "baseline_auc": 0.829481741858641,
+      "ordered_auc": 0.8267251869712433,
+      "contribution": -0.0027565548873976775,
+      "permutation_p": 0.7263681592039801,
+      "null_mean": -0.0018009196047861658,
+      "verdict": "null"
+    }
+  },
+  "momentary_commutator": {
+    "rows": 1709,
+    "order_features": 15,
+    "zero_fraction": 0.21544763019309537,
+    "Problem": {
+      "baseline_auc": 0.875606998996959,
+      "ordered_auc": 0.8702829212374023,
+      "contribution": -0.005324077759556789,
+      "permutation_p": 0.9552238805970149,
+      "null_mean": -0.002424150997468537,
+      "verdict": "null"
+    },
+    "Emotion": {
+      "baseline_auc": 0.829481741858641,
+      "ordered_auc": 0.826775218119668,
+      "contribution": -0.0027065237389729546,
+      "permutation_p": 0.39303482587064675,
+      "null_mean": -0.0030530217199740105,
+      "verdict": "null"
+    }
+  },
+  "task_commutator": {
+    "rows": 1709,
+    "order_features": 15,
+    "zero_fraction": 0.9586892919836162,
+    "Problem": {
+      "baseline_auc": 0.8640799885366747,
+      "ordered_auc": 0.857955070133261,
+      "contribution": -0.0061249184034136706,
+      "permutation_p": 0.8557213930348259,
+      "null_mean": -0.0038666751580187534,
+      "verdict": "void"
+    },
+    "Emotion": {
+      "baseline_auc": 0.8214097809281262,
+      "ordered_auc": 0.8152882278321665,
+      "contribution": -0.006121553095959742,
+      "permutation_p": 0.6567164179104478,
+      "null_mean": -0.004702484127214677,
+      "verdict": "void"
+    }
+  },
+  "task_categorical": {
+    "different_preceding_tasks": 1327,
+    "unordered_levels": 28,
+    "ordered_levels": 49,
+    "rows": 1709,
+    "order_features": 49,
+    "zero_fraction": 0.9795918367346939,
+    "Problem": {
+      "baseline_auc": 0.8640799885366747,
+      "ordered_auc": 0.8556751420974701,
+      "contribution": -0.008404846439204583,
+      "permutation_p": 0.7711442786069652,
+      "null_mean": -0.006345786431880778,
+      "verdict": "null"
+    },
+    "Emotion": {
+      "baseline_auc": 0.8214097809281262,
+      "ordered_auc": 0.8128383154673715,
+      "contribution": -0.008571465460754712,
+      "permutation_p": 0.48258706467661694,
+      "null_mean": -0.008560837876484385,
+      "verdict": "null"
+    }
+  },
+  "scope": {
+    "Refusal": {
+      "status": "not assessed",
+      "positive_rows": 50,
+      "people_with_positive": 24,
+      "largest_person_count": 13,
+      "top_five_people_count": 27,
+      "reason": "rare and concentrated across participants"
+    },
+    "interference": {
+      "status": "not testable",
+      "missing_cells": 0,
+      "missingness_patterns": 1,
+      "reason": "every variable is jointly observed at every prompt"
+    }
+  }
+}
