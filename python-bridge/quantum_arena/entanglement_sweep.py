@@ -19,7 +19,7 @@ import math
 
 from scipy.optimize import brentq
 
-from .payoffs import BIMATRIX, expected_payoffs
+from .payoffs import BIMATRIX, expected_payoffs, pure_nash
 from .protocol import BASIS, MAX_ENTANGLEMENT, MENU, outcome_probabilities
 from .su2_stress import (
     EXPLOITABILITY_TOLERANCE,
@@ -85,6 +85,88 @@ def restricted_stability_threshold() -> float:
     return float(brentq(_restricted_d_gain, 0.0, MAX_ENTANGLEMENT, xtol=1e-14))
 
 
+def _menu_payoff_table(gamma: float) -> dict[tuple[str, str], tuple[float, float]]:
+    return {
+        (x, o): expected_payoffs(outcome_probabilities(MENU[x], MENU[o], gamma))
+        for x in MENU
+        for o in MENU
+    }
+
+
+def menu_equilibria(gamma: float) -> list[list[str]]:
+    """Every pure Nash profile of the four-operation menu at this gamma.
+
+    Distinct from ``restricted_menu.candidate_is_equilibrium``, which asks only
+    about ``(Q,Q)``. The menu game has equilibria at every gamma; which ones
+    changes twice across the domain, and reporting only the candidate's status
+    invites reading "the menu stabilises" as "the menu had no equilibrium
+    before", which is false.
+    """
+
+    return [list(entry["profile"]) for entry in pure_nash(_menu_payoff_table(gamma))]
+
+
+def _q_over_d_against_d(gamma: float) -> float:
+    """Q's advantage over D as a reply to D. Root = (D,D) ceases to be an equilibrium."""
+
+    table = _menu_payoff_table(gamma)
+    return float(table[("Q", "D")][0] - table[("D", "D")][0])
+
+
+def menu_equilibrium_regimes() -> dict:
+    """The three pure-equilibrium regimes of the frozen menu, with exact boundaries.
+
+    Boundaries are Brent roots of best-response crossings, not grid readings. The
+    lower one is where Q overtakes D as a reply to D; the upper one is the same
+    root already reported as ``restricted_menu_transition``.
+    """
+
+    lower = float(brentq(_q_over_d_against_d, 0.0, MAX_ENTANGLEMENT, xtol=1e-14))
+    upper = restricted_stability_threshold()
+    probe = lambda a, b: menu_equilibria((a + b) / 2.0)  # noqa: E731
+    return {
+        "method": "Brent roots of frozen-menu best-response crossings; boundaries are exact, not grid readings",
+        "boundaries": {
+            "dd_to_asymmetric": {
+                "gamma": lower,
+                "gamma_fraction_of_max": lower / MAX_ENTANGLEMENT,
+                "crossing": "Q overtakes D as a best reply to D",
+            },
+            "asymmetric_to_qq": {
+                "gamma": upper,
+                "gamma_fraction_of_max": upper / MAX_ENTANGLEMENT,
+                "crossing": "D stops beating Q as a best reply to Q",
+            },
+        },
+        "regimes": [
+            {
+                "label": "low entanglement",
+                "gamma_min": 0.0,
+                "gamma_max": lower,
+                "equilibria": probe(0.0, lower),
+                "description": "Mutual defection is the unique pure equilibrium.",
+            },
+            {
+                "label": "middle band",
+                "gamma_min": lower,
+                "gamma_max": upper,
+                "equilibria": probe(lower, upper),
+                "description": (
+                    "Two asymmetric pure equilibria. This is a coordination regime: the "
+                    "players must agree which of them plays which operation."
+                ),
+            },
+            {
+                "label": "high entanglement",
+                "gamma_min": upper,
+                "gamma_max": MAX_ENTANGLEMENT,
+                "equilibria": probe(upper, MAX_ENTANGLEMENT),
+                "description": "(Q,Q) is the unique pure equilibrium within the menu.",
+            },
+        ],
+    }
+
+
 def sweep_point(gamma: float, tolerance: float = EXPLOITABILITY_TOLERANCE) -> dict:
     if not math.isfinite(gamma) or gamma < 0 or gamma > MAX_ENTANGLEMENT + 1e-12:
         raise ValueError("gamma must lie in [0, pi/2]")
@@ -111,6 +193,7 @@ def sweep_point(gamma: float, tolerance: float = EXPLOITABILITY_TOLERANCE) -> di
             "responses": restricted,
             "exploitability": restricted_exploitability,
             "candidate_is_equilibrium": restricted_exploitability <= tolerance,
+            "menu_equilibria": menu_equilibria(gamma),
         },
         "full_su2": {
             "responses": full,
@@ -149,6 +232,25 @@ def run_entanglement_sweep(
         "candidate": ["Q", "Q"],
         "gamma_domain": {"minimum": 0.0, "maximum": MAX_ENTANGLEMENT, "intervals": intervals},
         "tolerance": tolerance,
+        "menu_equilibrium_regimes": menu_equilibrium_regimes(),
+        "grid_versus_exact": {
+            "plotted_grid_points": intervals + 1,
+            "grid_resolves_transition_to": "the interval between adjacent grid points only",
+            "exact_values_source": "Brent root-finding on best-response crossings",
+            "note": (
+                "Every gamma reported to more precision than the grid spacing comes from a "
+                "Brent root, not from reading the plotted curve. The two must not be quoted "
+                "as though they carry the same precision."
+            ),
+        },
+        "classical_limit_note": (
+            "At gamma = 0 the entangler is the identity, Q is indistinguishable from C, and "
+            "the i*sigma_x deviation reduces to playing D against a cooperating opponent — "
+            "ordinary defection in a classical Prisoner's Dilemma, with no quantum content. "
+            "The full-SU(2) exploitability is therefore constant across the domain for two "
+            "different reasons, and only its value above the (Q,Q) stability threshold is "
+            "information the frozen menu does not already supply."
+        ),
         "restricted_menu_transition": {
             "gamma": threshold,
             "gamma_fraction_of_max": threshold / MAX_ENTANGLEMENT,
