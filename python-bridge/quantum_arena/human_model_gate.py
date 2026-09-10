@@ -101,7 +101,9 @@ def structural_observability(seed: int = 0, draws: int = 20000) -> dict:
     gauge_spread = float(max(gauge))
 
     # 3. With delta held at zero for both considerations the order effect is
-    #    identically zero. This is the sharp point prediction of the nested null.
+    #    zero to machine precision — max 2e-16 across 20,000 draws, against a
+    #    ~0.16 mean gap when delta is free. This is the sharp point prediction of
+    #    the nested null; the residual is one ULP and is platform-dependent.
     null_gaps = []
     for _ in range(draws):
         a1, a2 = rng.uniform(-math.pi, math.pi, 2)

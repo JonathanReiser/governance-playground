@@ -47,7 +47,11 @@ class TestStructuralObservability:
         # delta = 0 without needing a fitted comparison at all.
         fact = facts["null_predicts_exactly_zero_order_effect"]
         assert fact["holds"]
-        assert fact["max_order_gap_at_delta_zero"] == 0.0
+        # Machine precision, not bit-exact zero. This assertion originally read
+        # `== 0.0`, which passed locally and failed on CI at 2.22e-16 — one ULP.
+        # The scientific claim is unaffected: the null's order gap is fifteen
+        # orders of magnitude below the ~0.16 mean gap a free delta produces.
+        assert fact["max_order_gap_at_delta_zero"] < 1e-15
 
     def test_a_free_delta_generically_produces_an_order_effect(self, facts):
         fact = facts["free_delta_generically_produces_an_order_effect"]
