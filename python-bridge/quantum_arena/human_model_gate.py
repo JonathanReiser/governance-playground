@@ -261,29 +261,84 @@ def quantum_two_observables(betas: np.ndarray, delta: float) -> np.ndarray:
     return np.column_stack((end, middle))
 
 
-def quantum_jacobian_rank(triples: int, *, step: float = 1e-6,
-                          tolerance: float = 1e-8) -> int:
+def quantum_two_observable_jacobian(betas: np.ndarray, delta: float) -> np.ndarray:
+    """Analytic Jacobian of :func:`quantum_two_observables`.
+
+    Columns are the flattened beta values followed by the shared ``delta``.
+    Using the closed-form reduction avoids manufacturing small nonzero singular
+    values at the finite-difference roundoff floor.
+    """
+    betas = np.atleast_2d(np.asarray(betas, dtype=float))
+    triples = len(betas)
+    jacobian = np.zeros((2 * triples, 3 * triples + 1))
+
+    sine_delta = math.sin(delta)
+    cosine_delta = math.cos(delta)
+    for triple_index, (beta0, beta1, beta2) in enumerate(betas):
+        x, u, v = beta0 / 2.0, beta1 / 2.0, beta2 / 2.0
+        y, z = u + v, u - v
+        sine_x, cosine_x = math.sin(x), math.cos(x)
+        sine_y, cosine_y = math.sin(y), math.cos(y)
+        sine_z, cosine_z = math.sin(z), math.cos(z)
+
+        amplitude = (
+            cosine_x * cosine_y
+            - sine_x * sine_y * cosine_delta
+        )
+        scale = sine_x ** 2 * sine_delta ** 2
+
+        amplitude_x = -sine_x * cosine_y - cosine_x * sine_y * cosine_delta
+        amplitude_y = -cosine_x * sine_y - sine_x * cosine_y * cosine_delta
+        amplitude_delta = sine_x * sine_y * sine_delta
+        scale_x = 2.0 * sine_x * cosine_x * sine_delta ** 2
+        scale_delta = 2.0 * sine_x ** 2 * sine_delta * cosine_delta
+
+        end_factor = sine_y ** 2
+        middle_factor = sine_z ** 2
+        end_factor_y = 2.0 * sine_y * cosine_y
+        middle_factor_z = 2.0 * sine_z * cosine_z
+
+        row_end = 2 * triple_index
+        row_middle = row_end + 1
+        beta_column = 3 * triple_index
+
+        # x, u and v are half-angles, hence the factor 0.5 in beta derivatives.
+        jacobian[row_end, beta_column] = 0.5 * (
+            2.0 * amplitude * amplitude_x + scale_x * end_factor
+        )
+        jacobian[row_middle, beta_column] = 0.5 * (
+            2.0 * amplitude * amplitude_x + scale_x * middle_factor
+        )
+        jacobian[row_end, beta_column + 1] = 0.5 * (
+            2.0 * amplitude * amplitude_y + scale * end_factor_y
+        )
+        jacobian[row_end, beta_column + 2] = jacobian[row_end, beta_column + 1]
+        jacobian[row_middle, beta_column + 1] = 0.5 * (
+            2.0 * amplitude * amplitude_y + scale * middle_factor_z
+        )
+        jacobian[row_middle, beta_column + 2] = 0.5 * (
+            2.0 * amplitude * amplitude_y - scale * middle_factor_z
+        )
+        jacobian[row_end, -1] = (
+            2.0 * amplitude * amplitude_delta + scale_delta * end_factor
+        )
+        jacobian[row_middle, -1] = (
+            2.0 * amplitude * amplitude_delta + scale_delta * middle_factor
+        )
+
+    return jacobian
+
+
+def quantum_jacobian_rank(triples: int) -> int:
     """Generic local rank of the shipped quantum prediction map.
 
-    This is a deterministic diagnostic at an interior, nonsymmetric point.  It
-    checks local full-rank identifiability; the analytic two-observable reduction
-    explains why the returned generic rank is 2T and why special points may be
-    lower still.
+    This is a deterministic analytic diagnostic at an interior, nonsymmetric
+    point. It checks local full-rank identifiability without a finite-difference
+    step or a hand-tuned absolute tolerance.
     """
     betas = np.linspace(0.61, 2.41, 3 * triples)
-    vector = np.concatenate((betas, np.array([0.83])))
-
-    def predict(parameters):
-        return quantum_probabilities(
-            parameters[:-1].reshape(triples, 3), parameters[-1]
-        ).ravel()
-
-    jacobian = np.empty((6 * triples, 3 * triples + 1))
-    for column in range(vector.size):
-        offset = np.zeros_like(vector)
-        offset[column] = step
-        jacobian[:, column] = (predict(vector + offset) - predict(vector - offset)) / (2 * step)
-    return int(np.linalg.matrix_rank(jacobian, tol=tolerance))
+    jacobian = quantum_two_observable_jacobian(betas.reshape(triples, 3), 0.83)
+    return int(np.linalg.matrix_rank(jacobian))
 
 
 def markov_probabilities(rates: np.ndarray, asymmetry: float = 0.9) -> np.ndarray:
