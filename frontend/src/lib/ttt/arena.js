@@ -1,10 +1,9 @@
 /**
  * Client for the Quantum Policy Tic-Tac-Toe arena.
  *
- * The protocol and all of its validation live in python-bridge/quantum_arena.
- * Nothing here reimplements the physics — a second implementation would be a
- * second thing to keep correct, and the one in Python is the one the validation
- * list actually checks.
+ * The browser only calls the server. Python/NumPy is the independent scientific
+ * reference; server/quantumArena.js is its parity-tested serverless deployment
+ * port, and Qiskit remains the optional hardware path.
  */
 
 /**
@@ -27,6 +26,16 @@ export const MAX_ENTANGLEMENT = Math.PI / 2;
 
 export function labelFor(operation) {
   return NEUTRAL_LABELS.find((entry) => entry.operation === operation)?.label ?? "unknown";
+}
+
+/** Internal policy codes remain in records but never appear in participant UI. */
+export function policyLabelFor(policy) {
+  return policy === "C" ? "Policy I" : policy === "D" ? "Policy II" : "unknown policy";
+}
+
+export function profileLabelFor(profile) {
+  if (typeof profile !== "string" || profile.length !== 2) return "unknown outcome";
+  return `${policyLabelFor(profile[0])} / ${policyLabelFor(profile[1])}`;
 }
 
 /**

@@ -55,6 +55,7 @@ unitaries to entangled qubits; one measurement selects which policy pair plays t
   to a NIST beacon pulse, committed publicly before that pulse existed.
 - **[Implementation](python-bridge/quantum_arena/)** — circuit, payoffs, and the protocol's ten
   validation items as executable checks.
+- **[Strategy-space stress-test proposal](preregistrations/quantum-policy-tic-tac-toe.strategy-space-stress-test-v0.1.md)** — a separate draft that asks where the restricted-menu equilibrium breaks, beginning with a one-sided full-`SU(2)` deviation search. It does not modify v1 or authorize data collection.
 
 **What it claims:** a correct implementation with an exact classical limit, running in
 simulation and on pinned IBM hardware. **What it does not claim:** quantum advantage, any
@@ -62,9 +63,10 @@ result about human cognition, or that ordinary tic-tac-toe is no longer solved. 
 equilibrium it can exhibit holds within a four-option menu and does not survive an
 unrestricted strategy space.
 
-⚠️ **The arena does not run on the live site.** It needs a local Python bridge that the
-serverless deployment cannot host, so `?arena=play` will error there. Run it locally:
-`python-bridge/quantum_arena/README.md` has the steps.
+The arena runs on the live site through a parity-tested Node implementation of the frozen
+protocol's exact state-vector simulator. Its records identify that simulator honestly. The
+independent Python/NumPy reference and the optional Qiskit/IBM hardware path remain available
+locally; `python-bridge/quantum_arena/README.md` has those steps.
 
 ---
 

@@ -34,6 +34,7 @@ const cors      = require("cors");
 const rateLimit = require("express-rate-limit");
 const { fetchRealHeadlines } = require("./server/news");
 const { verifyBatch, hashRecord } = require("./server/prereg");
+const quantumArena = require("./server/quantumArena");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -1410,41 +1411,26 @@ app.post("/api/q-ai/deliberate", qpuReadingLimiter, async (req, res) => {
 
 
 // ─── Quantum Policy Tic-Tac-Toe arena ───────────────────────────────────────
-// Thin proxies to python-bridge/quantum_arena. Deliberately thin: the protocol
-// and its validation live in Python, and a second implementation here would be
-// a second thing to keep correct. See preregistrations/
-// quantum-policy-tic-tac-toe.protocol-v1.md.
-async function proxyToArena(path, body, res, timeoutMs = 60_000) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(`${PYTHON_BRIDGE_URL}${path}`, {
-      method: body ? "POST" : "GET",
-      headers: body ? { "Content-Type": "application/json" } : undefined,
-      body: body ? JSON.stringify(body) : undefined,
-      signal: controller.signal,
-    });
-    const payload = await response.json();
-    return res.status(response.status).json(payload);
-  } catch (error) {
-    return res.status(502).json({
-      error: `python-bridge unreachable at ${PYTHON_BRIDGE_URL}${path}: ${error.message}`,
-    });
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-app.get("/api/arena/menu", (_req, res) => proxyToArena("/arena/menu", null, res, 10_000));
+// Vercel cannot host the long-lived local Flask bridge. These routes therefore
+// use the small serverless Node port of protocol v1.0. The Python/NumPy version
+// remains the independent reference and Qiskit remains the optional QPU path;
+// cross-language fixtures prevent this deployment copy from silently drifting.
+app.get("/api/arena/menu", (_req, res) => res.json(quantumArena.menu()));
 
 app.post("/api/arena/play", qpuReadingLimiter, (req, res) => {
-  const { operationX, operationO, gamma } = req.body ?? {};
-  return proxyToArena("/arena/play", { operationX, operationO, gamma }, res);
+  try {
+    return res.json(quantumArena.play(req.body ?? {}));
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
 });
 
 app.post("/api/arena/explain", qpuReadingLimiter, (req, res) => {
-  const { operationX, operationO, gamma, shots } = req.body ?? {};
-  return proxyToArena("/arena/explain", { operationX, operationO, gamma, shots }, res);
+  try {
+    return res.json(quantumArena.explain(req.body ?? {}));
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
 });
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));

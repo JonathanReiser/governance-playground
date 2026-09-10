@@ -15,6 +15,11 @@ implementation-only.
 | `hardware.py` | The same protocol as a qiskit circuit, run on the pinned backend or a labelled local simulator. |
 | `validation.py` | The protocol's ten required-validation items, executable. |
 
+The public Vercel site cannot host this long-lived Python process. Its `/api/arena/*`
+routes use `server/quantumArena.js`, a small Node state-vector port checked against
+the NumPy reference by `test/quantumArenaServerless.test.js`. Records identify which
+simulator or hardware backend actually ran.
+
 `protocol.py` and `hardware.py` are **separate implementations on purpose**. The
 circuit is checked against the reference rather than against itself, so validation
 item 5's independence is real.
@@ -49,8 +54,10 @@ its flip strategy was `i*sigma_y`, which inverted the asymmetric classical corne
 outright at `gamma = pi/2`. `test_a_sigma_x_generated_entangler_would_break_the_asymmetric_corners`
 pins that failure so the guard is never mistaken for superstition.
 
-## What does not exist yet
+## Participant interface
 
-No participant interface. The menu is defined here; presenting it to a person —
-with neutral labels, as the protocol requires — is unbuilt, and collection stays
-prohibited until it exists and the pinned backend is confirmed live.
+The participant interface is available at `?arena=play`. It presents neutral
+setting and measured-policy labels, hides the opponent operation until submission,
+and stores single-shot plays separately from many-shot explanations and Phase 0 data.
+The public version uses the labelled Node simulator; local Python runs can use this
+reference simulator or the separately identified Qiskit/hardware path.

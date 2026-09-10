@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   MAX_ENTANGLEMENT, NEUTRAL_LABELS, appendArenaPlay, drawOpponentOperation,
-  explainArena, labelFor, playArena, readArenaPlays,
+  explainArena, labelFor, playArena, policyLabelFor, profileLabelFor, readArenaPlays,
 } from "../lib/ttt/arena";
 
 const MARKS = ["X", "O"];
@@ -145,7 +145,7 @@ export function QuantumArenaPage({ onBack }) {
         <>
           <div className="ttt-status">
             <span>Measurement selected</span>
-            <strong>{record.policies.X} vs {record.policies.O}</strong>
+            <strong>{policyLabelFor(record.policies.X)} vs {policyLabelFor(record.policies.O)}</strong>
           </div>
           <div className="ttt-board" role="group" aria-label="Tic-tac-toe board">
             {board.map((cell, index) => (
@@ -187,7 +187,7 @@ export function QuantumArenaPage({ onBack }) {
               </p>
               <code>
                 {Object.entries(explanation.empirical)
-                  .map(([profile, value]) => `${profile} ${(100 * value).toFixed(1)}%`)
+                  .map(([profile, value]) => `${profileLabelFor(profile)} ${(100 * value).toFixed(1)}%`)
                   .join(" · ")}
               </code>
             </div>

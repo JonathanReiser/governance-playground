@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   NEUTRAL_LABELS, appendArenaPlay, drawOpponentOperation, labelFor, readArenaPlays,
+  policyLabelFor, profileLabelFor,
 } from "../arena";
 
 function memoryStorage() {
@@ -32,6 +33,15 @@ describe("participant-facing labels", () => {
   it("maps operations back to what the participant saw", () => {
     expect(labelFor("Q")).toBe("Setting IV");
     expect(labelFor("nope")).toBe("unknown");
+  });
+
+  it("keeps internal measured-policy codes out of result labels", () => {
+    expect(policyLabelFor("C")).toBe("Policy I");
+    expect(policyLabelFor("D")).toBe("Policy II");
+    expect(profileLabelFor("CD")).toBe("Policy I / Policy II");
+    for (const label of [policyLabelFor("C"), policyLabelFor("D"), profileLabelFor("CC"), profileLabelFor("DD")]) {
+      expect(label).not.toMatch(/\b[CDMQ]\b/);
+    }
   });
 });
 
