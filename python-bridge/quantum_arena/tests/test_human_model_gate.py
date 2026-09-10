@@ -13,7 +13,8 @@ import pytest
 from quantum_arena.human_model_gate import (
     GateThresholds, TaskDesign, choice_probability, generate, fit_quantum,
     logistic_probabilities, markov_probabilities, quantum_probabilities,
-    quantum_jacobian_rank, quantum_two_observables, structural_observability, su2,
+    quantum_jacobian_rank, quantum_two_observable_jacobian,
+    quantum_two_observables, structural_observability, su2,
 )
 
 
@@ -61,11 +62,33 @@ class TestStructuralObservability:
 
 class TestTheseFactsForceTheDesign:
     def test_a_pair_design_is_saturated_and_must_be_rejected(self):
-        """Two conditions, two observed proportions. Any model with two or more
-        free parameters fits them exactly, at any sample size."""
-        pair_conditions = 2
-        smallest_quantum_model = 3  # two strengths plus delta
-        assert smallest_quantum_model >= pair_conditions
+        """The implemented two-operation map has deficient effective rank."""
+        point = np.array([1.0, 1.7, 0.8])  # beta0, beta1, delta
+
+        def pair_probabilities(parameters):
+            beta0, beta1, delta = parameters
+            first = su2(0.0, beta0, 0.0)
+            second = su2(0.0, beta1, delta)
+            return np.array([
+                choice_probability([second, first]),
+                choice_probability([first, second]),
+            ])
+
+        step = 1e-6
+        gradient = np.array([
+            (pair_probabilities(point + np.eye(3)[column] * step)[0]
+             - pair_probabilities(point - np.eye(3)[column] * step)[0]) / (2 * step)
+            for column in range(3)
+        ])
+        assert pair_probabilities(point)[0] == pytest.approx(
+            pair_probabilities(point)[1], abs=1e-14
+        )
+        assert np.linalg.norm(gradient) > 0.1
+        # The exact reversal equality makes both Jacobian rows this same gradient.
+        jacobian = np.vstack((gradient, gradient))
+        effective_rank = np.linalg.matrix_rank(jacobian)
+        assert effective_rank == 1
+        assert effective_rank < point.size
 
     def test_nominal_condition_count_does_not_make_triples_identifiable(self):
         design = TaskDesign(triples=4)
@@ -77,6 +100,34 @@ class TestTheseFactsForceTheDesign:
     def test_one_triple_is_rank_two_against_four_parameters(self):
         assert quantum_jacobian_rank(1) == 2
         assert not TaskDesign(triples=1).is_identifiable_in_principle()
+
+    @pytest.mark.parametrize("triples", [1, 2, 4, 8, 16])
+    def test_analytic_rank_is_stable_without_a_tuned_tolerance(self, triples):
+        jacobian = quantum_two_observable_jacobian(
+            np.linspace(0.61, 2.41, 3 * triples).reshape(triples, 3), 0.83
+        )
+        assert np.linalg.matrix_rank(jacobian) == 2 * triples
+
+    def test_analytic_jacobian_matches_the_prediction_map(self):
+        rng = np.random.default_rng(20260910)
+        for triples in (1, 4):
+            betas = rng.uniform(0.3, math.pi - 0.3, size=(triples, 3))
+            delta = rng.uniform(0.3, math.pi - 0.3)
+            point = np.concatenate((betas.ravel(), [delta]))
+            step = 1e-6
+
+            def predict(parameters):
+                return quantum_two_observables(
+                    parameters[:-1].reshape(triples, 3), parameters[-1]
+                ).ravel()
+
+            finite_difference = np.column_stack([
+                (predict(point + np.eye(point.size)[column] * step)
+                 - predict(point - np.eye(point.size)[column] * step)) / (2 * step)
+                for column in range(point.size)
+            ])
+            analytic = quantum_two_observable_jacobian(betas, delta)
+            assert analytic == pytest.approx(finite_difference, abs=2e-9)
 
 
 class TestModels:
