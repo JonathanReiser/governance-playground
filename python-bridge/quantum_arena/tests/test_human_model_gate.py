@@ -13,7 +13,7 @@ import pytest
 from quantum_arena.human_model_gate import (
     GateThresholds, TaskDesign, choice_probability, generate, fit_quantum,
     logistic_probabilities, markov_probabilities, quantum_probabilities,
-    structural_observability, su2,
+    quantum_jacobian_rank, quantum_two_observables, structural_observability, su2,
 )
 
 
@@ -67,14 +67,16 @@ class TestTheseFactsForceTheDesign:
         smallest_quantum_model = 3  # two strengths plus delta
         assert smallest_quantum_model >= pair_conditions
 
-    def test_a_triple_design_has_more_conditions_than_parameters(self):
+    def test_nominal_condition_count_does_not_make_triples_identifiable(self):
         design = TaskDesign(triples=4)
         assert design.conditions == 24
         assert design.free_parameters == 13
-        assert design.is_identifiable_in_principle()
+        assert quantum_jacobian_rank(4) == 8
+        assert not design.is_identifiable_in_principle()
 
-    def test_one_triple_already_beats_saturation(self):
-        assert TaskDesign(triples=1).is_identifiable_in_principle()
+    def test_one_triple_is_rank_two_against_four_parameters(self):
+        assert quantum_jacobian_rank(1) == 2
+        assert not TaskDesign(triples=1).is_identifiable_in_principle()
 
 
 class TestModels:
@@ -89,6 +91,83 @@ class TestModels:
         # The sharp point prediction, at the level of the fitted model.
         probabilities = quantum_probabilities(np.array([[1.0, 2.0, 0.7]]), 0.0)
         assert probabilities.std() == pytest.approx(0.0, abs=1e-12)
+
+    def test_six_orderings_collapse_exactly_to_two(self):
+        betas = np.array([[1.0, 2.0, 0.7]])
+        probabilities = quantum_probabilities(betas, 0.83)[0]
+        assert len(np.unique(np.round(probabilities, 14))) == 2
+
+        end, middle = quantum_two_observables(betas, 0.83)[0]
+        # itertools.permutations order: 012, 021, 102, 120, 201, 210.
+        # Consideration 0 is in the middle only in 102 and 201.
+        assert probabilities[[0, 1, 3, 5]] == pytest.approx(end, abs=1e-14)
+        assert probabilities[[2, 4]] == pytest.approx(middle, abs=1e-14)
+
+    def test_analytic_two_observable_reduction_matches_the_engine(self):
+        rng = np.random.default_rng(20260910)
+        for _ in range(50):
+            betas = rng.uniform(0.0, math.pi, size=(1, 3))
+            delta = rng.uniform(0.0, math.pi)
+            end, middle = quantum_two_observables(betas, delta)[0]
+            probabilities = quantum_probabilities(betas, delta)[0]
+            assert probabilities[[0, 1, 3, 5]] == pytest.approx(end, abs=1e-14)
+            assert probabilities[[2, 4]] == pytest.approx(middle, abs=1e-14)
+
+    def test_end_position_equivalence_includes_special_points(self):
+        for betas, delta in [([0.0, 1.0, 2.0], 0.8),
+                             ([math.pi, 1.0, 2.0], math.pi / 2),
+                             ([1.0, 0.0, math.pi], 0.0)]:
+            probabilities = quantum_probabilities(np.array([betas]), delta)[0]
+            assert np.ptp(probabilities[[0, 1, 3, 5]]) == pytest.approx(0.0, abs=1e-14)
+
+    def test_pi_over_two_is_not_a_point_identification_exception(self):
+        # Generic data generated at pi/2 are reproduced exactly at delta=0.8 by
+        # a different nuisance-beta vector.  This guards against inferring a
+        # singleton identified set from the delta <-> pi-delta reflection.
+        truth = quantum_probabilities(
+            np.array([[2.6082532487312564, 1.5973208412481563,
+                       2.6859650893984361]]), math.pi / 2
+        )
+        equivalent = quantum_probabilities(
+            np.array([[2.3700948709420477, 1.2960963378063062,
+                       1.296789683916604]]), 0.8
+        )
+        assert equivalent == pytest.approx(truth, abs=2e-14)
+
+    def test_independent_deltas_restore_three_generic_directions(self):
+        def probabilities(parameters):
+            betas = parameters[:3]
+            deltas = (0.0, parameters[3], parameters[4])
+            out = []
+            import itertools
+            for order in itertools.permutations(range(3)):
+                operations = [su2(0.0, betas[i], deltas[i]) for i in order]
+                out.append(choice_probability(list(reversed(operations))))
+            return np.array(out)
+
+        point = np.array([1.0, 1.3, 2.1, 0.6, -0.9])
+        step = 1e-6
+        jacobian = np.column_stack([
+            (probabilities(point + np.eye(5)[j] * step)
+             - probabilities(point - np.eye(5)[j] * step)) / (2 * step)
+            for j in range(5)
+        ])
+        assert np.linalg.matrix_rank(jacobian, tol=1e-8) == 3
+
+    @pytest.mark.parametrize("delta", [0.0, math.pi])
+    def test_shared_delta_rank_drops_to_one_at_phase_boundaries(self, delta):
+        point = np.array([1.0, 1.2, 2.1, delta])
+        step = 1e-6
+
+        def probabilities(parameters):
+            return quantum_probabilities(parameters[:3], parameters[3]).ravel()
+
+        jacobian = np.column_stack([
+            (probabilities(point + np.eye(4)[j] * step)
+             - probabilities(point - np.eye(4)[j] * step)) / (2 * step)
+            for j in range(4)
+        ])
+        assert np.linalg.matrix_rank(jacobian, tol=1e-8) == 1
 
     def test_markov_is_a_genuine_competitor_not_a_strawman(self):
         # Stochastic matrices do not commute either, so this classical model
@@ -113,12 +192,6 @@ class TestModels:
 
 
 class TestRecoveryOnSyntheticData:
-    def test_a_generated_delta_is_recovered_up_to_sign_with_enough_restarts(self):
-        design = TaskDesign(triples=4, trials_per_ordering=8, participants=60)
-        data = generate(design, delta=1.1, seed=1)
-        fit = fit_quantum(data, design.triples, delta_free=True, restarts=16, seed=2)
-        assert abs(abs(fit["delta"]) - 1.1) < 0.3
-
     def test_the_free_model_beats_the_null_on_delta_bearing_data(self):
         design = TaskDesign(triples=4, trials_per_ordering=8, participants=60)
         data = generate(design, delta=1.1, seed=1)
@@ -145,11 +218,10 @@ class TestTheGateCanFail:
         assert 0.5 < thresholds.min_true_positive_rate <= 1.0
 
     def test_an_impossible_design_fails_the_in_principle_check(self):
-        # 1 triple with the parameter count of 4 would not be identifiable; the
-        # check is real, not decorative.
+        # Six nominal orderings reduce to rank two, so the check must fail.
         design = TaskDesign(triples=1)
         assert design.conditions == 6 and design.free_parameters == 4
-        assert design.is_identifiable_in_principle()
+        assert not design.is_identifiable_in_principle()
 
 
 class TestNoiselessLimit:
@@ -191,51 +263,17 @@ class TestNoiselessLimit:
 
         report = noiseless_limit_recovery(restarts=2, true_deltas=(0.8,))
         assert report["engineering_only"] is True
-        # The reading must refuse BOTH over-reads of the small errors at larger
-        # true values: neither "recovers above 1.1" nor "coincidence". Five points
-        # cannot separate those, and an earlier version of this text asserted the
-        # second one. It must defer to tracking_slope instead.
         reading = report["reading"]
-        assert "tracking_slope" in reading
-        assert "attenuated" in reading
-        assert "not the same as being identified" not in reading
+        assert "generic Jacobian rank 2T" in reading
+        assert "slope" in reading
 
 
 class TestTrackingSlope:
-    """Does the estimate track delta, or just land near it sometimes?
+    """The historical slope is retained as output, not as identification evidence."""
 
-    These tests exist because a five-point check was over-read twice, in opposite
-    directions. Slope is the statistic that settles it, so the assertions are on
-    slope rather than on any individual point's error.
-    """
-
-    def test_the_estimate_carries_real_information_above_the_threshold(self):
-        """Guards against the withdrawn claim that the estimator returns a fixed
-        band regardless of the truth. If that were so, slope would be ~0."""
-        from quantum_arena.human_model_gate import tracking_slope
-
-        report = tracking_slope(restarts=3, true_deltas=(1.1, 1.7, 2.3, 2.9))
-        assert report["slope_above_threshold"] > 0.15, "estimates do move with the truth"
-
-    def test_but_the_estimate_is_severely_attenuated(self):
-        """Guards against the opposite over-read — that delta simply recovers above
-        the threshold. Full identification means slope 1; this is far below it."""
-        from quantum_arena.human_model_gate import tracking_slope
-
-        report = tracking_slope(restarts=3, true_deltas=(1.1, 1.7, 2.3, 2.9))
-        assert report["slope_above_threshold"] < 0.75
-        assert report["identified_slope_would_be"] == 1.0
-
-    def test_below_the_threshold_tracking_is_not_merely_weak_but_inverted(self):
-        from quantum_arena.human_model_gate import tracking_slope
-
-        report = tracking_slope(restarts=3, true_deltas=(0.2, 0.5, 0.8, 1.1),
-                                tracking_threshold=1.1)
-        assert report["slope_overall"] < 0.0
-
-    def test_the_reading_refuses_both_simple_stories(self):
+    def test_the_reading_rejects_the_threshold_inference(self):
         from quantum_arena.human_model_gate import tracking_slope
 
         report = tracking_slope(restarts=2, true_deltas=(1.1, 2.9))
-        assert "not 'recovered above 1.1'" in report["reading"]
-        assert "not a fixed band" in report["reading"]
+        assert "does not imply partial" in report["reading"]
+        assert "no structural status" in report["reading"]
