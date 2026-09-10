@@ -149,6 +149,33 @@ expected. Estimation does not improve at all.** That contrast is the finding.
 
 Artifact: `preregistrations/human-model-gate/design-sweep-2026-09-10.json`.
 
+### The noiseless limit — stronger than the sweep
+
+The sweep shows no *tested* design recovers `delta`. Feeding the fitter expected
+counts instead of binomial draws — the infinite-data limit — shows that no design
+**can**:
+
+| true `delta` | fitted \|δ\| | \|error\| |
+|---|---|---|
+| 0.4 | 2.7104 | 2.3104 |
+| 0.8 | 2.0874 | 1.2874 |
+| 1.1 | 1.9915 | 0.8915 |
+| 1.5 | 1.5755 | 0.0755 |
+| 2.0 | 1.8656 | 0.1344 |
+
+At 10⁷ trials per cell and zero sampling noise, `delta` is still not recovered
+below about 1.1. So the sweep's flat error is not a sample-size limit — **no
+budget reaches it.**
+
+Two refinements worth keeping rather than rounding off:
+
+- **Larger `delta` does recover** (0.076 and 0.134 at 1.5 and 2.0). The honest
+  claim is not "unidentifiable" but "unidentifiable below roughly 1.1".
+- **Every estimate lands in about `[1.6, 2.7]` regardless of the truth.** That is
+  the profiled-likelihood plateau seen from a third angle. Large `delta` recovers
+  largely because the true value happens to fall inside that band, which is not
+  the same as being identified.
+
 ### Consequence for the recommendation above
 
 Option 1 (binary `C²` task) stands, and the case for it strengthens: the extra

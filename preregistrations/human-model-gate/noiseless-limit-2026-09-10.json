@@ -1,0 +1,38 @@
+{
+  "schema": "human-choice-identifiability-gate/v0.1",
+  "engineering_only": true,
+  "trials_per_cell": 10000000.0,
+  "rows": [
+    {
+      "true_delta": 0.4,
+      "fitted_absolute_delta": 2.710441838502362,
+      "absolute_error": 2.310441838502362
+    },
+    {
+      "true_delta": 0.8,
+      "fitted_absolute_delta": 2.0874231205382405,
+      "absolute_error": 1.2874231205382405
+    },
+    {
+      "true_delta": 1.1,
+      "fitted_absolute_delta": 1.9914654736403814,
+      "absolute_error": 0.8914654736403813
+    },
+    {
+      "true_delta": 1.5,
+      "fitted_absolute_delta": 1.5755055903206134,
+      "absolute_error": 0.07550559032061344
+    },
+    {
+      "true_delta": 2.0,
+      "fitted_absolute_delta": 1.8656158151130962,
+      "absolute_error": 0.13438418488690385
+    }
+  ],
+  "worst_absolute_error": 2.310441838502362,
+  "estimate_range": [
+    1.5755055903206134,
+    2.710441838502362
+  ],
+  "reading": "Recovery fails at infinite data for the smaller true values, so the design sweep's flat error is structural rather than a sample-size limit. Note the fitted estimates cluster in a narrow band regardless of the generating value: that is the profiled-likelihood plateau seen from another angle. Larger true deltas 'recover' largely because they happen to fall inside that band, which is not the same as being identified."
+}
