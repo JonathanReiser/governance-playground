@@ -105,11 +105,39 @@ what has and has not been tested. Pairwise interactions in a logistic model are
 not order effects, and non-commutativity is an order effect: whether high demand
 *then* low control predicts differently from low control *then* high demand,
 beyond their aggregate. The dataset carries sequence, so that question is
-answerable here, and it has not yet been asked.
+answerable here.
+
+## Order test
+
+The follow-up is specified in `order-test-spec.md` and implemented in
+`order_test.py`. It compares the two preceding moments while controlling for
+current context, the unordered content of those moments, and the person's prior
+coping rate. A 200-draw within-row swap null finds no incremental predictive
+order effect for either common outcome:
+
+| encoding | Problem contribution (p) | Emotion contribution (p) | verdict |
+|---|---:|---:|---|
+| momentary linear | -0.0014 (0.478) | -0.0028 (0.726) | null |
+| momentary commutator | -0.0053 (0.955) | -0.0027 (0.393) | null |
+| task commutator | -0.0061 (0.856) | -0.0061 (0.657) | **void** |
+| categorical task order | -0.0084 (0.771) | -0.0086 (0.483) | null |
+
+The task-commutator representation is void because 95.9% of its encoded values
+are zero. The categorical repair has genuine variation—1,327 rows have differing
+preceding tasks, with 49 ordered versus 28 unordered levels—and is still null.
+
+This dataset also cannot test interference or a violation of total probability:
+all variables are jointly observed on every one of the 1,901 rows (zero missing
+cells and one missingness pattern). Such a test requires an experimental arm in
+which a relevant state or question is deliberately left unresolved. More EMA
+rows with the same design cannot create that counterfactual condition.
 
 Run from the repository root after installing `python-bridge/requirements-ema.txt`:
 
 ```bash
 PYTHONPATH=python-bridge python3 -m context_ema.nurses_poc \
   path/to/eco2.RData --output path/to/results.json
+
+PYTHONPATH=python-bridge python3 -m context_ema.order_test \
+  path/to/eco2.RData --output path/to/order-results.json
 ```
