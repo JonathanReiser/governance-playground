@@ -45,23 +45,47 @@ def load_ema(path: str | Path) -> pd.DataFrame:
 
 
 def add_recent_state(frame: pd.DataFrame) -> pd.DataFrame:
-    """Add only past-within-person observations; never borrow across people."""
+    """Add only past-within-person observations; never borrow across people.
+
+    Three kinds of history are built separately, because they answer different
+    questions and only the decomposition tells them apart:
+
+    ``previous_<momentary>``  the person's preceding mood, fatigue, demand,
+                              effort, control and reward — genuine recent state.
+    ``previous_<outcome>``    the person's preceding coping choice.
+    ``propensity_<outcome>``  the running mean of that person's OWN PAST choices
+                              (shifted first, so the current row is excluded).
+
+    The third is a person-level base rate rather than a momentary quantity. It is
+    included so that a gain from knowing "this person usually copes this way" is
+    not reported as evidence of recent cognitive state.
+    """
     augmented = frame.copy()
     grouped = augmented.groupby("Person", sort=False)
     for column in MOMENTARY + OUTCOMES:
         augmented[f"previous_{column}"] = grouped[column].shift(1)
+    for column in OUTCOMES:
+        augmented[f"propensity_{column}"] = grouped[column].transform(
+            lambda series: series.shift(1).expanding().mean()
+        )
     return augmented
 
 
-def _pipeline(feature_set: str) -> tuple[Pipeline, list[str]]:
+def _pipeline(feature_set: str, outcome: str) -> tuple[Pipeline, list[str]]:
     current = list(MOMENTARY + TASKS)
+    recent_momentary = [f"previous_{column}" for column in MOMENTARY]
     recent = [f"previous_{column}" for column in MOMENTARY + OUTCOMES]
     traits = list(PERSON_TRAITS)
     categorical = ["Shift", "Hospital", "Gender"]
 
+    # recent_state mixes two very different things: the preceding momentary state
+    # and the preceding choice of the outcome being predicted. The two sets below
+    # separate them, because the shipped comparison could not.
     specifications = {
         "additive": (current, 1),
         "context_interactions": (current, 2),
+        "recent_momentary": (current + recent_momentary, 1),
+        "own_history": (current + [f"propensity_{outcome}"], 1),
         "recent_state": (current + recent, 1),
         "context_state": (current + recent, 2),
     }
@@ -107,9 +131,12 @@ def evaluate(frame: pd.DataFrame, folds: int = 5) -> dict:
         target = data[outcome].astype(int).to_numpy()
         prevalence = float(target.mean())
         outcome_result = {"prevalence": prevalence}
-        feature_sets = ("additive", "context_interactions", "recent_state", "context_state")
+        feature_sets = (
+            "additive", "context_interactions", "recent_momentary", "own_history",
+            "recent_state", "context_state",
+        )
         for feature_set in feature_sets:
-            model, columns = _pipeline(feature_set)
+            model, columns = _pipeline(feature_set, outcome)
             probabilities = cross_val_predict(
                 model,
                 data[columns],
