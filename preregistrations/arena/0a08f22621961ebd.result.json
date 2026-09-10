@@ -1,0 +1,220 @@
+{
+  "kind": "quantum-arena/hardware-validation-result",
+  "version": 1,
+  "registrationHash": "0a08f22621961ebd6893c02f68768561f88bf4152680d88798fe6ac79c54a132",
+  "beacon": {
+    "pulseIndex": 1934482,
+    "timeStamp": "2026-09-09T22:56:00.000Z",
+    "outputValue": "99C23FF5F852055641886731D9BCEBA90F615AA3773D78D976D2FBE880624FB83FD7DD88B1AF330ED78480A0D94B50BC2086EA89F7B21708F7C3ECD22EBCEB3F",
+    "uri": "https://beacon.nist.gov/beacon/2.0/pulse/time/next/1788994501870"
+  },
+  "completedAt": "2026-09-09T23:59:52.557Z",
+  "backendReported": "ibm_marrakesh",
+  "cellCount": 7,
+  "cells": [
+    {
+      "operationX": "C",
+      "operationO": "D",
+      "gamma": 0,
+      "counts": {
+        "CC": 16,
+        "CD": 4075,
+        "DC": 0,
+        "DD": 5
+      },
+      "empirical": {
+        "CC": 0.00390625,
+        "CD": 0.994873046875,
+        "DC": 0,
+        "DD": 0.001220703125
+      },
+      "exact": {
+        "CC": 3.749399456654644e-33,
+        "CD": 1,
+        "DC": 0,
+        "DD": 0
+      },
+      "tvd": 0.005126953125,
+      "shots": 4096,
+      "simulator": false,
+      "backend": "ibm_marrakesh",
+      "job_id": "dagut0b9k43c73advhr0",
+      "readout_mitigation": "none (raw counts)"
+    },
+    {
+      "operationX": "C",
+      "operationO": "D",
+      "gamma": 1.5707963267948966,
+      "counts": {
+        "CC": 36,
+        "CD": 4059,
+        "DC": 0,
+        "DD": 1
+      },
+      "empirical": {
+        "CC": 0.0087890625,
+        "CD": 0.990966796875,
+        "DC": 0,
+        "DD": 0.000244140625
+      },
+      "exact": {
+        "CC": 7.498798913309288e-33,
+        "CD": 1,
+        "DC": 8.514806322777526e-98,
+        "DD": 3.749399456654644e-33
+      },
+      "tvd": 0.009033203125,
+      "shots": 4096,
+      "simulator": false,
+      "backend": "ibm_marrakesh",
+      "job_id": "daguvvfi3e6s738n17fg",
+      "readout_mitigation": "none (raw counts)"
+    },
+    {
+      "operationX": "D",
+      "operationO": "C",
+      "gamma": 0,
+      "counts": {
+        "CC": 25,
+        "CD": 0,
+        "DC": 4066,
+        "DD": 5
+      },
+      "empirical": {
+        "CC": 0.006103515625,
+        "CD": 0,
+        "DC": 0.99267578125,
+        "DD": 0.001220703125
+      },
+      "exact": {
+        "CC": 3.749399456654644e-33,
+        "CD": 0,
+        "DC": 1,
+        "DD": 0
+      },
+      "tvd": 0.00732421875,
+      "shots": 4096,
+      "simulator": false,
+      "backend": "ibm_marrakesh",
+      "job_id": "dagv1t1hvn6c73cr75eg",
+      "readout_mitigation": "none (raw counts)"
+    },
+    {
+      "operationX": "D",
+      "operationO": "C",
+      "gamma": 1.5707963267948966,
+      "counts": {
+        "CC": 34,
+        "CD": 0,
+        "DC": 4061,
+        "DD": 1
+      },
+      "empirical": {
+        "CC": 0.00830078125,
+        "CD": 0,
+        "DC": 0.991455078125,
+        "DD": 0.000244140625
+      },
+      "exact": {
+        "CC": 7.498798913309288e-33,
+        "CD": 1.7840160354182158e-97,
+        "DC": 1,
+        "DD": 3.749399456654644e-33
+      },
+      "tvd": 0.008544921875,
+      "shots": 4096,
+      "simulator": false,
+      "backend": "ibm_marrakesh",
+      "job_id": "dagv1v8mhr3c73e5ollg",
+      "readout_mitigation": "none (raw counts)"
+    },
+    {
+      "operationX": "M",
+      "operationO": "M",
+      "gamma": 0.7853981633974483,
+      "counts": {
+        "CC": 1008,
+        "CD": 1068,
+        "DC": 1032,
+        "DD": 988
+      },
+      "empirical": {
+        "CC": 0.24609375,
+        "CD": 0.2607421875,
+        "DC": 0.251953125,
+        "DD": 0.2412109375
+      },
+      "exact": {
+        "CC": 0.2500000000000001,
+        "CD": 0.25,
+        "DC": 0.25,
+        "DD": 0.24999999999999983
+      },
+      "tvd": 0.012695312499999972,
+      "shots": 4096,
+      "simulator": false,
+      "backend": "ibm_marrakesh",
+      "job_id": "dagv21fi3e6s738n1aqg",
+      "readout_mitigation": "none (raw counts)"
+    },
+    {
+      "operationX": "M",
+      "operationO": "Q",
+      "gamma": 1.5707963267948966,
+      "counts": {
+        "CC": 13,
+        "CD": 2045,
+        "DC": 10,
+        "DD": 2028
+      },
+      "empirical": {
+        "CC": 0.003173828125,
+        "CD": 0.499267578125,
+        "DC": 0.00244140625,
+        "DD": 0.4951171875
+      },
+      "exact": {
+        "CC": 1.9824750557387595e-32,
+        "CD": 0.4999999999999999,
+        "DC": 1.232595164407831e-32,
+        "DD": 0.5000000000000001
+      },
+      "tvd": 0.005615234375,
+      "shots": 4096,
+      "simulator": false,
+      "backend": "ibm_marrakesh",
+      "job_id": "dagv23b9k43c73advqe0",
+      "readout_mitigation": "none (raw counts)"
+    },
+    {
+      "operationX": "Q",
+      "operationO": "Q",
+      "gamma": 1.5707963267948966,
+      "counts": {
+        "CC": 4074,
+        "CD": 22,
+        "DC": 0,
+        "DD": 0
+      },
+      "empirical": {
+        "CC": 0.99462890625,
+        "CD": 0.00537109375,
+        "DC": 0,
+        "DD": 0
+      },
+      "exact": {
+        "CC": 1,
+        "CD": 3.7493994566546427e-33,
+        "DC": 3.7493994566546427e-33,
+        "DD": 1.4997597826618576e-32
+      },
+      "tvd": 0.00537109375,
+      "shots": 4096,
+      "simulator": false,
+      "backend": "ibm_marrakesh",
+      "job_id": "dagv5pfi3e6s738n1erg",
+      "readout_mitigation": "none (raw counts)"
+    }
+  ],
+  "chain": "3a3b5509af47f2e901067f62aa3142473703d22ead451b84fa40104b1dd2531e"
+}
