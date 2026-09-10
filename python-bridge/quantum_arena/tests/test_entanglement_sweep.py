@@ -13,6 +13,24 @@ from quantum_arena.entanglement_sweep import (
 from quantum_arena.protocol import MAX_ENTANGLEMENT
 
 
+def assert_records_close(actual, expected, path="record"):
+    """Compare a generated record across platforms without demanding bit identity."""
+
+    assert type(actual) is type(expected), f"{path}: {type(actual)} != {type(expected)}"
+    if isinstance(actual, dict):
+        assert actual.keys() == expected.keys(), f"{path}: keys differ"
+        for key in actual:
+            assert_records_close(actual[key], expected[key], f"{path}.{key}")
+    elif isinstance(actual, list):
+        assert len(actual) == len(expected), f"{path}: lengths differ"
+        for index, (actual_item, expected_item) in enumerate(zip(actual, expected)):
+            assert_records_close(actual_item, expected_item, f"{path}[{index}]")
+    elif isinstance(actual, float):
+        assert actual == pytest.approx(expected, rel=1e-12, abs=1e-12), path
+    else:
+        assert actual == expected, path
+
+
 class TestEntanglementSweep:
     def test_restricted_menu_has_a_reproducible_stability_transition(self):
         threshold = restricted_stability_threshold()
@@ -49,7 +67,10 @@ class TestEntanglementSweep:
         regenerated = run_entanglement_sweep(intervals=artifact["gamma_domain"]["intervals"])
         artifact.pop("generated_at")
         regenerated.pop("generated_at")
-        assert artifact == regenerated
+        # NumPy/SciPy transcendental results can differ in their last bits across
+        # Python and libc builds. The artifact must reproduce to the protocol's
+        # 1e-12 numerical precision, not to platform-specific byte identity.
+        assert_records_close(artifact, regenerated)
 
     @pytest.mark.parametrize("intervals", [0, 1, 513, 2.5])
     def test_rejects_invalid_grid_sizes(self, intervals):
