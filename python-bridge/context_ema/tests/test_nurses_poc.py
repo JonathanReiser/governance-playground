@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from context_ema.nurses_poc import OUTCOMES, _pipeline, add_recent_state
+from context_ema.nurses_poc import MOMENTARY, OUTCOMES, _pipeline, add_recent_state
 
 
 def test_recent_state_never_crosses_person_boundaries():
@@ -65,3 +65,34 @@ def test_the_feature_sets_separate_recent_state_from_own_past_choice():
     _, emotion_columns = _pipeline("own_history", "Emotion")
     assert "propensity_Emotion" in emotion_columns
     assert "propensity_Problem" not in emotion_columns
+
+
+def test_the_two_baselines_the_claims_needed_now_exist():
+    """The withdrawn README claimed what momentary variables add, and what they
+    add on top of the person's base rate. Both need a model that did not exist."""
+    _, tasks_columns = _pipeline("tasks_only", "Problem")
+    _, rate_columns = _pipeline("propensity_only", "Problem")
+
+    assert not any(column in tasks_columns for column in MOMENTARY), \
+        "tasks_only must exclude the momentary variables it is the baseline for"
+    assert rate_columns == ["propensity_Problem"] or set(rate_columns) == {"propensity_Problem"}, \
+        "propensity_only must be the base rate alone, not the base rate plus context"
+
+
+def test_regularization_is_not_a_single_fixed_constant():
+    """One fixed C shrank a 22-feature model and a 231-interaction model equally,
+    biasing the interaction comparison. C must be selected, not hardcoded."""
+    from context_ema.nurses_poc import C_GRID
+    model, _ = _pipeline("additive", "Problem")
+    assert model.named_steps["classifier"].C == 1.0, "C must be left at the default for tuning"
+    assert len(C_GRID) >= 5 and min(C_GRID) < 0.01 < max(C_GRID)
+
+
+def test_brier_is_not_reported_for_balanced_models():
+    """class_weight='balanced' decalibrates by design; a Brier score computed
+    from those probabilities is not a calibration measure."""
+    import inspect
+    from context_ema import nurses_poc
+    source = inspect.getsource(nurses_poc)
+    assert "brier_score_loss" not in source, \
+        "Brier must not be reported while every model uses balanced class weights"

@@ -42,6 +42,17 @@ refit, and repeat for 200 fixed-seed draws. The one-sided permutation p-value is
 - `null`: otherwise;
 - `void`: representation fails the predeclared 90% zero-feature power check.
 
+**Scope of the void rule (deviation, recorded).** The 90% check is applied to
+the commutator encodings only. It is **not** applied to the categorical task-pair
+encoding: a one-hot representation of ~49 levels is ~98% zero by construction,
+one `1` per row, so the rule would void any categorical encoding regardless of
+its information content. The rule was written for the antisymmetric commutator,
+where a zero means the row carries no order signal at all. For the categorical
+encoding, power is evidenced instead by the count of rows with differing
+preceding tasks and by the ordered-versus-unordered level counts, both reported.
+Each encoding's output now carries `void_rule_applied` and `void_rule_note`, so
+the exception is visible in the results rather than inferred from the code.
+
 A null result means this dataset did not detect incremental predictive order
 information. It does not prove that cognition is commutative. This observational
 dataset cannot test interference or violations of total probability because all

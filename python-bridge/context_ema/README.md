@@ -35,77 +35,90 @@ would leak each person's stable traits and repeated state into the test data.
 This is an exploratory predictive comparison, not evidence for quantum brain
 processes, a causal treatment effect, or clinical guidance.
 
-## First run
+## Results: withdrawn pending regeneration
 
-The archived file contains 1,901 observations from 96 people (the publication
-reports 113 recruited participants). With five-fold person-held-out validation:
+**The first run's result table and every conclusion drawn from it have been
+withdrawn.** They are not restated here, because restating them would let claims
+survive on the strength of having once appeared in this file. `results/
+nurses-poc-v0.1.json` is kept as a record of what was run, but it is superseded:
+the current module cannot even produce that schema.
 
-| outcome | additive | interactions | recent momentary | own history | recent state | state + interactions |
-|---|---:|---:|---:|---:|---:|---:|
-| problem-focused coping | 0.715 | 0.710 | 0.719 | **0.861** | 0.850 | 0.835 |
-| emotion-focused coping | 0.614 | 0.587 | 0.612 | **0.820** | 0.744 | 0.706 |
-| social support | 0.582 | 0.562 | 0.569 | **0.709** | 0.643 | 0.617 |
-| refusal | **0.620** | 0.573 | 0.600 | 0.586 | 0.577 | 0.483 |
+Three defects, found in review, made those numbers unsafe to carry forward.
 
-Read the middle two columns first, because they decompose the fourth.
+**Two headline numbers were not computable from the code that allegedly produced
+them.** The README reported that dropping the six momentary variables "costs
+0.031, 0.026, 0.028 and 0.033" ROC-AUC, and that those variables "still add
+0.009, 0.008, 0.026 and 0.040 on top of the person's base rate". Both require a
+tasks-only model and a base-rate-only model. Neither existed. The shipped
+`specifications` table defined six feature sets and included no such arm, and the
+committed results file contains no such key. The central positive claim of the
+analysis — *"Current state matters"* — rested on numbers no one could reproduce.
+Those two models now exist (`tasks_only`, `propensity_only`).
 
-**Generic pairwise interactions do not help.** Every outcome is worse with them
-(−0.005, −0.027, −0.020, −0.046). That is a clean negative and it is the result
-this analysis was built to obtain.
+**No uncertainty was computed at all.** The module emitted point estimates and
+bare differences. The claimed gains of **+0.009** and **+0.008** are roughly an
+order of magnitude smaller than the marginal 95% interval on a single AUC at this
+sample size (about ±0.026 and ±0.028 by Hanley–McNeil), before accounting for
+clustering at all. With 1,901 observations from 96 people — about 20 each — the
+design effect at an intraclass correlation of 0.1 to 0.3 is between 2.9 and 6.6.
+Whether those gains are real is an open question, not a settled one.
 
-**Cognitive state does help, but only the current moment's.** Dropping the six
-momentary variables from the additive model costs 0.031, 0.026, 0.028 and 0.033
-ROC-AUC, and they still add 0.009, 0.008, 0.026 and 0.040 on top of the person's
-base rate — eight gains out of eight. Current state matters.
+**Metrics pooled clustered rows as independent.** ROC-AUC, average precision and
+Brier were each computed in one call over all 1,901 rows, and per-fold results
+were discarded, so not even between-fold variation was recoverable.
 
-The *previous* moment's state is what adds nothing. `recent momentary` moves
-ROC-AUC by +0.004, −0.002, −0.013 and −0.020 beyond the additive model, three of
-four negative. That is expected when state is autocorrelated: once the current
-value is known, the lag is largely redundant. It is a statement about the lag,
-not about cognitive state.
+### What the module now does differently
 
-**What predicts a coping choice is how often that person makes it.** A single
-feature — the running mean of that person's own past choices, excluding the
-current row — reaches 0.861 / 0.820 / 0.709, beating the entire ten-feature
-`recent state` bundle on three of four outcomes.
-
-So the `recent state` gain reported by the fourth column is not evidence about
-cognitive state. It comes almost entirely from including the lagged value of the
-outcome being predicted, and that lag is in turn a worse proxy for something
-simpler: the person's habitual rate. Adding the lag on top of the base rate gains
-+0.006, +0.001 and −0.001.
-
-This interacts with the validation design and is worth stating plainly. Holding
-out whole people stops the model *learning* person-specific parameters, but
-handing it that person's own base rate as a feature supplies the same
-information by another route. This is not leakage — the base rate uses strictly
-earlier rows, and the prediction is legitimate wherever a person's history is
-available — but person-held-out validation is not the stringent test it appears
-to be once such a feature is present.
-
-Refusal has only 50 positive rows and behaves inconsistently throughout; treat
-its column as noise.
-
-**The supported conclusion.** Three effects of very different size, which the
-first run's single `recent state` column merged into one:
-
-| effect | size |
+| change | why |
 |---|---|
-| the person's stable rate of that coping style | +0.15 to +0.21 |
-| the current moment's cognitive state | +0.03 |
-| the previous moment's state, given the current | ~0 |
-| pairwise interactions among context variables | negative |
+| `tasks_only` and `propensity_only` feature sets | the two baselines the claims needed and the code lacked |
+| participant bootstrap (people resampled, never rows) | rows are not independent; 96 people, ~20 observations each |
+| paired differences on the same folds and the same resampled people | a difference of two pooled AUCs from different splits is not a comparison |
+| per-fold AUCs retained, with mean and SD | fold-to-fold spread is evidence, not overhead |
+| C selected by inner GroupKFold on training folds only | one fixed `C=0.1` shrank `additive` (~22 features) and `context_state` (~231 interactions) by the same amount, biasing the comparison *against* interactions. The old "interactions do not help" result is confounded with that choice and is withdrawn with the rest |
+| Brier removed | every model uses `class_weight="balanced"`, which deliberately decalibrates; a Brier score from those probabilities is not a calibration measure |
+| dataset SHA-256 recorded in the output | the Dryad file cannot be redistributed here, so a checksum is the only way to say which bytes produced a result |
 
-So the model these data support is a stable per-person baseline plus a smaller
-but genuine momentary term. A latent *temporal* state model is not supported:
-once the current moment is known, the previous one adds nothing.
+### Regenerating
 
-Nothing here supports a quantum or noncommutative mechanism either — but note
-what has and has not been tested. Pairwise interactions in a logistic model are
-not order effects, and non-commutativity is an order effect: whether high demand
-*then* low control predicts differently from low control *then* high demand,
-beyond their aggregate. The dataset carries sequence, so that question is
-answerable here.
+The archived file is not in this repository and Dryad does not permit automated
+download, so these results must be regenerated by someone holding `eco2.RData`:
+
+```bash
+PYTHONPATH=python-bridge python3 -m context_ema.nurses_poc \
+  path/to/eco2.RData --output python-bridge/context_ema/results/nurses-poc-v0.2.json
+```
+
+Conclusions should be written from that output — from the paired differences and
+their intervals, not from the point estimates. If `propensity_only` matches or
+beats the richer models, the honest headline is that a person's habitual rate is
+what predicts their coping choice, and that momentary context adds little. That
+result is permitted.
+
+### On participant count
+
+The archived file contains 96 people; the publication reports 113 recruited.
+This module applies **no** participant exclusions — `load_ema` sorts and
+type-checks only — so the shortfall is a property of the Dryad deposit, not of
+this analysis. The deposit does not document which participants were withheld or
+why, so it cannot be attributed here, and the sample should be described as the
+archived subset rather than the recruited cohort. The output records both counts.
+
+### What survives review
+
+Two design choices were checked and hold up, and they are worth keeping in view
+when the numbers are regenerated.
+
+`propensity_<outcome>` genuinely excludes the current observation: it is built by
+shifting within person and then taking an expanding mean, and row *i* equals the
+mean of that person's rows 0…*i*−1. Lags never cross a person boundary.
+
+Holding out whole people stops the model *learning* person-specific parameters,
+but handing it that person's own base rate as a feature supplies the same
+information by another route. This is not leakage — the base rate uses strictly
+earlier rows — but person-held-out validation is not the stringent test it
+appears to be once such a feature is present. That caveat applies with more force
+now that `propensity_only` is reported on its own.
 
 ## Order test
 
@@ -123,8 +136,25 @@ order effect for either common outcome:
 | categorical task order | -0.0084 (0.771) | -0.0086 (0.483) | null |
 
 The task-commutator representation is void because 95.9% of its encoded values
-are zero. The categorical repair has genuine variation—1,327 rows have differing
-preceding tasks, with 49 ordered versus 28 unordered levels—and is still null.
+are zero.
+
+**The 90% void rule was not applied to the categorical encoding, and that is a
+deviation from the spec.** Stated plainly because the two numbers invite the
+wrong comparison: the categorical encoding is **98.0%** zero — *higher* than the
+95.9% that voided the commutator — yet it is reported as a null rather than void.
+The reason is that a one-hot representation of ~49 task-pair levels is ~98% zero
+by construction, one `1` per row, so the rule would void any categorical encoding
+whatever its information content. The rule was written for the antisymmetric
+commutator, where a zero means the row carries no order signal. Power for the
+categorical arm is evidenced instead by its 1,327 rows with differing preceding
+tasks and its 49 ordered versus 28 unordered levels. Each encoding's output now
+carries `void_rule_applied` and `void_rule_note` so the exception is visible in
+the results, and `order-test-spec.md` records it as a declared deviation.
+
+These order-test numbers stand: they do not depend on the withdrawn feature sets
+above, and the order contribution is measured against its own matched unordered
+baseline. They were, however, produced under the same single fixed `C`, so the
+same caveat about regularization applies to their magnitudes.
 
 This dataset also cannot test interference or a violation of total probability:
 all variables are jointly observed on every one of the 1,901 rows (zero missing

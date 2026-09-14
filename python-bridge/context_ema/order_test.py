@@ -126,12 +126,22 @@ def _evaluate_encoding(
     permutations: int,
     seed: int,
     void_fraction: float | None = None,
+    void_rule_note: str = "",
 ) -> dict:
     groups = data["Person"].to_numpy()
     ordered = order_builder(None).reset_index(drop=True)
     combined = pd.concat([base, ordered], axis=1)
     zero_fraction = float((ordered.to_numpy() == 0).mean()) if ordered.size else 1.0
-    results = {"rows": len(data), "order_features": ordered.shape[1], "zero_fraction": zero_fraction}
+    results = {
+        "rows": len(data),
+        "order_features": ordered.shape[1],
+        "zero_fraction": zero_fraction,
+        # The spec declares a 90% zero-feature void check. It is NOT applied to
+        # every encoding, and the exception is recorded here rather than left to
+        # be inferred from which call passes void_fraction.
+        "void_rule_applied": void_fraction is not None,
+        "void_rule_note": void_rule_note,
+    }
     for outcome in DECISION_OUTCOMES:
         target = data[outcome].astype(int).to_numpy()
         propensity = data[[f"propensity_{outcome}"]].reset_index(drop=True)
@@ -193,6 +203,9 @@ def evaluate_order(frame: pd.DataFrame, permutations: int = 200, seed: int = 870
             data, task_base,
             lambda swap: _commutators(data, TASKS, swap), permutations, seed + 2,
             void_fraction=0.90,
+            void_rule_note="applied: for an antisymmetric commutator encoding a zero "
+                           "means no order signal exists in that row, so a high zero "
+                           "fraction is exactly the degeneracy the rule targets",
         ),
         "task_categorical": {
             "different_preceding_tasks": differing_tasks,
@@ -202,6 +215,14 @@ def evaluate_order(frame: pd.DataFrame, permutations: int = 200, seed: int = 870
                 data, task_base,
                 lambda swap: _categorical_task_pair(data, ordered=True, swap=swap),
                 permutations, seed + 3,
+                void_rule_note="NOT applied, and this is a declared deviation from the "
+                               "spec. A one-hot encoding of ~49 task-pair levels is "
+                               "~98% zero by construction -- one 1 per row -- so the "
+                               "90% rule would void any categorical encoding whatever "
+                               "its information content. The rule was written for the "
+                               "commutator, where zeros mean absent signal. Power is "
+                               "instead evidenced by different_preceding_tasks and the "
+                               "ordered-vs-unordered level counts reported alongside.",
             ),
         },
         "scope": {
