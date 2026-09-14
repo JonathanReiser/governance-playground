@@ -1,0 +1,4 @@
+-r requirements.txt
+pandas>=3.0
+pyreadr>=0.5
+scikit-learn>=1.9

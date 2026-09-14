@@ -1,0 +1,247 @@
+{
+  "rows": 1901,
+  "people": 96,
+  "validation": "5-fold GroupKFold by Person",
+  "models": {
+    "Problem": {
+      "prevalence": 0.3161493950552341,
+      "additive": {
+        "roc_auc": 0.7146979393318827,
+        "average_precision": 0.49204011397942027,
+        "brier": 0.21800274979833767
+      },
+      "context_interactions": {
+        "roc_auc": 0.7101683092282094,
+        "average_precision": 0.4816709190671151,
+        "brier": 0.2207282699593252
+      },
+      "recent_momentary": {
+        "roc_auc": 0.7187917573275311,
+        "average_precision": 0.500468479401631,
+        "brier": 0.216364659525054
+      },
+      "own_history": {
+        "roc_auc": 0.8605958018686803,
+        "average_precision": 0.7392830312713031,
+        "brier": 0.14807539375932044
+      },
+      "recent_state": {
+        "roc_auc": 0.8499744016382952,
+        "average_precision": 0.7212830502107678,
+        "brier": 0.15628185274411863
+      },
+      "context_state": {
+        "roc_auc": 0.8353730961218482,
+        "average_precision": 0.7000503973333688,
+        "brier": 0.16234876961458414
+      },
+      "difference_from_additive": {
+        "context_interactions": {
+          "roc_auc": -0.004529630103673354,
+          "average_precision": -0.010369194912305146,
+          "brier": 0.002725520160987538
+        },
+        "recent_momentary": {
+          "roc_auc": 0.004093817995648341,
+          "average_precision": 0.008428365422210704,
+          "brier": -0.0016380902732836822
+        },
+        "own_history": {
+          "roc_auc": 0.1458978625367976,
+          "average_precision": 0.24724291729188286,
+          "brier": -0.06992735603901723
+        },
+        "recent_state": {
+          "roc_auc": 0.13527646230641244,
+          "average_precision": 0.2292429362313475,
+          "brier": -0.06172089705421904
+        },
+        "context_state": {
+          "roc_auc": 0.12067515678996543,
+          "average_precision": 0.20801028335394856,
+          "brier": -0.05565398018375353
+        }
+      }
+    },
+    "Emotion": {
+      "prevalence": 0.30983692793266704,
+      "additive": {
+        "roc_auc": 0.6140678703051887,
+        "average_precision": 0.36619765743864013,
+        "brier": 0.2492822773395697
+      },
+      "context_interactions": {
+        "roc_auc": 0.5869264772868441,
+        "average_precision": 0.35021299146866885,
+        "brier": 0.2566805286190818
+      },
+      "recent_momentary": {
+        "roc_auc": 0.6118569868317529,
+        "average_precision": 0.36415470994752713,
+        "brier": 0.25018856832795355
+      },
+      "own_history": {
+        "roc_auc": 0.8199867230527144,
+        "average_precision": 0.6878588111501569,
+        "brier": 0.1690297287249299
+      },
+      "recent_state": {
+        "roc_auc": 0.7441496024680111,
+        "average_precision": 0.535460839862407,
+        "brier": 0.20330169092976622
+      },
+      "context_state": {
+        "roc_auc": 0.7058819723383991,
+        "average_precision": 0.49721219641469744,
+        "brier": 0.21441486729289358
+      },
+      "difference_from_additive": {
+        "context_interactions": {
+          "roc_auc": -0.027141393018344617,
+          "average_precision": -0.01598466596997128,
+          "brier": 0.0073982512795121025
+        },
+        "recent_momentary": {
+          "roc_auc": -0.0022108834734357874,
+          "average_precision": -0.0020429474911130008,
+          "brier": 0.000906290988383851
+        },
+        "own_history": {
+          "roc_auc": 0.20591885274752564,
+          "average_precision": 0.32166115371151677,
+          "brier": -0.08025254861463979
+        },
+        "recent_state": {
+          "roc_auc": 0.13008173216282237,
+          "average_precision": 0.16926318242376687,
+          "brier": -0.04598058640980349
+        },
+        "context_state": {
+          "roc_auc": 0.09181410203321039,
+          "average_precision": 0.1310145389760573,
+          "brier": -0.03486741004667612
+        }
+      }
+    },
+    "Support": {
+      "prevalence": 0.07522356654392424,
+      "additive": {
+        "roc_auc": 0.5820445197578303,
+        "average_precision": 0.15042592720916925,
+        "brier": 0.21415269555254662
+      },
+      "context_interactions": {
+        "roc_auc": 0.562051998058824,
+        "average_precision": 0.14379526417663552,
+        "brier": 0.20750310009952286
+      },
+      "recent_momentary": {
+        "roc_auc": 0.5688560586171508,
+        "average_precision": 0.14421729795590912,
+        "brier": 0.21540877574720338
+      },
+      "own_history": {
+        "roc_auc": 0.7088554221660024,
+        "average_precision": 0.18860020253394613,
+        "brier": 0.18201111582637639
+      },
+      "recent_state": {
+        "roc_auc": 0.6427838373230865,
+        "average_precision": 0.18793264357102793,
+        "brier": 0.19083868917917313
+      },
+      "context_state": {
+        "roc_auc": 0.6165103383533418,
+        "average_precision": 0.1846834296280101,
+        "brier": 0.15646787786434524
+      },
+      "difference_from_additive": {
+        "context_interactions": {
+          "roc_auc": -0.019992521699006338,
+          "average_precision": -0.006630663032533735,
+          "brier": -0.0066495954530237655
+        },
+        "recent_momentary": {
+          "roc_auc": -0.013188461140679508,
+          "average_precision": -0.006208629253260128,
+          "brier": 0.0012560801946567557
+        },
+        "own_history": {
+          "roc_auc": 0.12681090240817205,
+          "average_precision": 0.03817427532477688,
+          "brier": -0.03214157972617024
+        },
+        "recent_state": {
+          "roc_auc": 0.06073931756525619,
+          "average_precision": 0.03750671636185868,
+          "brier": -0.023314006373373497
+        },
+        "context_state": {
+          "roc_auc": 0.034465818595511455,
+          "average_precision": 0.034257502418840846,
+          "brier": -0.057684817688201384
+        }
+      }
+    },
+    "Refusal": {
+      "prevalence": 0.026301946344029457,
+      "additive": {
+        "roc_auc": 0.6198973527822799,
+        "average_precision": 0.07539651249565449,
+        "brier": 0.17241952982576933
+      },
+      "context_interactions": {
+        "roc_auc": 0.5730470016207456,
+        "average_precision": 0.06642991977338282,
+        "brier": 0.14571426750106567
+      },
+      "recent_momentary": {
+        "roc_auc": 0.5995029713668287,
+        "average_precision": 0.07840561562362379,
+        "brier": 0.1748570683887921
+      },
+      "own_history": {
+        "roc_auc": 0.5854673149648838,
+        "average_precision": 0.06654678493505296,
+        "brier": 0.16092415038475755
+      },
+      "recent_state": {
+        "roc_auc": 0.5771204754186927,
+        "average_precision": 0.07967223436317998,
+        "brier": 0.16187228211417712
+      },
+      "context_state": {
+        "roc_auc": 0.4828038897893031,
+        "average_precision": 0.034157325704955284,
+        "brier": 0.09034268236503269
+      },
+      "difference_from_additive": {
+        "context_interactions": {
+          "roc_auc": -0.04685035116153424,
+          "average_precision": -0.008966592722271668,
+          "brier": -0.02670526232470366
+        },
+        "recent_momentary": {
+          "roc_auc": -0.020394381415451135,
+          "average_precision": 0.003009103127969301,
+          "brier": 0.0024375385630227564
+        },
+        "own_history": {
+          "roc_auc": -0.034430037817396064,
+          "average_precision": -0.008849727560601525,
+          "brier": -0.011495379441011783
+        },
+        "recent_state": {
+          "roc_auc": -0.04277687736358715,
+          "average_precision": 0.004275721867525492,
+          "brier": -0.010547247711592211
+        },
+        "context_state": {
+          "roc_auc": -0.13709346299297676,
+          "average_precision": -0.041239186790699205,
+          "brier": -0.08207684746073664
+        }
+      }
+    }
+  }
+}
