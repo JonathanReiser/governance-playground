@@ -8,23 +8,58 @@ It uses the CC0 Dryad dataset *Nurses coping with daily stressors*
 (`doi:10.5061/dryad.ns1rn8pqv`). The data contain repeated momentary reports of
 work task, demand, control, effort, reward, mood, fatigue, and coping behavior.
 
-Six regularized logistic models are compared:
+**Eight** regularized logistic models are compared, split into two regimes that
+answer different questions. (An earlier version of this file said six; that count
+predated the `tasks_only` and `propensity_only` baselines and was wrong.)
 
-1. `additive`: current context and stable coping traits;
-2. `context_interactions`: pairwise interactions among current context inputs;
-3. `recent_momentary`: additive current context plus the person's immediately
-   preceding mood, fatigue, demand, effort, control and reward;
-4. `own_history`: additive current context plus the running mean of that
-   person's own past values of the outcome being predicted, current row excluded;
-5. `recent_state`: additive current context plus the person's immediately
+### Cold start — no outcome of the held-out person, ever
+
+These are the only models that test generalisation to a person never seen coping.
+Their person-specific inputs are context and preceding momentary *state*, both
+observed at prompt time.
+
+1. `tasks_only`: the work-task indicators alone — the floor;
+2. `additive`: current context and stable coping traits;
+3. `context_interactions`: pairwise interactions among current context inputs;
+4. `recent_momentary`: additive current context plus the person's immediately
+   preceding mood, fatigue, demand, effort, control and reward.
+
+### Warm start (online) — consumes the held-out person's own past outcomes
+
+Legitimate wherever a history exists, and a different claim entirely.
+
+5. `propensity_only`: the running mean of that person's own past values of the
+   outcome being predicted, current row excluded — nothing else;
+6. `own_history`: additive current context plus that running mean;
+7. `recent_state`: additive current context plus the person's immediately
    preceding state **and** preceding coping response;
-6. `context_state`: recent state plus pairwise interactions among all dynamic
+8. `context_state`: recent state plus pairwise interactions among all dynamic
    inputs.
 
-Sets 3 and 4 exist because set 5 bundles two things that a summary cannot tell
+Sets 3 and 6 exist because set 7 bundles two things that a summary cannot tell
 apart: recent cognitive state, and the person's own previous choice of the very
 outcome being predicted. Reporting a gain from that bundle as evidence about
 cognitive state is only defensible if the two are also reported separately.
+
+### Why the split is load-bearing
+
+Holding out whole people stops a model *learning* person-specific parameters.
+Handing it that person's own base rate as a feature supplies the same information
+by another route. Both regimes use `GroupKFold`, so both *look* like
+person-held-out validation, but only the cold-start set actually withholds the
+held-out person's behaviour.
+
+The module records this per model as `regime` and
+`uses_held_out_person_outcomes`, and reports a separate `cold_start_comparison`
+against `tasks_only` so the generalisation question can be read without the
+warm-start models in the way.
+
+**Warm start needs history, and the first prompt has none.** A person's first
+observation has no prior outcome, so its propensity value is median-imputed — a
+cold prediction wearing warm clothes. Metrics computed over all rows therefore
+include rows the warm-start feature could not inform. The output records how many
+rows carry at least 1, 5, 10 and 20 prior observations, along with the count of
+first-prompt rows, so any warm-start claim can state the history it assumes.
 
 Together this prevents two distinct misreadings: a gain from temporal memory
 being reported as evidence for context interactions, and a gain from stable
@@ -50,8 +85,8 @@ them.** The README reported that dropping the six momentary variables "costs
 0.031, 0.026, 0.028 and 0.033" ROC-AUC, and that those variables "still add
 0.009, 0.008, 0.026 and 0.040 on top of the person's base rate". Both require a
 tasks-only model and a base-rate-only model. Neither existed. The shipped
-`specifications` table defined six feature sets and included no such arm, and the
-committed results file contains no such key. The central positive claim of the
+`specifications` table defined six feature sets at the time and included no such
+arm, and the committed results file contains no such key. The central positive claim of the
 analysis — *"Current state matters"* — rested on numbers no one could reproduce.
 Those two models now exist (`tasks_only`, `propensity_only`).
 
@@ -73,6 +108,7 @@ were discarded, so not even between-fold variation was recoverable.
 |---|---|
 | `tasks_only` and `propensity_only` feature sets | the two baselines the claims needed and the code lacked |
 | participant bootstrap (people resampled, never rows) | rows are not independent; 96 people, ~20 observations each |
+| cold-start vs warm-start regimes reported separately | `GroupKFold` alone does not withhold a held-out person's behaviour once their own base rate is a feature |
 | paired differences on the same folds and the same resampled people | a difference of two pooled AUCs from different splits is not a comparison |
 | per-fold AUCs retained, with mean and SD | fold-to-fold spread is evidence, not overhead |
 | C selected by inner GroupKFold on training folds only | one fixed `C=0.1` shrank `additive` (~22 features) and `context_state` (~231 interactions) by the same amount, biasing the comparison *against* interactions. The old "interactions do not help" result is confounded with that choice and is withdrawn with the rest |
@@ -88,6 +124,15 @@ download, so these results must be regenerated by someone holding `eco2.RData`:
 PYTHONPATH=python-bridge python3 -m context_ema.nurses_poc \
   path/to/eco2.RData --output python-bridge/context_ema/results/nurses-poc-v0.2.json
 ```
+
+**The intervals are conditional, and are a lower bound.** The participant
+bootstrap does not refit anything. Out-of-fold probabilities are computed once and
+each draw re-scores those fixed predictions on a resampled set of people, so the
+interval covers sampling variability of the evaluation sample only. Variability in
+the fitted coefficients, in the `C` selected per fold, and in the fold boundaries
+is not propagated. A full bootstrap would refit the entire cross-validation inside
+every draw and would give wider intervals. Read these as the narrowest defensible
+intervals, not the true ones.
 
 Conclusions should be written from that output — from the paired differences and
 their intervals, not from the point estimates. If `propensity_only` matches or
@@ -117,8 +162,11 @@ Holding out whole people stops the model *learning* person-specific parameters,
 but handing it that person's own base rate as a feature supplies the same
 information by another route. This is not leakage — the base rate uses strictly
 earlier rows — but person-held-out validation is not the stringent test it
-appears to be once such a feature is present. That caveat applies with more force
-now that `propensity_only` is reported on its own.
+appears to be once such a feature is present. The module now separates the two
+regimes rather than relying on a reader to remember this paragraph: the
+cold-start set is the one that answers the generalisation question, and
+`propensity_only` is reported on its own so a warm-start gain cannot be mistaken
+for one.
 
 ## Order test
 

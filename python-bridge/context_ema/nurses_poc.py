@@ -151,6 +151,52 @@ FEATURE_SETS = (
     "tasks_only", "propensity_only", "additive", "context_interactions",
     "recent_momentary", "own_history", "recent_state", "context_state",
 )
+
+# Two regimes, and they answer different questions.
+#
+# COLD START: predicting for a person whose coping outcomes have never been
+# observed. Uses current context and the person's preceding momentary *state*,
+# which is measured at prompt time, but no outcome of theirs, ever. This is the
+# regime that person-held-out validation appears to test.
+#
+# WARM START (online): predicting for a person whose earlier outcomes are in
+# hand. Legitimate wherever a history exists, but it is not a test of
+# generalisation to a new person: the held-out person's own labels enter as
+# features at prediction time, even though no row of theirs was used to fit.
+COLD_START = ("tasks_only", "additive", "context_interactions", "recent_momentary")
+WARM_START = ("propensity_only", "own_history", "recent_state", "context_state")
+
+
+def uses_held_out_outcomes(feature_set, outcome):
+    """True if the feature set consumes the predicted person's own past labels."""
+    _, columns = _pipeline(feature_set, outcome)
+    return any(column.startswith(f"propensity_{outcome}")
+               or column.startswith(f"previous_{outcome}")
+               or any(column.startswith(f"previous_{name}") for name in OUTCOMES)
+               for column in columns)
+
+
+def history_requirements(data, outcome):
+    """How much of the data a warm-start model can actually serve.
+
+    The base rate needs at least one earlier observation from the same person, so
+    a warm-start model cannot score a person's first prompt at all -- that row is
+    imputed, which silently makes it a cold prediction wearing warm clothes.
+    """
+    position = data.groupby("Person", sort=False).cumcount()
+    total = int(len(data))
+    counts = {f"rows_with_at_least_{k}_prior_observations": int((position >= k).sum())
+              for k in (1, 5, 10, 20)}
+    return {
+        "total_rows": total,
+        **counts,
+        "fraction_with_any_history": float((position >= 1).mean()),
+        "first_prompt_rows": int((position == 0).sum()),
+        "median_prior_observations": float(np.median(position)),
+        "note": "rows at position 0 have no propensity value and are median-imputed; "
+                "warm-start metrics computed over all rows therefore include rows the "
+                "warm-start feature could not inform",
+    }
 BOOTSTRAP_DRAWS = 2000
 BOOTSTRAP_SEED = 20260914
 
@@ -192,6 +238,16 @@ def _person_bootstrap(target, probabilities, people, draws, seed):
     rows would treat those as 1,901 independent facts and understate the interval
     by the design effect, which at an intraclass correlation of 0.1 to 0.3 is
     between 2.9 and 6.6.
+
+    CONDITIONAL, and the distinction matters. The models are NOT refitted inside
+    the bootstrap. Out-of-fold probabilities are computed once, and each draw
+    re-scores those fixed predictions on a resampled set of people. The interval
+    therefore covers sampling variability of the evaluation sample only. It does
+    not cover variability in fitting -- a different draw of participants would
+    have produced different coefficients, a different selected C, and different
+    fold boundaries, and none of that is propagated here. A full bootstrap would
+    refit the entire cross-validation inside every draw and would give wider
+    intervals. These are a lower bound on uncertainty.
     """
     rng = np.random.default_rng(seed)
     unique = np.unique(people)
@@ -248,6 +304,33 @@ def evaluate(frame, folds=5, draws=BOOTSTRAP_DRAWS, seed=BOOTSTRAP_SEED):
             "seed": seed,
             "paired": "differences are bootstrapped on the same resampled people "
                       "and the same fold assignments as the reference model",
+            "conditional_on_fitted_models": True,
+            "what_is_not_propagated": "models are not refitted inside the bootstrap. "
+                                      "Out-of-fold predictions are computed once and "
+                                      "re-scored on resampled people, so the interval "
+                                      "covers evaluation-sample variability only -- not "
+                                      "variability in coefficients, in the selected C, "
+                                      "or in fold boundaries. Treat these intervals as "
+                                      "a LOWER BOUND on uncertainty.",
+        },
+        "regimes": {
+            "cold_start": {
+                "models": list(COLD_START),
+                "definition": "uses no outcome of the held-out person, ever; the only "
+                              "person-specific inputs are context and preceding "
+                              "momentary state, both observed at prompt time",
+                "answers": "can this generalise to a person never seen coping?",
+            },
+            "warm_start_online": {
+                "models": list(WARM_START),
+                "definition": "consumes the held-out person's own earlier outcomes as "
+                              "features at prediction time",
+                "answers": "given a history for this person, what will they do next?",
+                "caveat": "not a test of generalisation to a new person. Holding out "
+                          "whole people stops the model LEARNING person-specific "
+                          "parameters; handing it that person's own base rate supplies "
+                          "the same information by another route.",
+            },
         },
         "regularization": {
             "grid": list(C_GRID),
@@ -261,7 +344,10 @@ def evaluate(frame, folds=5, draws=BOOTSTRAP_DRAWS, seed=BOOTSTRAP_SEED):
     }
     for outcome in OUTCOMES:
         target = data[outcome].astype(int).to_numpy()
-        outcome_result = {"prevalence": float(target.mean())}
+        outcome_result = {
+            "prevalence": float(target.mean()),
+            "history_requirements": history_requirements(data, outcome),
+        }
         predictions = {}
         for feature_set in FEATURE_SETS:
             _, columns = _pipeline(feature_set, outcome)
@@ -269,6 +355,9 @@ def evaluate(frame, folds=5, draws=BOOTSTRAP_DRAWS, seed=BOOTSTRAP_SEED):
                 data, columns, target, groups, splitter, outcome)
             predictions[feature_set] = probabilities
             outcome_result[feature_set] = {
+                "regime": "warm_start" if feature_set in WARM_START else "cold_start",
+                "uses_held_out_person_outcomes": uses_held_out_outcomes(
+                    feature_set, outcome),
                 "roc_auc": float(roc_auc_score(target, probabilities)),
                 "average_precision": float(average_precision_score(target, probabilities)),
                 "roc_auc_per_fold": per_fold,
@@ -278,6 +367,17 @@ def evaluate(frame, folds=5, draws=BOOTSTRAP_DRAWS, seed=BOOTSTRAP_SEED):
                     target, probabilities, groups, draws, seed),
                 "selected_C_per_fold": chosen_c,
             }
+        outcome_result["cold_start_comparison"] = {
+            "reference": "tasks_only",
+            "note": "the honest generalisation question, restricted to models that "
+                    "never see the held-out person's outcomes",
+            "differences": {
+                feature_set: _paired_difference(
+                    target, predictions[feature_set], predictions["tasks_only"],
+                    groups, draws, seed)
+                for feature_set in COLD_START if feature_set != "tasks_only"
+            },
+        }
         outcome_result["paired_differences"] = {
             reference: {
                 feature_set: _paired_difference(

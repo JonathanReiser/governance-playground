@@ -96,3 +96,44 @@ def test_brier_is_not_reported_for_balanced_models():
     source = inspect.getsource(nurses_poc)
     assert "brier_score_loss" not in source, \
         "Brier must not be reported while every model uses balanced class weights"
+
+
+def test_cold_start_models_never_touch_the_held_out_persons_outcomes():
+    """GroupKFold alone does not withhold a held-out person's behaviour once
+    their own base rate is a feature. The cold-start set must be clean."""
+    from context_ema.nurses_poc import COLD_START, WARM_START, uses_held_out_outcomes
+    for feature_set in COLD_START:
+        assert not uses_held_out_outcomes(feature_set, "Problem"), \
+            f"{feature_set} is listed cold-start but consumes the person's own outcomes"
+    for feature_set in WARM_START:
+        assert uses_held_out_outcomes(feature_set, "Problem"), \
+            f"{feature_set} is listed warm-start but uses no outcome history"
+
+
+def test_every_feature_set_is_assigned_to_exactly_one_regime():
+    from context_ema.nurses_poc import COLD_START, FEATURE_SETS, WARM_START
+    assert set(COLD_START) | set(WARM_START) == set(FEATURE_SETS)
+    assert not set(COLD_START) & set(WARM_START)
+
+
+def test_readme_model_count_matches_the_code():
+    """The README said six while the module defined eight."""
+    from pathlib import Path
+    from context_ema.nurses_poc import FEATURE_SETS
+    text = Path(__file__).resolve().parents[1].joinpath("README.md").read_text(encoding="utf-8")
+    assert "**Eight** regularized logistic models" in text
+    assert len(FEATURE_SETS) == 8
+    assert "Six regularized logistic models are compared:" not in text
+
+
+def test_history_requirements_count_first_prompts_as_unserved():
+    """A person's first row has no prior outcome, so a warm-start feature cannot
+    inform it; the output must say how many such rows there are."""
+    import numpy as np
+    import pandas as pd
+    from context_ema.nurses_poc import history_requirements
+    frame = pd.DataFrame({"Person": [1, 1, 1, 2, 2], "Moment_total": [1, 2, 3, 1, 2]})
+    stats = history_requirements(frame, "Problem")
+    assert stats["first_prompt_rows"] == 2
+    assert stats["rows_with_at_least_1_prior_observations"] == 3
+    assert stats["total_rows"] == 5
