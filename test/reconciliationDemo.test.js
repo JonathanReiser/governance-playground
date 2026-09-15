@@ -64,6 +64,30 @@ describe("synthetic management-review reconciliation", function () {
     edit("approval.json", x => { x.reviewedPackageHash = core.digest("inputs", hashes); });
     assert.throws(() => w.retain(candidate, path.join(dir, "another-reviewer")), /inconsistent/);
   });
+  for (const target of ["candidate", "anchor"]) it(`rejects a ${target} FIFO without blocking`, function () {
+    if (process.platform === "win32") this.skip(); // POSIX named pipes only.
+    const file = target === "candidate" ? path.join(candidate, "statement.json") : path.join(trusted, "anchor.json");
+    fs.unlinkSync(file);
+    assert.equal(spawnSync("mkfifo", [file]).status, 0);
+    const result = spawnSync(process.execPath, [path.join(__dirname, "../scripts/reconciliation-demo.js"), "check", candidate, trusted], { encoding: "utf8", timeout: 1500 });
+    assert.equal(result.error, undefined);
+    assert.equal(result.status, 1);
+    assert.equal(JSON.parse(result.stdout).report.status, "FAIL");
+  });
+  it("a newly retained, correctly calculated nonzero package passes only against its new reference", function () {
+    edit("ledger.json", x => { x.endingBalanceCents -= 1500000; });
+    const calculated = w.calculate(w.observe(candidate).inputs);
+    fs.writeFileSync(path.join(candidate, "calculation.json"), w.json(calculated));
+    const hashes = Object.fromEntries(w.FILES.filter(f => f !== "approval.json").map(f => [f, require("../server/sha256").sha256(w.read(path.join(candidate, f)))]));
+    edit("approval.json", x => { x.reviewedPackageHash = core.digest("inputs", hashes); });
+    assert.equal(w.check(candidate, trusted).report.ok, false);
+    const replacement = path.join(dir, "replacement-reference");
+    w.retain(candidate, replacement);
+    const result = w.check(candidate, replacement);
+    assert.equal(result.report.ok, true);
+    assert.equal(result.calculation.differenceCents, 1500000);
+    assert.equal(result.calculation.withinTolerance, false);
+  });
   it("builds three cases and runs the standalone checker with correct exit codes", function () {
     const out = path.join(dir, "demo"), cli = path.join(__dirname, "../scripts/reconciliation-demo.js");
     build(out); assert.throws(() => build(out));

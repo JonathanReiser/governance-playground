@@ -29,9 +29,16 @@ no longer match the retained package. Both keep the earlier simulated approval;
 its package reference is therefore stale. Neither revised package is silently
 presented as the earlier reviewed version.
 
+**PASS means the presented package matches the retained reference and its arithmetic
+checks. It does not mean the account balances.** A correctly calculated, retained
+package with a nonzero difference can pass; inspect `calculation.withinTolerance`
+and `calculation.differenceCents` separately.
+
 ## Run it
 
-Use Node 24, from the repository root. Choose a new directory:
+Use Node 24, from the repository root, with a system clock after the fictional
+manifest time (July 1, 2026, 10:00 UTC). That time is not independently authenticated.
+Choose a new directory:
 
 ```sh
 npm run demo:reconciliation -- /tmp/reconciliation-example
@@ -92,6 +99,10 @@ that an approval is genuine, that the files reflect real balances, or that the
 asserted review time is trustworthy. The comparison also does not establish which
 revisions were authorized outside this example.
 
+**The reviewer must retain the expected commitment and context somewhere the
+operator cannot change them.** If the operator can replace both the package and
+its retained reference, the checker can accept a replacement as its new baseline.
+
 Separate directories demonstrate the expected trust boundary but do not enforce
 independent custody when one user controls both. A real workflow would need source-
 system capture, actual reviewer identity/approval integration and independently
@@ -113,9 +124,11 @@ npm run test:conformity
 npm test
 ```
 
-Validation for this addition: 14 new reconciliation cases; **157 targeted tests**
-and **348 full-suite tests** passing on Node 24.19.0. Tests cover unchanged and
+Validation for this addition: 17 reconciliation cases; **160 targeted tests**
+and **351 full-suite tests** passing on Node 24.19.0. Tests cover unchanged and
 balanced/imbalanced revisions, edits to every file role, stale approval scope,
 invalid input/extra/missing files, bounded cents, wrong retained manifests,
-incorrect recalculation with a resealed approval, and standalone CLI exit behavior.
+incorrect recalculation with a resealed approval, nonblocking rejection of POSIX
+named pipes, a matching but unbalanced package, replacement-reference trust limits,
+and standalone CLI exit behavior.
 The one-page PDF was rendered and visually checked before delivery.

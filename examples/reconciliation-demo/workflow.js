@@ -15,7 +15,8 @@ const STAMP = "2026-07-01T10:00:00.000Z"; // fictional asserted time, not a trus
 const json = value => core.canonicalize(value) + "\n";
 function writeJSON(file, value) { fs.writeFileSync(file, json(value), { flag: "wx", mode: 0o600 }); }
 function read(file) {
-  const fd = fs.openSync(file, "r");
+  // Nonblocking open lets the regular-file check reject FIFOs without hanging.
+  const fd = fs.openSync(file, fs.constants.O_RDONLY | fs.constants.O_NONBLOCK);
   try {
     if (!fs.fstatSync(fd).isFile()) throw new Error("expected regular file");
     const bytes = Buffer.alloc(core.MAX_BYTES + 2);

@@ -77,9 +77,9 @@ def render(root, output):
         pdf.setFillColor(color); pdf.setFont('Helvetica-Bold', 9); pdf.drawString(x, y, title)
         para(text, x, y-10, 164, 'small')
     para('<b>A reconciliation can still balance even though its supporting files have changed.</b>', left, 209)
-    para('In both revisions, the original simulated approval no longer matches the current '
-         'package. The changes can be surfaced for review instead of silently treating the '
-         'revised files as the earlier reviewed version.', left, 168)
+    para('&quot;Matches package&quot; does not mean the account balances. Keep the retained '
+         'reference with the reviewer, somewhere the operator cannot change it. '
+         'Both revisions no longer match the original simulated approval.', left, 168)
     rule(111)
     para('<b>What this example establishes:</b> whether presented files match a retained package. '
          'All amounts, notes and approvals are made up. It does not authenticate a real approval, '
