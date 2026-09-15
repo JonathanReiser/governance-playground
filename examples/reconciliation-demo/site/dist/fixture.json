@@ -1,0 +1,17 @@
+{
+  "original": {
+    "statement.json": "{\"endingBalanceCents\":12500000,\"periodEnd\":\"2026-06-30\"}\n",
+    "ledger.json": "{\"endingBalanceCents\":12350000,\"periodEnd\":\"2026-06-30\"}\n",
+    "reconciling-items.json": "{\"depositsInTransitCents\":400000,\"outstandingPaymentsCents\":550000,\"periodEnd\":\"2026-06-30\"}\n",
+    "assumptions.json": "{\"currency\":\"USD\",\"differenceToleranceCents\":0,\"rule\":\"statement + deposits in transit - outstanding payments; compare with ledger\"}\n",
+    "review-notes.txt": "SYNTHETIC REVIEW NOTE - no actual review or approval occurred.\nFictional reviewer checked the stated balances, timing items and zero unexplained difference.\nThe simulated approval refers to the exact files in this package.\n",
+    "calculation.json": "{\"adjustedStatementCents\":12350000,\"differenceCents\":0,\"ledgerCents\":12350000,\"withinTolerance\":true}\n",
+    "approval.json": "{\"assertedAt\":\"2026-07-01T10:00:00.000Z\",\"decision\":\"simulated-approved\",\"kind\":\"simulated-approval\",\"reviewedPackageHash\":\"136f0e739b6739d8c162a228a58e741c106a8c5c3fb373a1db918ff77bc1edf5\",\"reviewerRole\":\"Fictional finance reviewer\"}\n"
+  },
+  "manifestWire": "{\"blindingNonce\":\"d24b292b109fb60828c739666a2b9c9f1d7ea5bd246f0f17a77828ade7c61021\",\"createdAt\":\"2026-07-01T10:00:00.000Z\",\"executionId\":\"synthetic-close-2026-q2\",\"outputConstraint\":{\"id\":\"synthetic-cash-reconciliation\",\"type\":\"adapter\",\"version\":\"1\"},\"protocol\":\"verifiable-conformity/v1\",\"specification\":{\"fileHashes\":{\"approval.json\":\"78f1ba9e37dc85075dcd96c70a091e9887e579c4f9ba86b9ad14f943ad9f39ab\",\"assumptions.json\":\"b54db04544a445bf26032c162bea570c796506df86f7c4c76a767405d6e32fc7\",\"calculation.json\":\"0096f056bcc20bba5330dc1562439ed1baad90820ed4c0577642312ca1fc4fd0\",\"ledger.json\":\"a346ac4f5d30cae9e09801e1cc5d8752e2b33bebc8004472f7a7324a610f6309\",\"reconciling-items.json\":\"922a09ad848f978185f6f69ae0c805500dc232e7688605c3dd9da6caa4d2890b\",\"review-notes.txt\":\"c46252520cf5abe9a2f600100c06869955cb2b27f50a9e8c5349effa1ede6dec\",\"statement.json\":\"ac69d810a0d852e42178aaa0b07f281a105ea63e05cdb7eb88b321e3fafa75a6\"},\"periodEnd\":\"2026-06-30\",\"reviewedPackageHash\":\"136f0e739b6739d8c162a228a58e741c106a8c5c3fb373a1db918ff77bc1edf5\",\"workflow\":{\"id\":\"synthetic-cash-reconciliation\",\"version\":\"1\"}}}\n",
+  "anchor": {
+    "expectedCommitment": "ed3b5ca6810e7d1116d4792c917adccd50d115b7989b97a8d5d73a69bd25aad8",
+    "expectedExecutionId": "synthetic-close-2026-q2",
+    "protocol": "verifiable-conformity/retained-anchor-v1"
+  }
+}

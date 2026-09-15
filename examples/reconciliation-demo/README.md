@@ -8,6 +8,14 @@ All amounts, files, notes, roles and approvals are fictional. There is no involv
 by a real financial institution. This is a package-comparison demonstration, not an
 accounting policy, compliance control, approval service or evidence of real review.
 
+## Clickable demonstration
+
+The [interactive example](site/README.md) lets a reviewer edit supporting amounts,
+inspect before/after files, and compute the package check in their browser. It
+also has a self-contained HTML export for sharing. It uses live SHA-256 checks,
+not stored outcome labels. The browser checker is tested against the independent
+Node checker for the same candidate bytes.
+
 ## One-page explanation
 
 [reconciliation-example.pdf](reconciliation-example.pdf) is the nontechnical handout.
@@ -132,3 +140,6 @@ incorrect recalculation with a resealed approval, nonblocking rejection of POSIX
 named pipes, a matching but unbalanced package, replacement-reference trust limits,
 and standalone CLI exit behavior.
 The one-page PDF was rendered and visually checked before delivery.
+
+Interactive addition validation: **169 targeted tests and 360 full-suite tests**
+pass on Node 24.19.0, including nine browser-checker parity and binding tests.
