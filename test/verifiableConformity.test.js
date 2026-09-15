@@ -3,9 +3,15 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
-const { PROTOCOL, MAX_BYTES, canonicalize, parseCanonical, digest, commit, createEvidence, verify } = require("../server/verifiableExecution");
-const demo = require("../examples/verifiable-execution/synthetic-workflow");
-const { report } = require("../scripts/verifiable-execution");
+const core = require("../server/verifiableConformity");
+const { PROTOCOL, MAX_BYTES, canonicalize, parseCanonical, digest, createEvidence } = core;
+const { commit } = core.unsafe;
+// Existing object-level behavioral regressions intentionally exercise the internal API.
+const verify = options => core.unsafe.verifyObjects(options == null ? options : { adapters: demo.adapters, ...options });
+const demo = require("../examples/verifiable-conformity/synthetic-workflow");
+const { report: wireReport, ANCHOR_PROTOCOL } = require("../scripts/verifiable-conformity");
+const report = (manifest, evidence, hash, id) => wireReport(canonicalize(manifest), canonicalize(evidence),
+  canonicalize({ protocol: ANCHOR_PROTOCOL, expectedCommitment: hash, expectedExecutionId: id }), { synthetic: true, verbose: true });
 const clone = value => JSON.parse(JSON.stringify(value));
 function setup() {
   const manifest = demo.makeManifest("test-execution-001", "2026-09-15T00:00:00.000Z");
@@ -17,18 +23,18 @@ function reseal(evidence) {
   return createEvidence(body);
 }
 function fails(bundle, field) {
-  const result = verify(bundle);
+  const result = verify({ ...bundle, verbose: true });
   assert.equal(result.status, "FAIL");
   assert.equal(result.ok, false);
   assert.ok(result.mismatches.some(m => m.path === field), JSON.stringify(result));
 }
 
-describe("verifiable execution v0", function () {
+describe("verifiable conformity v1", function () {
   it("unchanged execution passes and states its limited claim", function () {
     const result = verify(setup());
     assert.equal(result.status, "PASS");
-    assert.match(result.claim, /Presented evidence conforms/);
-    assert.match(result.limitations, /no proof of actual execution/);
+    assert.match(result.claim, /presented manifest\/evidence conforms/);
+    assert.match(result.limitations, /actual execution/);
   });
   it("actual threshold 0.75 fails against 0.72 and changes output", function () {
     const b = setup();
@@ -69,7 +75,7 @@ describe("verifiable execution v0", function () {
     b.evidence = reseal(b.evidence);
     fails(b, "/evidence/commitment");
   });
-  it("replay across verifier execution contexts fails", function () {
+  it("different expected contexts fail without asserting adversarial freshness", function () {
     const b = setup();
     b.expectedExecutionId = "another-execution";
     fails(b, "/manifest/executionId");
@@ -103,6 +109,7 @@ describe("verifiable execution v0", function () {
   it("binds all extension fields including nested arrays and null", function () {
     const b = setup();
     b.manifest.specification.extension = { sequence: [1, 2], note: null };
+    b.manifest.outputConstraint = { type: "unconstrained" };
     b.expectedCommitment = commit(b.manifest);
     b.evidence.observedSpecification = clone(b.manifest.specification);
     b.evidence.commitment = b.expectedCommitment;
@@ -129,17 +136,18 @@ describe("verifiable execution v0", function () {
     b.evidence.output[0].decision = "fabricated";
     fails(b, "/evidence/evidenceHash");
     b.evidence = reseal(b.evidence);
-    assert.equal(verify(b).ok, true); // core compares spec, not arbitrary workflow semantics
+    assert.equal(verify(b).ok, false); // committed output adapter rejects resealed fabrication
     const result = report(b.manifest, b.evidence, b.expectedCommitment, b.expectedExecutionId, true);
     assert.equal(result.ok, false); // demo-specific deterministic replay detects this
-    assert.ok(result.mismatches.some(m => m.path === "/output/0/decision"));
+    assert.ok(result.mismatches.some(m => m.path === "/output"));
   });
-  it("does not treat backdated timestamps as trustworthy evidence of timing", function () {
+  it("rejects completion before manifest creation (internal consistency only)", function () {
     const b = setup();
     b.evidence.completedAt = "2000-01-01T00:00:00.000Z";
     b.evidence = reseal(b.evidence);
     const result = verify(b);
-    assert.equal(result.ok, true);
+    assert.equal(result.ok, false);
+    assert.ok(result.mismatches.some(m => m.path === "/evidence/completedAt"));
     assert.match(result.limitations, /Timestamps are operator assertions/);
   });
   it("detects mutations to every leaf of the demo specification", function () {
@@ -175,14 +183,14 @@ describe("verifiable execution v0", function () {
   });
 });
 
-describe("v0 canonicalization and wire format", function () {
+describe("v1 canonicalization and wire format", function () {
   it("has a fixed byte/digest vector independent of object-key insertion order", function () {
     const a = { b: 1, a: { d: 4, c: 3 }, "2": "two", "10": "ten" };
     const b = { "10": "ten", "2": "two", a: { c: 3, d: 4 }, b: 1 };
     assert.equal(canonicalize(a), '{"10":"ten","2":"two","a":{"c":3,"d":4},"b":1}');
     assert.equal(canonicalize(a), canonicalize(b));
-    assert.equal(digest("artifact", a), digest("artifact", b));
-    assert.equal(digest("artifact", a), "b4d2288e57cf5df69929e2aa9423853eccda85cd990f0709cafdf0fd5ea3ff9e");
+    assert.equal(digest("model", a), digest("model", b));
+    assert.equal(digest("model", a), require("../examples/verifiable-conformity/canonicalization-vectors.json").accepted.find(v => v.name === "integer-like keys").digests.model);
     assert.notEqual(digest("manifest", a), digest("evidence", a));
   });
   it("retains __proto__ as data and escapes JSON pointer field paths", function () {
@@ -234,47 +242,57 @@ describe("v0 canonicalization and wire format", function () {
 });
 
 describe("standalone CLI", function () {
-  const cli = path.join(__dirname, "../scripts/verifiable-execution.js");
+  const cli = path.join(__dirname, "../scripts/verifiable-conformity.js");
   let dir;
-  beforeEach(() => { dir = fs.mkdtempSync(path.join(os.tmpdir(), "verifiable-execution-test-")); });
+  beforeEach(() => { dir = fs.mkdtempSync(path.join(os.tmpdir(), "verifiable-conformity-test-")); });
   afterEach(() => { fs.rmSync(dir, { recursive: true, force: true }); });
   const run = (...args) => spawnSync(process.execPath, [cli, ...args], { encoding: "utf8" });
-  it("runs the full demo and independent verification with correct exit statuses", function () {
-    const out = path.join(dir, "demo");
-    const demoResult = run("demo", out);
+  it("runs separate anchor/evidence demo and independent verification with correct exit statuses", function () {
+    const out = path.join(dir, "operator"), trusted = path.join(dir, "reviewer");
+    const demoResult = run("demo", trusted, out);
     assert.equal(demoResult.status, 0, demoResult.stderr);
-    assert.match(demoResult.stdout, /0.72 → 0.72 = VERIFIED/);
-    assert.match(demoResult.stdout, /0.72 → 0.75 = VERIFICATION FAILED/);
-    const hash = fs.readFileSync(path.join(out, "expected-commitment.txt"), "utf8").trim();
-    const id = fs.readFileSync(path.join(out, "expected-execution-id.txt"), "utf8").trim();
+    assert.match(demoResult.stdout, /0.72 → 0.72 = PASS: CONFORMS/);
+    assert.match(demoResult.stdout, /0.72 → 0.75 = FAIL: DOES NOT CONFORM/);
+    assert.ok(!demoResult.stdout.includes("VERIFIED"));
+    const anchor = path.join(trusted, "anchor.json");
+    const { expectedCommitment: hash } = parseCanonical(fs.readFileSync(anchor));
     const manifest = path.join(out, "manifest.json");
     assert.equal(run("commit", manifest).stdout.trim(), hash);
-    for (const command of ["verify", "verify-demo"]) {
-      assert.equal(run(command, manifest, path.join(out, "unchanged.evidence.json"), hash, id).status, 0);
-      const fail = run(command, manifest, path.join(out, "tampered.evidence.json"), hash, id);
-      assert.equal(fail.status, 1);
-      assert.match(fail.stdout, /specification\/parameters\/threshold/);
-      assert.equal(run(command, manifest, path.join(out, "unchanged.evidence.json"), "0".repeat(64), id).status, 1);
-    }
+    assert.equal(run("verify", manifest, path.join(out, "unchanged.evidence.json"), anchor).status, 1); // missing required adapter
+    assert.equal(run("verify-demo", manifest, path.join(out, "unchanged.evidence.json"), anchor).status, 0);
+    const fail = run("verify-demo", manifest, path.join(out, "tampered.evidence.json"), anchor, "--verbose");
+    assert.equal(fail.status, 1);
+    assert.match(fail.stdout, /specification\/parameters\/threshold/);
     const output = path.join(out, "separate.evidence.json");
     assert.equal(run("execute-demo", manifest, hash, output).status, 0);
-    assert.equal(run("verify-demo", manifest, output, hash, id).status, 0);
-    assert.equal(run("execute-demo", manifest, hash, output).status, 1); // never overwrite
-    assert.equal(run("demo", out).status, 1);
+    assert.equal(run("verify-demo", manifest, output, anchor).status, 0);
+    assert.equal(run("execute-demo", manifest, hash, output).status, 1);
+    assert.equal(run("demo", trusted, out).status, 1);
+    assert.equal(fs.existsSync(path.join(out, "anchor.json")), false);
+    // Replacing ALL operator-side files cannot replace the independently retained anchor.
+    const changed = demo.makeManifest("replacement-context");
+    fs.writeFileSync(manifest, canonicalize(changed));
+    fs.writeFileSync(output, canonicalize(demo.execute(changed, commit(changed))));
+    assert.equal(run("verify-demo", manifest, output, anchor).status, 1);
   });
   it("verifies from a minimal copy with no research module, demo adapter or npm packages", function () {
     const b = setup();
+    b.manifest.outputConstraint = { type: "digest", digest: digest("output", b.evidence.output) };
+    b.expectedCommitment = commit(b.manifest);
+    b.evidence = demo.execute(b.manifest, b.expectedCommitment);
+    const anchor = path.join(dir, "anchor.json");
+    fs.writeFileSync(anchor, canonicalize({ protocol: ANCHOR_PROTOCOL, expectedCommitment: b.expectedCommitment, expectedExecutionId: b.expectedExecutionId }));
     fs.mkdirSync(path.join(dir, "server"));
     fs.mkdirSync(path.join(dir, "scripts"));
-    for (const file of ["server/sha256.js", "server/verifiableExecution.js", "scripts/verifiable-execution.js"]) {
+    for (const file of ["server/sha256.js", "server/verifiableConformity.js", "scripts/verifiable-conformity.js"]) {
       fs.copyFileSync(path.join(__dirname, "..", file), path.join(dir, file));
     }
     const manifest = path.join(dir, "manifest.json");
     const evidence = path.join(dir, "evidence.json");
     fs.writeFileSync(manifest, canonicalize(b.manifest));
     fs.writeFileSync(evidence, canonicalize(b.evidence));
-    const result = spawnSync(process.execPath, [path.join(dir, "scripts/verifiable-execution.js"),
-      "verify", manifest, evidence, b.expectedCommitment, b.expectedExecutionId], { encoding: "utf8" });
+    const result = spawnSync(process.execPath, [path.join(dir, "scripts/verifiable-conformity.js"),
+      "verify", manifest, evidence, anchor], { encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
     assert.equal(JSON.parse(result.stdout).status, "PASS");
   });

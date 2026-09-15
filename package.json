@@ -7,8 +7,8 @@
     "server": "node server.js",
     "test": "hardhat test",
     "prereg": "node -r dotenv/config scripts/prereg.js",
-    "test:verifiable-execution": "mocha test/verifiableExecution.test.js test/prereg.test.js test/arenaPrereg.test.js",
-    "demo:verifiable-execution": "node scripts/verifiable-execution.js demo"
+    "test:conformity": "mocha test/verifiableConformity.test.js test/conformityHardening.test.js test/prereg.test.js test/arenaPrereg.test.js",
+    "demo:conformity": "node scripts/verifiable-conformity.js demo"
   },
   "keywords": [],
   "author": "",
