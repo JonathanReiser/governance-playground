@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Independent stdlib byte/digest fixture checker, NOT a full Python canonicalizer.
 
-Verifies JS/Python parse agreement for these fixtures, UTF-8 bytes, and each role's
+Verifies JS/Python value agreement for these fixtures, UTF-8 bytes, and each role's
 SHA-256 preimage. It deliberately hashes supplied canonical bytes, not json.dumps:
 Python's default float formatting is NOT the ECMAScript serialization profile.
 """

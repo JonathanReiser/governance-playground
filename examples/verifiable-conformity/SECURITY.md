@@ -75,3 +75,30 @@ check did not pass. It is not proof of fraud or a diagnosis of the operator's mo
 No external timestamp/transparency anchor, signature, runtime attestation, independent
 observer or durable single-use service is implemented. Blockchain storage does not
 automatically make inputs trustworthy or prove that a computation occurred.
+
+## Pilot-review clarifications
+
+- Redacted specification mismatches carry HMAC-SHA-256 `fieldId` labels derived from
+  full escaped JSON Pointer paths. The default key is fresh, private and report-local.
+  A reviewer-controlled `diagnosticKey` can intentionally correlate reports, but
+  reusing it reveals path equality and permits chosen-input correlation to anyone
+  who can submit and observe diagnostic requests. Never derive it from the manifest
+  nonce, reuse a public key value, or disclose it with the report. IDs authenticate
+  nothing and do not recover field names. Verbose remains opt-in; values stay hidden.
+- Visually confusable Unicode and invisible characters remain distinct committed
+  data. Human visual review does not reliably establish semantic equivalence. Domain
+  adapters should enforce exact field names; digest/unconstrained output modes do
+  not impose such a schema. Normalizing keys would silently change protocol meaning.
+- A committed adapter ID/version labels a reviewer-trusted predicate, not its code
+  hash. Parties must agree on its actual implementation and reference artifacts.
+- The manifest's context check is a reviewer-label consistency check (the manifest
+  is already hash-bound); the evidence context check ties presented evidence to
+  that label. Neither is independently issued freshness evidence.
+- In-memory plain-object key enumeration can allocate before the member check.
+  This residual limitation is outside the bounded wire boundary; do not treat the
+  unsafe API as a hardened service for attacker-controlled JS objects.
+- Use tested Node 24 for the pilot. The external review reported a state-dependent
+  Node 26 JSON parser anomaly; it has not been independently reproduced here.
+  No claim of safety on all newer runtimes or complete startup parser attestation
+  is made. The existing canonical roundtrip is a consistency check, not immunity
+  to arbitrary runtime defects.

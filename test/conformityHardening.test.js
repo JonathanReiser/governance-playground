@@ -229,3 +229,118 @@ describe("separate retention CLI", function () {
     assert.equal(run("commit",file).status,1);
   });
 });
+
+describe("pilot diagnostic cleanup", function () {
+  function changed() {
+    const b = bundle();
+    b.evidence.observedSpecification["private-patient-A"] = "private-value-A";
+    b.evidence.observedSpecification["private-patient-B"] = "private-value-B";
+    reseal(b);
+    return b;
+  }
+  it("L-B distinguishes colliding redacted paths without disclosing keys or values", function () {
+    const result = verify(changed());
+    assert.equal(result.ok, false);
+    assert.equal(result.mismatches.length, 2);
+    assert.equal(result.mismatches[0].path, result.mismatches[1].path);
+    assert.notEqual(result.mismatches[0].fieldId, result.mismatches[1].fieldId);
+    for (const m of result.mismatches) assert.match(m.fieldId, /^[a-f0-9]{64}$/);
+    const report = JSON.stringify(result);
+    assert.ok(!report.includes("private-patient"));
+    assert.ok(!report.includes("private-value"));
+  });
+  it("L-B correlates the same path only when a reviewer explicitly reuses a private key", function () {
+    const b = changed(), diagnosticKey = Buffer.alloc(32, 17);
+    const first = verify(b, { diagnosticKey });
+    b.evidence.observedSpecification["private-patient-A"] = "a different value"; reseal(b);
+    const second = verify(b, { diagnosticKey, verbose: true });
+    assert.deepEqual(first.mismatches.map(m => m.fieldId), second.mismatches.map(m => m.fieldId));
+    const otherKey = verify(b, { diagnosticKey: Buffer.alloc(32, 18) });
+    assert.notEqual(first.mismatches[0].fieldId, otherKey.mismatches[0].fieldId);
+    assert.ok(!JSON.stringify(first).includes(diagnosticKey.toString("hex")));
+  });
+  it("L-B uses fresh report-local identifiers by default and does not mutate committed data", function () {
+    const b = changed(), before = c.canonicalize({ manifest: b.manifest, evidence: b.evidence });
+    assert.notEqual(verify(b).mismatches[0].fieldId, verify(b).mismatches[0].fieldId);
+    assert.equal(c.canonicalize({ manifest: b.manifest, evidence: b.evidence }), before);
+  });
+  it("L-B binds tokens to unambiguous full paths including escaped keys and array indices", function () {
+    const expected = { "a/b": 0, a: { b: 0 }, items: [0, 0] };
+    const actual = { "a/b": 1, a: { b: 1 }, items: [1, 1] };
+    const mismatches = c.unsafe.differences(expected, actual, "/specification", false, Buffer.alloc(32, 2));
+    assert.equal(new Set(mismatches.map(m => m.fieldId)).size, 4);
+  });
+  it("L-B rejects invalid diagnostic keys and still requires literal true for verbose", function () {
+    const b = changed();
+    for (const diagnosticKey of ["public-key", Buffer.alloc(0), Buffer.alloc(31), Buffer.alloc(33), null]) {
+      assert.equal(verify(b, { diagnosticKey }).mismatches[0].path, "/");
+    }
+    for (const verbose of [1, "yes", "true", {}, [1]]) {
+      assert.ok(!JSON.stringify(verify(b, { verbose })).includes("private-patient"));
+    }
+  });
+  it("I-B repeats the unchecked-output limit in the PASS claim itself", function () {
+    const b = bundle();
+    assert.ok(!verify(b).claim.includes("no output constraint"));
+    b.manifest.outputConstraint = { type: "unconstrained" }; update(b);
+    const result = verify(b);
+    assert.equal(result.ok, true);
+    assert.match(result.claim, /Output correctness is not verified: no output constraint was declared/);
+  });
+  it("I-C demonstrates that an adapter label does not identify its implementation", function () {
+    const b = bundle(); b.evidence.output = { fabricated: true }; reseal(b);
+    assert.equal(verify(b).ok, false);
+    assert.equal(verify(b, { adapters: new Map([["synthetic-review@1", () => true]]) }).ok, true);
+  });
+  it("L-D treats confusable Unicode keys as distinct data, not equivalent semantics", function () {
+    const b = bundle(); b.manifest.outputConstraint = { type: "unconstrained" };
+    const hashes = [];
+    for (const key of ["threshold", "thresh\u043eld", "threshold\u200b"]) {
+      b.manifest.specification = { parameters: { [key]: 0.72 } };
+      b.expectedCommitment = c.unsafe.commit(b.manifest);
+      b.evidence = c.createEvidence({ commitment: b.expectedCommitment, executionId: b.expectedExecutionId,
+        observedSpecification: b.manifest.specification, output: null, completedAt: b.manifest.createdAt });
+      assert.equal(verify(b).ok, true); // no schema: lexical conformity, not human interpretation
+      hashes.push(b.expectedCommitment);
+    }
+    assert.equal(new Set(hashes).size, 3);
+    b.expectedCommitment = hashes[0];
+    assert.equal(verify(b).ok, false);
+  });
+});
+
+describe("pilot CLI help", function () {
+  const cli = path.join(__dirname, "../scripts/verifiable-conformity.js");
+  const run = (...args) => spawnSync(process.execPath, [cli, ...args], { encoding: "utf8" });
+  it("L-A provides discoverable help with success exit status", function () {
+    for (const arg of ["--help", "help"]) {
+      const result = run(arg);
+      assert.equal(result.status, 0);
+      assert.match(result.stdout, /Usage:.*verifiable-conformity/);
+      for (const name of ["prepare-demo", "retain", "demo", "commit", "execute-demo", "verify", "verify-demo"]) {
+        assert.ok(result.stdout.includes(name));
+      }
+    }
+  });
+  it("L-A distinguishes syntax errors without echoing user arguments", function () {
+    for (const args of [[], ["private-secret-command"], ["verify", "private-secret-path"], ["commit", "--verbose"]]) {
+      const result = run(...args), failure = JSON.parse(result.stderr);
+      assert.equal(result.status, 1);
+      assert.equal(failure.error, "Invalid command syntax.");
+      assert.match(failure.usage, /Usage:/);
+      assert.ok(!result.stderr.includes("private-secret"));
+    }
+  });
+  it("L-A keeps file errors generic and separate from syntax help", function () {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "conformity-help-"));
+    try {
+      const file = path.join(dir, "private-file.json");
+      fs.writeFileSync(file, '{"private-key":"private-value" oops}');
+      const result = run("commit", file), failure = JSON.parse(result.stderr);
+      assert.equal(result.status, 1);
+      assert.equal(failure.usage, undefined);
+      assert.match(failure.error, /Invalid wire data/);
+      assert.ok(!result.stderr.includes("private-"));
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  });
+});

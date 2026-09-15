@@ -1,5 +1,5 @@
 /** Offline conformity, not historical execution attestation. Primary API: verify(wire inputs). */
-const { randomBytes } = require("node:crypto");
+const { randomBytes, createHmac } = require("node:crypto");
 const { TextDecoder } = require("node:util");
 const { sha256 } = require("./sha256");
 const PROTOCOL = "verifiable-conformity/v1";
@@ -139,31 +139,40 @@ function validateEvidenceBody(body) {
   timestamp(body.completedAt, "evidence.completedAt"); specification(body.observedSpecification, "evidence.observedSpecification");
 }
 const pointer = key => String(key).replace(/~/g, "~0").replace(/\//g, "~1");
-function differences(expected, actual, path = "/specification", verbose = false) {
+function differences(expected, actual, path = "/specification", verbose = false, diagnosticKey = randomBytes(32)) {
   canonicalize(expected); canonicalize(actual);
+  if (!Buffer.isBuffer(diagnosticKey) || diagnosticKey.length !== 32) throw new Error("diagnosticKey must be a private 32-byte Buffer");
+  // A reviewer-controlled secret, never the manifest's nonce or a public digest.
+  // Fresh by default; reusing a private key explicitly enables cross-report correlation.
+  const key = Buffer.from(diagnosticKey);
   const out = [];
-  function walk(a, b, p) {
+  function add(p, shown, reason) {
+    const fieldId = createHmac("sha256", key).update("conformity-diagnostic-path/v1\n" + p, "utf8").digest("hex");
+    out.push({ path: shown, fieldId, reason });
+  }
+  function walk(a, b, p, shown) {
     if (out.length >= MAX_MISMATCHES || Object.is(a, b)) return;
     if ((plain(a) && plain(b)) || (Array.isArray(a) && Array.isArray(b))) {
-      for (const key of [...new Set([...Object.keys(a), ...Object.keys(b)])].sort()) {
+      for (const part of [...new Set([...Object.keys(a), ...Object.keys(b)])].sort()) {
         if (out.length >= MAX_MISMATCHES) break;
-        const child = `${p}/${verbose ? pointer(key) : "[redacted]"}`;
-        if (!own(a, key)) out.push({ path: child, reason: "unexpected field" });
-        else if (!own(b, key)) out.push({ path: child, reason: "missing field" });
-        else walk(a[key], b[key], child);
+        const child = `${p}/${pointer(part)}`;
+        const display = `${shown}/${verbose === true ? pointer(part) : "[redacted]"}`;
+        if (!own(a, part)) add(child, display, "unexpected field");
+        else if (!own(b, part)) add(child, display, "missing field");
+        else walk(a[part], b[part], child, display);
       }
-    } else out.push({ path: p, reason: "value differs" });
+    } else add(p, shown, "value differs");
   }
-  walk(expected, actual, path);
+  walk(expected, actual, path, path);
   return out;
 }
 const LIMITATIONS = "No proof of historical execution or actual execution, non-fabrication, truthful inputs, correct model/policy, genuine approval, absence of alternative runs, trusted wall-clock time, freshness or regulatory compliance. Digests are not authentication. Timestamps are operator assertions.";
 function result(mismatches, outputValidation) {
   const ok = mismatches.length === 0;
   return { ok, status: ok ? "PASS" : "FAIL", scope: "presented-evidence conformity", mismatches,
-    diagnostics: "At most 100 specification mismatches; object-key segments redacted unless verbose is explicitly enabled.",
+    diagnostics: "At most 100 specification mismatches; object-key segments redacted unless verbose is explicitly enabled; fieldId distinguishes paths (report-local unless a private diagnosticKey is reused).",
     outputValidation,
-    claim: ok ? "Given an independently retained commitment and expected context, presented manifest/evidence conforms to the committed specification." : "Presented manifest/evidence did not pass conformity checks.",
+    claim: ok ? "Given an independently retained commitment and expected context, presented manifest/evidence conforms to the committed specification." + (outputValidation.status === "NOT_CHECKED" ? " Output correctness is not verified: no output constraint was declared." : "") : "Presented manifest/evidence did not pass conformity checks.",
     limitations: LIMITATIONS };
 }
 // INTERNAL/UNSAFE FOR UNTRUSTED WIRE: cannot recover duplicate keys or rounding
@@ -172,7 +181,7 @@ function verifyObjects(options = {}) {
   const mismatches = [];
   let outputValidation = { status: "NOT_RUN", detail: "Output correctness is not verified." };
   try {
-    const { manifest, evidence, expectedCommitment, expectedExecutionId, adapters = new Map(), verbose = false } = options;
+    const { manifest, evidence, expectedCommitment, expectedExecutionId, adapters = new Map(), verbose = false, diagnosticKey } = options;
     hash(expectedCommitment, "expectedCommitment"); identifier(expectedExecutionId, "expectedExecutionId");
     validateManifest(manifest); canonicalize(evidence);
     exactKeys(evidence, ["protocol", "commitment", "executionId", "observedSpecification", "output", "completedAt", "evidenceHash"], "evidence");
@@ -185,7 +194,7 @@ function verifyObjects(options = {}) {
     check(evidence.executionId === expectedExecutionId, "/evidence/executionId", "wrong expected context (not a freshness check)");
     check(Date.parse(evidence.completedAt) >= Date.parse(manifest.createdAt), "/evidence/completedAt", "precedes manifest.createdAt (internal chronology only)");
     check(evidenceHash === digest("evidence", body), "/evidence/evidenceHash", "evidence digest differs (not authentication)");
-    mismatches.push(...differences(manifest.specification, evidence.observedSpecification, "/specification", verbose === true));
+    mismatches.push(...differences(manifest.specification, evidence.observedSpecification, "/specification", verbose === true, diagnosticKey));
     if (!mismatches.length) {
       const c = manifest.outputConstraint;
       if (c.type === "unconstrained") outputValidation = { status: "NOT_CHECKED", detail: "No output constraint: output correctness is not verified." };

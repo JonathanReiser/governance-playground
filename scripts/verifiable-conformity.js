@@ -4,6 +4,18 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { MAX_BYTES, canonicalize, parseCanonical, commitWire, verify } = require("../server/verifiableConformity");
 const ANCHOR_PROTOCOL = "verifiable-conformity/retained-anchor-v1";
+const USAGE = `Usage: node scripts/verifiable-conformity.js <command>
+  prepare-demo OPERATOR_DIR
+  retain MANIFEST TRUSTED_ANCHOR
+  demo TRUSTED_DIR OPERATOR_DIR [--verbose]
+  commit MANIFEST
+  execute-demo MANIFEST EXPECTED_HASH OUTPUT [THRESHOLD]
+  verify MANIFEST EVIDENCE TRUSTED_ANCHOR [--verbose]
+  verify-demo MANIFEST EVIDENCE TRUSTED_ANCHOR [--verbose]
+  --help
+
+PASS means presented-evidence conformity only. --verbose reveals object keys.`;
+class UsageError extends Error {}
 function read(file) {
   const fd = fs.openSync(file, "r");
   try {
@@ -31,9 +43,10 @@ function report(manifestWire, evidenceWire, anchorWire, { synthetic = false, ver
 }
 function main(args) {
   const [command, ...rest] = args;
+  if (args.length === 1 && ["--help", "help"].includes(command)) { console.log(USAGE); return; }
   const verbose = rest.includes("--verbose");
   const a = rest.filter(x => x !== "--verbose");
-  if (verbose && !["verify", "verify-demo", "demo"].includes(command)) throw new Error("unexpected option");
+  if (verbose && !["verify", "verify-demo", "demo"].includes(command)) throw new UsageError();
   if (command === "commit" && a.length === 1) console.log(commitWire(read(a[0])));
   else if (command === "prepare-demo" && a.length === 1) {
     fs.mkdirSync(a[0], { mode: 0o700 });
@@ -75,14 +88,21 @@ function main(args) {
       const result = report(manifestWire, read(evidenceFile), read(anchorFile), { synthetic: true, verbose });
       write(path.join(operator, `${name}.report.json`), result);
       console.log(`0.72 → ${threshold} = ${result.ok ? "PASS: CONFORMS" : "FAIL: DOES NOT CONFORM"}`);
-      for (const mismatch of result.mismatches) console.log(`  ${mismatch.path}: ${mismatch.reason}`);
+      for (const mismatch of result.mismatches) console.log(`  ${mismatch.fieldId ? `[field ${mismatch.fieldId}] ` : ""}${mismatch.path}: ${mismatch.reason}`);
       if (result.ok !== (name === "unchanged")) throw new Error("unexpected demo conformity result");
     }
     console.log("PASS covers presented-evidence conformity only. Directory separation is not trusted custody, time or freshness.");
-  } else throw new Error("usage: verifiable-conformity <prepare-demo OPERATOR_DIR | retain MANIFEST TRUSTED_ANCHOR | demo TRUSTED_DIR OPERATOR_DIR [--verbose] | commit MANIFEST | execute-demo MANIFEST EXPECTED_HASH OUTPUT [THRESHOLD] | verify[-demo] MANIFEST EVIDENCE TRUSTED_ANCHOR [--verbose]>");
+  } else throw new UsageError();
 }
 if (require.main === module) {
   try { main(process.argv.slice(2)); }
-  catch { console.error(JSON.stringify({ status: "FAIL", error: "Invalid command, wire data, anchor or file operation. See README for usage. No untrusted input is echoed." })); process.exitCode = 1; }
+  catch (error) {
+    // Only static help text is disclosed. Neither argv nor exception messages are echoed.
+    const failure = error instanceof UsageError
+      ? { status: "FAIL", error: "Invalid command syntax.", usage: USAGE }
+      : { status: "FAIL", error: "Invalid wire data, anchor or file operation. Use --help for command syntax. No untrusted input is echoed." };
+    console.error(JSON.stringify(failure));
+    process.exitCode = 1;
+  }
 }
 module.exports = { read, report, ANCHOR_PROTOCOL };

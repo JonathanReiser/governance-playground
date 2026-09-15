@@ -8,7 +8,7 @@
 
 A PASS is **presented-evidence conformity**, not historical execution verification.
 No network, wallet, ledger, application server or npm dependency is required by the
-core or demo. Node.js 22+; tested on Node 24. The branch keeps its original name,
+core or demo. Use Node.js 24 for the pilot (tested on 24.19.0). The branch keeps its original name,
 `prototype/verifiable-execution-v0`, for review continuity. The revised protocol is
 `verifiable-conformity/v1`; the old experimental wire format is intentionally rejected.
 
@@ -25,13 +25,25 @@ TRUSTED / INDEPENDENT ANCHOR (simulated retention): /tmp/conformity-reviewer/anc
 OPERATOR-PRESENTED EVIDENCE: /tmp/conformity-operator
 0.72 → 0.72 = PASS: CONFORMS
 0.72 → 0.75 = FAIL: DOES NOT CONFORM
-  /specification/[redacted]/[redacted]: value differs
+  [field <opaque field ID>] /specification/[redacted]/[redacted]: value differs
 ```
 
 Use `--verbose` only for public synthetic data to see
 `/specification/parameters/threshold`. Dynamic object-key segments are redacted by
 default; values are never included in mismatch reports. Even debug paths can reveal
 identifiers, so do not use verbose diagnostics with confidential metadata.
+Each specification mismatch also has an opaque `fieldId`, distinguishing otherwise
+identical redacted paths. IDs are report-local by default. A verifier may explicitly
+reuse a private 32-byte `diagnosticKey` Buffer to correlate paths across reports;
+keep that key outside all manifests/evidence and do not use a public nonce. Reuse
+exposes path equality and enables chosen-input correlation if an attacker can submit
+requests and observe reports. Default CLI reports use a fresh key, never persist or
+print it, and do not expose names/values through IDs. IDs are diagnostic labels,
+not commitments or authentication; their randomness does not change protocol hashes.
+
+Run `node scripts/verifiable-conformity.js --help` for command syntax. Missing or
+incorrect arguments produce static usage text with exit 1, while malformed data and
+file errors remain generic and do not echo arguments or exception contents.
 
 The fictional transaction-review adapter scores two synthetic rows. A score of
 0.73 changes from `review` to `clear` when the threshold changes to 0.75. It observes
@@ -70,6 +82,10 @@ node scripts/verifiable-conformity.js verify-demo \
 the pin. The operator evidence directory contains no expected-anchor file. Replacing
 all operator files fails against the retained anchor, as regression tests demonstrate.
 This flow provides no independently established time or identity guarantee.
+Visual inspection alone is insufficient: Unicode lookalikes or invisible characters
+can make distinct keys appear identical. Use an explicit domain schema/adapter that
+recognizes exact field names; unconstrained or digest-only modes do not supply that
+semantic check. Canonicalization deliberately preserves these distinctions.
 
 `verify-demo` installs a specific trusted local synthetic output adapter. Generic
 `verify` handles unconstrained and committed-digest outputs, and **fails** if the
@@ -150,6 +166,9 @@ here; the core does not implement a schema language. False, exceptions, promises
 other truthy values fail. The output constraint is part of the independently pinned
 manifest: deleting/downgrading it fails. An adapter is trusted code, not sandboxed;
 its quality/meaning and availability remain the reviewer's responsibility.
+`id@version` is a coordination label, not a hash of the predicate implementation.
+Different verifiers can register different predicates under that label and disagree;
+reviewers must agree on the actual adapter code/reference artifacts.
 
 Output `PASS` means only that the selected predicate/digest constraint was satisfied,
 not correctness in the real world. A weak schema may check only shape. `evidenceHash`

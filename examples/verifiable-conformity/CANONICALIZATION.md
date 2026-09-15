@@ -42,6 +42,11 @@ length-checked then scanned to count exact UTF-8/escape size. A bounded prefligh
 runs before building canonical strings. Wire decoding/parsing begins only after
 input-size validation. Diagnostic comparison reports at most 100 specification
 mismatches. These are resource controls, not a hostile-JavaScript sandbox.
+For existing in-memory plain objects, `Reflect.ownKeys` still allocates the complete
+key list before the member limit rejects it. This trusted-caller path is not a hard
+allocation bound; the primary wire path bounds input size before parsing. A capped
+`for...in` would not establish a portable bound on engine enumeration allocations
+either. Do not expose the unsafe object API as an untrusted object service.
 
 Use strings under an explicit adapter schema for exact money or arbitrary-precision
 numbers. Do not assume Python `json.dumps`, Go JSON or another runtime's default
@@ -77,7 +82,7 @@ rejected negative zero, safe integer edges and the smallest positive subnormal.
 
 The Node tests compare the implementation against these frozen expected bytes and
 hashes, and assert rejection cases. The independent stdlib Python
-[check_vectors.py](check_vectors.py) checks parse agreement for accepted fixtures,
+[check_vectors.py](check_vectors.py) checks value agreement for accepted fixtures,
 UTF-8 and SHA-256 preimages across all roles. It deliberately hashes the supplied
 canonical bytes: **it is a byte/digest compatibility fixture, not a full independent
 canonicalizer or protocol verifier**, and does not establish universal cross-language
