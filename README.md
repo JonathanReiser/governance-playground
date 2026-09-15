@@ -646,3 +646,11 @@ copying that approach wholesale.
 
 Built by someone with a philosophy + software consulting background, interested in whether IR
 theories are actually predictive — the falsifiability angle. Solo project; collaborators welcome.
+
+## Verifiable execution prototype
+
+An additive, offline demonstration of **COMMIT → EXECUTE → VERIFY** generalizes
+the existing preregistration pattern to domain-neutral specification/evidence
+conformity. Includes synthetic threshold tampering, an independent CLI verifier,
+and explicit security limits. See [the demo](examples/verifiable-execution/README.md).
+The existing research preregistration workflow remains available unchanged.

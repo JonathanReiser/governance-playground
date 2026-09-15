@@ -32,7 +32,7 @@
  * ledger.js / canonicalJson.js, adapted from ESM to this project's CommonJS.
  */
 
-const crypto = require("crypto");
+const { sha256 } = require("./sha256");
 
 const BEACON_BASE = "https://beacon.nist.gov/beacon/2.0/pulse";
 
@@ -58,10 +58,6 @@ function sortKeysDeep(value) {
 
 function canonicalStringify(value) {
   return JSON.stringify(sortKeysDeep(value));
-}
-
-function sha256(text) {
-  return crypto.createHash("sha256").update(text, "utf8").digest("hex");
 }
 
 function hashRecord(record) {
