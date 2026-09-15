@@ -207,3 +207,9 @@ npm run test:conformity
 npm test
 python3 examples/verifiable-conformity/check_vectors.py
 ```
+
+## Quarterly-close discussion example
+
+For a nontechnical management-review example, see the
+[synthetic reconciliation package](../reconciliation-demo/README.md), including a
+one-page handout and an example that changes while still balancing.

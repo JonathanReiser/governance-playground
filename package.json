@@ -7,8 +7,9 @@
     "server": "node server.js",
     "test": "hardhat test",
     "prereg": "node -r dotenv/config scripts/prereg.js",
-    "test:conformity": "mocha test/verifiableConformity.test.js test/conformityHardening.test.js test/prereg.test.js test/arenaPrereg.test.js",
-    "demo:conformity": "node scripts/verifiable-conformity.js demo"
+    "test:conformity": "mocha test/verifiableConformity.test.js test/conformityHardening.test.js test/reconciliationDemo.test.js test/prereg.test.js test/arenaPrereg.test.js",
+    "demo:conformity": "node scripts/verifiable-conformity.js demo",
+    "demo:reconciliation": "node scripts/reconciliation-demo.js build"
   },
   "keywords": [],
   "author": "",
