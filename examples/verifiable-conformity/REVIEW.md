@@ -43,8 +43,9 @@ intentionally unsolved. No freshness or trusted-time mechanism is introduced.
 `README.md`, `SECURITY.md`, `CANONICALIZATION.md`, `check_vectors.py`, `REVIEW.md`.
 
 Protocol v1, manifest/evidence schemas and canonical/hash bytes are unchanged.
-Diagnostic labels affect reports only; reports may differ across invocations while
-commitments and verdicts remain deterministic for the same trusted configuration.
+Diagnostic labels affect reports only. With valid diagnostic options, changing the
+label key changes field IDs without changing protocol hashes or comparison rules.
+Output adapter behavior remains the verifier's responsibility.
 Scientific preregistration code, archives, tests, shared SHA-256 and lockfile are unchanged.
 
 ### Validation
